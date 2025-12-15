@@ -1,0 +1,29 @@
+[config]
+
+[templates.hyprland]
+input_path = './templates/hypr-conf.template'
+output_path = './generated_templates/hypr-colors.conf'
+post_hook = 'hyprctl hyprpaper reload , $(cat $HOME/.config/hypr/hyprpaper/wp.txt)'
+
+[templates.css]
+input_path = './templates/css.template'
+output_path = './generated_templates/colors.css'
+# post_hook = 'touch $HOME/.config/waybar/style.css && rm -r ~/.cache/gtk-4.0/* 2>/dev/null'
+
+# [templates.scss]
+# input_path = './templates/scss.template'
+# output_path = './generated_templates/colors.scss'
+
+[templates.kitty]
+input_path = './templates/kitty-conf.template'
+output_path = './generated_templates/kitty-colors.conf'
+# post_hook = 'pgrep kitty && pkill -SIGUSR1 kitty'
+
+[templates.shell]
+input_path = './templates/shell.template'
+output_path = './generated_templates/colors.sh'
+# post_hook = 'pgrep -x zsh | xargs -I {} kill -USR1 {} 2>/dev/null'
+
+# [templates.vscode]
+# input_path = './templates/vscode.template'
+# output_path = '~/.vscode/extensions/hyprluna.hyprluna-theme-1.0.2/themes/hyprluna.json'

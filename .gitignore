@@ -1,0 +1,18 @@
+# VSCode - Ignore everything in Code directory
+config/.config/Code/*
+
+# But keep the important user configs
+!config/.config/Code/User/
+config/.config/Code/User/*
+!config/.config/Code/User/settings.json
+!config/.config/Code/User/keybindings.json
+!config/.config/Code/User/tasks.json
+!config/.config/Code/User/snippets/
+
+# General patterns to avoid
+*.log
+*.tmp
+.DS_Store
+*~
+*.swp
+*.swo

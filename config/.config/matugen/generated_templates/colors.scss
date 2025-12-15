@@ -1,0 +1,122 @@
+$bg: rgb(20, 20, 30);
+$bg_1: alpha($bg, 0.1);
+$bg_2: alpha($bg, 0.2);
+$bg_3: alpha($bg, 0.3);
+$bg_4: alpha($bg, 0.4);
+$bg_5: alpha($bg, 0.5);
+$bg_6: alpha($bg, 0.6);
+$bg_7: alpha($bg, 0.7);
+$bg_8: alpha($bg, 0.8);
+$bg_9: alpha($bg, 0.9);
+
+$primary_1: alpha(rgb(255, 183, 121), 0.1);
+$primary_2: alpha(rgb(255, 183, 121), 0.2);
+$primary_3: alpha(rgb(255, 183, 121), 0.3);
+$primary_4: alpha(rgb(255, 183, 121), 0.4);
+$primary_5: alpha(rgb(255, 183, 121), 0.5);
+$primary_6: alpha(rgb(255, 183, 121), 0.6);
+$primary_7: alpha(rgb(255, 183, 121), 0.7);
+$primary_8: alpha(rgb(255, 183, 121), 0.8);
+$primary_9: alpha(rgb(255, 183, 121), 0.9);
+
+
+$background: #19120c;
+
+$error: #ffb4ab;
+
+$error_container: #93000a;
+
+$inverse_on_surface: #372f28;
+
+$inverse_primary: #87521c;
+
+$inverse_surface: #efe0d5;
+
+$on_background: #efe0d5;
+
+$on_error: #690005;
+
+$on_error_container: #ffdad6;
+
+$on_primary: #4c2700;
+
+$on_primary_container: #ffdcc1;
+
+$on_primary_fixed: #2e1500;
+
+$on_primary_fixed_variant: #6b3b04;
+
+$on_secondary: #412c19;
+
+$on_secondary_container: #ffdcc1;
+
+$on_secondary_fixed: #2a1707;
+
+$on_secondary_fixed_variant: #5a422d;
+
+$on_surface: #efe0d5;
+
+$on_surface_variant: #d6c3b6;
+
+$on_tertiary: #2d330e;
+
+$on_tertiary_container: #dfe7b2;
+
+$on_tertiary_fixed: #181e00;
+
+$on_tertiary_fixed_variant: #434a22;
+
+$outline: #9e8e82;
+
+$outline_variant: #51443a;
+
+$primary: #ffb779;
+
+$primary_container: #6b3b04;
+
+$primary_fixed: #ffdcc1;
+
+$primary_fixed_dim: #ffb779;
+
+$scrim: #000000;
+
+$secondary: #e3c0a5;
+
+$secondary_container: #5a422d;
+
+$secondary_fixed: #ffdcc1;
+
+$secondary_fixed_dim: #e3c0a5;
+
+$shadow: #000000;
+
+$source_color: #bd701f;
+
+$surface: #19120c;
+
+$surface_bright: #413730;
+
+$surface_container: #261e18;
+
+$surface_container_high: #312822;
+
+$surface_container_highest: #3c332c;
+
+$surface_container_low: #221a14;
+
+$surface_container_lowest: #130d08;
+
+$surface_dim: #19120c;
+
+$surface_tint: #ffb779;
+
+$surface_variant: #51443a;
+
+$tertiary: #c3cb97;
+
+$tertiary_container: #434a22;
+
+$tertiary_fixed: #dfe7b2;
+
+$tertiary_fixed_dim: #c3cb97;
+

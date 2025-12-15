@@ -1,0 +1,33 @@
+{
+    "bibitems": [
+    ],
+    "bibtexfiles": [
+    ],
+    "childdocs": [
+    ],
+    "filename": "/home/jj/Desktop/Masters/Dissertation/chapters/2_LiteratureReview/4_AlgorithmicOptimisations.tex",
+    "labels": [
+    ],
+    "modified": "Fri Dec 5 15:33:43 2025",
+    "packages": [
+    ],
+    "refs": [
+    ],
+    "toc": [
+        "2#\\titlecap{Optimization Approaches for Classical Computer Vision Algorithms}#0",
+        "3#\\titlecap{Statistical Outlier Detection Methods}#3",
+        "4#\\titlecap{Tukey's Fences}#6",
+        "4#\\titlecap{Standard Score}#14",
+        "3#\\titlecap{Complexity Reduction through Spatial Constraints}#26"
+    ],
+    "usercommands": [
+        [
+            "",
+            "\\bar{x}"
+        ],
+        [
+            "",
+            "\\bar{x}"
+        ]
+    ]
+}

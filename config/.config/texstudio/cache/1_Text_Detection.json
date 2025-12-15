@@ -1,0 +1,46 @@
+{
+    "bibitems": [
+    ],
+    "bibtexfiles": [
+    ],
+    "childdocs": [
+    ],
+    "filename": "/home/jj/Desktop/Masters/Dissertation/chapters/2_LiteratureReview/1_Text_Detection.tex",
+    "labels": [
+        "fig:moire",
+        "fig:barrel",
+        "fig:alias",
+        "fig:nonplanar",
+        "fig:illum",
+        "fig:perspective"
+    ],
+    "modified": "Fri Dec 5 14:28:44 2025",
+    "packages": [
+    ],
+    "refs": [
+        "fig:barrel",
+        "fig:alias",
+        "fig:moire",
+        "fig:illum",
+        "fig:nonplanar",
+        "fig:perspective"
+    ],
+    "toc": [
+        "2#\\titlecap{Text Detection Methods and Related Work}#0",
+        "3#\\titlecap{Technical Challenges in Scene Text Detection}#4",
+        "4#\\titlecap{Complex Scenes}#10",
+        "4#\\titlecap{Resolution}#13",
+        "4#\\titlecap{Lighting}#45",
+        "4#\\titlecap{Perspective Distortion}#48",
+        "4#Barrel and Pincushion Distortion#75",
+        "3#\\titlecap{Previous Work in Text Detection}#79",
+        "4#\\titlecap{Maximally Stable Extremal Regions}#82",
+        "4#\\titlecap{AdaBoost}#91",
+        "4#\\titlecap{Colour Enhanced Contrasting Extremal Regions}#98",
+        "4#\\titlecap{Rule-based Connected Component Filtering}#105",
+        "4#\\titlecap{Adaptive Method using Text Cues}#112",
+        "4#\\titlecap{Remarks}#117"
+    ],
+    "usercommands": [
+    ]
+}

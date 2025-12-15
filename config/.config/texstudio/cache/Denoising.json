@@ -1,0 +1,196 @@
+{
+    "bibitems": [
+    ],
+    "bibtexfiles": [
+    ],
+    "childdocs": [
+    ],
+    "filename": "/home/jj/Desktop/Masters/Dissertation/chapters/2_LiteratureReview/Denoising.tex",
+    "labels": [
+    ],
+    "modified": "Sun Jun 29 12:48:15 2025",
+    "packages": [
+    ],
+    "refs": [
+    ],
+    "toc": [
+        "2#Preprocessing Techniques for Text Detection#0",
+        "3#Denoising#9",
+        "3#Edge-preserving Denoising#18",
+        "4#Weighted Median Filter#24",
+        "4#Bilateral Filters#34",
+        "5#Bilateral Texture Filter#49",
+        "5#Guided Filter#60",
+        "5#Joint Bilateral Filter#69"
+    ],
+    "usercommands": [
+        [
+            "",
+            "\\mathcal{B}"
+        ],
+        [
+            "",
+            "\\sum_{q \\epsilon \\mathcal{B}_p}"
+        ],
+        [
+            "",
+            "\\mathcal{W}"
+        ],
+        [
+            "",
+            "\\bm{s}"
+        ],
+        [
+            "",
+            "\\bm{r}"
+        ],
+        [
+            "",
+            "\\mu_{k}"
+        ],
+        [
+            "",
+            "\\bar{p_{k}}"
+        ],
+        [
+            "",
+            "\\mathcal{B}"
+        ],
+        [
+            "",
+            "\\sum_{q \\epsilon \\mathcal{B}_p}"
+        ],
+        [
+            "",
+            "\\sigma_{k}"
+        ],
+        [
+            "",
+            "\\bar{p_{k}}"
+        ],
+        [
+            "",
+            "\\mu_{k}"
+        ],
+        [
+            "",
+            "\\omega_{k}"
+        ],
+        [
+            "",
+            "\\sum_{i\\epsilon \\omega _{k}}"
+        ],
+        [
+            "",
+            "\\mathcal{B}"
+        ],
+        [
+            "",
+            "\\mathcal{B}"
+        ],
+        [
+            "",
+            "\\mathcal{B}"
+        ],
+        [
+            "",
+            "\\sum_{q \\epsilon \\mathcal{B}_p}"
+        ],
+        [
+            "",
+            "\\mathcal{W}"
+        ],
+        [
+            "",
+            "\\omega_{k}"
+        ],
+        [
+            "",
+            "\\sum_{i\\epsilon \\omega _{k}}"
+        ],
+        [
+            "",
+            "\\bar{p}"
+        ],
+        [
+            "",
+            "\\omega_k"
+        ],
+        [
+            "",
+            "\\omega_k"
+        ],
+        [
+            "",
+            "\\omega_{k}"
+        ],
+        [
+            "",
+            "\\mathcal{B}"
+        ],
+        [
+            "",
+            "\\mathcal{B}"
+        ],
+        [
+            "",
+            "\\omega_k"
+        ],
+        [
+            "",
+            "\\sum_{q = 1}"
+        ],
+        [
+            "",
+            "\\sum_{q = 1}"
+        ],
+        [
+            "",
+            "\\omega_k"
+        ],
+        [
+            "",
+            "\\omega_k"
+        ],
+        [
+            "",
+            "\\mathcal{W}"
+        ],
+        [
+            "",
+            "\\mathcal{B}"
+        ],
+        [
+            "",
+            "\\sigma_d"
+        ],
+        [
+            "",
+            "\\sigma_r"
+        ],
+        [
+            "",
+            "\\mathcal{B}"
+        ],
+        [
+            "",
+            "\\mathcal{B}"
+        ],
+        [
+            "",
+            "\\mathcal{B}"
+        ],
+        [
+            "",
+            "\\mathcal{B}"
+        ],
+        [
+            "",
+            "\\mathcal{B}"
+        ],
+        [
+            "",
+            "\\mathcal{B}"
+        ]
+    ]
+}

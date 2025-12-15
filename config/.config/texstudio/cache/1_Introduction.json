@@ -1,0 +1,33 @@
+{
+    "bibitems": [
+    ],
+    "bibtexfiles": [
+    ],
+    "childdocs": [
+    ],
+    "filename": "/home/jj/Desktop/Masters/Dissertation/chapters/1_Introduction.tex",
+    "labels": [
+        "fig:natural_scene_images"
+    ],
+    "modified": "Fri Dec 5 14:03:50 2025",
+    "packages": [
+    ],
+    "refs": [
+        "fig:natural_scene_images",
+        "ch:conclusions",
+        "ch:results",
+        "ch:implementation",
+        "ch:methodology",
+        "ch:literature"
+    ],
+    "toc": [
+        "1#Introduction#0",
+        "2#\\titlecap{Scene Text Detection: Problem Definition and Challenges}#6",
+        "2#\\titlecap{Applications of Robust Text Detection}#31",
+        "2#\\titlecap{The Stroke Width Transform: A Case Study}#36",
+        "2#\\titlecap{Research Motivation and Scope}#44",
+        "2#\\titlecap{Contributions and Dissertation Structure}#57"
+    ],
+    "usercommands": [
+    ]
+}

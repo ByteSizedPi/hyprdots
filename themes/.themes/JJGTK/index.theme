@@ -1,0 +1,12 @@
+[Desktop Entry]
+Type=X-GNOME-Metatheme
+Name=JJGTK
+Comment=Matugen themed minimal flat GTK+ theme
+Encoding=UTF-8
+
+[X-GNOME-Metatheme]
+GtkTheme=JJGTK
+MetacityTheme=JJGTK
+IconTheme=Papirus-Dark
+CursorTheme=Adwaita
+ButtonLayout=close,minimize,maximize:menu

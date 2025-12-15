@@ -1,0 +1,37 @@
+{
+    "bibitems": [
+    ],
+    "bibtexfiles": [
+    ],
+    "childdocs": [
+    ],
+    "filename": "/home/jj/Desktop/Masters/Dissertation/chapters/chapter6_conclusions_revised.tex",
+    "labels": [
+        "ch:conclusions"
+    ],
+    "modified": "Thu Nov 13 19:42:38 2025",
+    "packages": [
+    ],
+    "refs": [
+    ],
+    "toc": [
+        "1#Conclusions, Discussion And Future Research#4",
+        "2#Summary of Contributions#10",
+        "2#Performance Analysis and Interpretation#37",
+        "3#Achievements and Limitations#40",
+        "3#Why Precision Remains Problematic#53",
+        "2#Denoising Insights and Contradictions#66",
+        "2#Theoretical Implications for Classical Computer Vision#87",
+        "3#When Are Classical Methods Appropriate?#92",
+        "3#Lessons for Algorithm Optimization#107",
+        "2#Critical Limitations#122",
+        "2#Future Research Directions#141",
+        "3#Refinements Within the Classical Framework#146",
+        "3#Hybrid Classical-Deep Learning Architectures#159",
+        "3#Extended Evaluation and Analysis#172",
+        "3#Fundamental Limitations Acknowledged#192",
+        "2#Concluding Remarks#205"
+    ],
+    "usercommands": [
+    ]
+}

@@ -1,0 +1,157 @@
+{
+  "workbench.startupEditor": "none",
+  "workbench.iconTheme": "material-icon-theme",
+  "editor.fontFamily": "JetBrainsMono NFP",
+  "editor.inlineSuggest.enabled": true,
+  "editor.fontLigatures": true,
+  "editor.minimap.renderCharacters": false,
+  "editor.minimap.enabled": false,
+  "editor.formatOnType": true,
+  "editor.overviewRulerBorder": false,
+  "editor.codeActionsOnSave": {
+    "source.organizeImports": "explicit",
+    "source.fixAll": "explicit"
+  },
+  "editor.formatOnSave": true,
+  "editor.accessibilitySupport": "off",
+  "explorer.confirmDelete": false,
+  "[jsonc]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.codeActionsOnSave": {
+      "source.fixAll.eslint": "explicit"
+    }
+  },
+  "[properties]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true
+  },
+  "[scss]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[html]": {
+    "editor.codeActionsOnSave": {
+      "source.fixAll.eslint": "explicit"
+    },
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[python]": {
+    "editor.formatOnType": true
+  },
+  "[dockercompose]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[json]": {
+    "editor.defaultFormatter": "vscode.json-language-features"
+  },
+  "explorer.confirmDragAndDrop": false,
+  "editor.wordWrap": "on",
+  "security.workspace.trust.untrustedFiles": "open",
+  "terminal.integrated.enableMultiLinePasteWarning": "never",
+  "terminal.integrated.fontFamily": "monospace",
+  "github.copilot.enable": {
+    "*": false,
+    "plaintext": true,
+    "markdown": false,
+    "scminput": false,
+    "yaml": false,
+    "python": true,
+    "rust": false,
+    "latex": false,
+    "java": false,
+    "javascript": false,
+    "qml": false
+  },
+  "editor.linkedEditing": true,
+  "python.defaultInterpreterPath": "/sbin/python3.14",
+  "git.openRepositoryInParentFolders": "never",
+  "git.confirmSync": false,
+  "[javascript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "terminal.integrated.shellIntegration.decorationsEnabled": "never",
+  "editor.cursorSmoothCaretAnimation": "on",
+  "workbench.list.smoothScrolling": true,
+  "editor.smoothScrolling": true,
+  "terminal.integrated.smoothScrolling": true,
+  "notebook.formatOnSave.enabled": true,
+  "terminal.integrated.persistentSessionScrollback": 1000,
+  "typescript.updateImportsOnFileMove.enabled": "always",
+  "javascript.updateImportsOnFileMove.enabled": "always",
+  "window.density.editorTabHeight": "compact",
+  "rust-analyzer.inlayHints.closingBraceHints.enable": false,
+  "rust-analyzer.inlayHints.chainingHints.enable": false,
+  "rust-analyzer.inlayHints.typeHints.enable": false,
+  "rust-analyzer.inlayHints.renderColons": false,
+  "rust-analyzer.inlayHints.parameterHints.enable": false,
+  "accessibility.verbosity.keybindingsEditor": false,
+  "redhat.telemetry.enabled": false,
+  "[html][typescript]": {
+    "editor.codeActionsOnSave": {
+      "source.fixAll.eslint": "explicit"
+    }
+  },
+  "[nginx]": {
+    "editor.defaultFormatter": "raynigon.nginx-formatter"
+  },
+  "code-runner.runInTerminal": true,
+  "workbench.layoutControl.enabled": false,
+  "workbench.sideBar.location": "right",
+  "editor.rulers": [],
+  "latex-workshop.formatting.latexindent.path": "/home/johan/.TinyTeX/bin/x86_64-linux/latexindent",
+  "window.commandCenter": false,
+  "diffEditor.ignoreTrimWhitespace": false,
+  "workbench.editorAssociations": {
+    "*.copilotmd": "vscode.markdown.preview.editor",
+    "*.mlx": "default"
+  },
+  "[css]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "workbench.editor.empty.hint": "hidden",
+  "totalTypeScript.hideAllTips": false,
+  "totalTypeScript.hideBasicTips": true,
+  "workbench.activityBar.location": "top",
+  "breadcrumbs.enabled": false,
+  "editor.formatOnPaste": true,
+  "qt-qml.qmlls.useQmlImportPathEnvVar": true,
+  "qt-qml.qmlls.useNoCMakeCalls": true,
+  "qt-cpp.doNotAskForCMakePath": true,
+  "qt-qml.qmlls.customExePath": "/lib64/qt6/bin/qmlls",
+  "qt-qml.qmlls.customArgs": ["--bare"],
+  "workbench.colorCustomizations": {
+    "terminal.background": "#24273a",
+    "terminal.foreground": "#cad3f5",
+    "terminalCursor.background": "#24273a",
+    "terminalCursor.foreground": "#f4dbd6",
+    "terminal.ansiBlack": "#494d64",
+    "terminal.ansiRed": "#ed8796",
+    "terminal.ansiGreen": "#a6da95",
+    "terminal.ansiYellow": "#eed49f",
+    "terminal.ansiBlue": "#8aadf4",
+    "terminal.ansiMagenta": "#f5bde6",
+    "terminal.ansiCyan": "#8bd5ca",
+    "terminal.ansiWhite": "#b8c0e0",
+    "terminal.ansiBrightBlack": "#5b6078",
+    "terminal.ansiBrightRed": "#ed8796",
+    "terminal.ansiBrightGreen": "#a6da95",
+    "terminal.ansiBrightYellow": "#eed49f",
+    "terminal.ansiBrightBlue": "#8aadf4",
+    "terminal.ansiBrightMagenta": "#f5bde6",
+    "terminal.ansiBrightCyan": "#8bd5ca",
+    "terminal.ansiBrightWhite": "#a5adcb"
+  },
+  "terminal.integrated.stickyScroll.enabled": false,
+  "animations.Install-Method": "Apc Customize UI++",
+  "apc.imports": [
+    "file://${userHome}/.vscode/extensions/brandonkirbyson.vscode-animations-2.0.7/dist/updateHandler.js"
+  ],
+  "glassit.alpha": 255,
+  "workbench.colorTheme": "Catppuccin Macchiato",
+  "python.analysis.typeCheckingMode": "standard",
+  "workbench.preferredHighContrastColorTheme": "Alt Catppuccin Macchiato",
+  "claudeCode.preferredLocation": "panel",
+  "extensions.ignoreRecommendations": true
+}

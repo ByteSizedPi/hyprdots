@@ -1,0 +1,66 @@
+/* Catppuccin Mocha Theme Colors */
+@define-color bg #181926;
+@define-color bg_1 alpha(@bg, 0.1);
+@define-color bg_2 alpha(@bg, 0.2);
+@define-color bg_3 alpha(@bg, 0.3);
+@define-color bg_4 alpha(@bg, 0.4);
+@define-color bg_5 alpha(@bg, 0.5);
+@define-color bg_6 alpha(@bg, 0.6);
+@define-color bg_7 alpha(@bg, 0.7);
+@define-color bg_8 alpha(@bg, 0.8);
+@define-color bg_9 alpha(@bg, 0.9);
+
+@define-color primary #91d7e3;
+@define-color primary_1 alpha(@primary, 0.1);
+@define-color primary_3 alpha(@primary, 0.3);
+@define-color primary_4 alpha(@primary, 0.4);
+@define-color primary_2 alpha(@primary, 0.2);
+@define-color primary_5 alpha(@primary, 0.5);
+@define-color primary_6 alpha(@primary, 0.6);
+@define-color primary_7 alpha(@primary, 0.7);
+@define-color primary_8 alpha(@primary, 0.8);
+@define-color primary_9 alpha(@primary, 0.9);
+
+@define-color secondary #f5bde6;
+@define-color secondary_1 alpha(@secondary, 0.1);
+@define-color secondary_2 alpha(@secondary, 0.2);
+@define-color secondary_3 alpha(@secondary, 0.3);
+@define-color secondary_4 alpha(@secondary, 0.4);
+@define-color secondary_5 alpha(@secondary, 0.5);
+@define-color secondary_6 alpha(@secondary, 0.6);
+@define-color secondary_7 alpha(@secondary, 0.7);
+@define-color secondary_8 alpha(@secondary, 0.8);
+@define-color secondary_9 alpha(@secondary, 0.9);
+
+@define-color red #ed8796;
+@define-color red_1 alpha(@red, 0.1);
+@define-color red_2 alpha(@red, 0.2);
+@define-color red_3 alpha(@red, 0.3);
+@define-color red_4 alpha(@red, 0.4);
+@define-color red_5 alpha(@red, 0.5);
+@define-color red_6 alpha(@red, 0.6);
+@define-color red_7 alpha(@red, 0.7);
+@define-color red_8 alpha(@red, 0.8);
+@define-color red_9 alpha(@red, 0.9);
+
+@define-color green #a6da95;
+@define-color green_1 alpha(@green, 0.1);
+@define-color green_2 alpha(@green, 0.2);
+@define-color green_3 alpha(@green, 0.3);
+@define-color green_4 alpha(@green, 0.4);
+@define-color green_5 alpha(@green, 0.5);
+@define-color green_6 alpha(@green, 0.6);
+@define-color green_7 alpha(@green, 0.7);
+@define-color green_8 alpha(@green, 0.8);
+@define-color green_9 alpha(@green, 0.9);
+
+@define-color tertiary #f5a97f;
+@define-color tertiary_1 alpha(@tertiary, 0.1);
+@define-color tertiary_2 alpha(@tertiary, 0.2);
+@define-color tertiary_3 alpha(@tertiary, 0.3);
+@define-color tertiary_4 alpha(@tertiary, 0.4);
+@define-color tertiary_5 alpha(@tertiary, 0.5);
+@define-color tertiary_6 alpha(@tertiary, 0.6);
+@define-color tertiary_7 alpha(@tertiary, 0.7);
+@define-color tertiary_8 alpha(@tertiary, 0.8);
+@define-color tertiary_9 alpha(@tertiary, 0.9);

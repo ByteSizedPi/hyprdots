@@ -1,0 +1,33 @@
+{
+    "bibitems": [
+    ],
+    "bibtexfiles": [
+        "/home/jj/Downloads/nwu-msc-phd-latex-template-2020-05-26/MyBib.bib#MyBib"
+    ],
+    "childdocs": [
+        "/home/jj/Downloads/nwu-msc-phd-latex-template-2020-05-26/ExampleChapter2.tex",
+        "/home/jj/Downloads/nwu-msc-phd-latex-template-2020-05-26/ExampleChapter3.tex",
+        "/home/jj/Downloads/nwu-msc-phd-latex-template-2020-05-26/ExampleAppendix.tex",
+        "/home/jj/Downloads/nwu-msc-phd-latex-template-2020-05-26/ExampleChapter1.tex"
+    ],
+    "filename": "/home/jj/Downloads/nwu-msc-phd-latex-template-2020-05-26/MainTemplate.tex",
+    "labels": [
+    ],
+    "modified": "Tue May 26 15:23:26 2020",
+    "packages": [
+        "a4paper,oneside,11pt#class-book",
+        "a4paper,oneside,11pt#latex-document",
+        "a4paper,oneside,11pt#tex",
+        "#NWUStyle"
+    ],
+    "refs": [
+    ],
+    "toc": [
+        "-1#ExampleChapter1#93",
+        "-1#ExampleChapter2#94",
+        "-1#ExampleChapter3#95",
+        "-1#ExampleAppendix#105"
+    ],
+    "usercommands": [
+    ]
+}

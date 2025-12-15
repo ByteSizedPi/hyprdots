@@ -1,0 +1,46 @@
+{
+    "bibitems": [
+    ],
+    "bibtexfiles": [
+    ],
+    "childdocs": [
+    ],
+    "filename": "/home/jj/Desktop/Masters/Dissertation/chapters/3_Methodology_Experimental_Design/chapter3_methodology_revised.tex",
+    "labels": [
+        "sec:eval_metrics",
+        "sec:parameters",
+        "ch:methodology",
+        "fig:evaltree"
+    ],
+    "modified": "Thu Nov 13 18:53:23 2025",
+    "packages": [
+    ],
+    "refs": [
+        "fig:evaltree",
+        "sec:eval_metrics"
+    ],
+    "toc": [
+        "1#Methodology and Experimental Design#12",
+        "2#Research Questions and Hypotheses#18",
+        "2#Research Framework#29",
+        "3#Experimental Methodology Overview#32",
+        "3#Baseline Implementation: OpenCV SWT#49",
+        "3#Proposed Modifications Summary#63",
+        "2#Dataset Selection and Preparation#80",
+        "3#ICDAR 2013 Robust Reading Competition Dataset#83",
+        "3#Data Preprocessing and Standardization#97",
+        "2#Evaluation Methodology#115",
+        "3#Performance Metrics#119",
+        "3#Statistical Significance Testing#147",
+        "2#Experimental Design#177",
+        "3#Implementation Optimization Experiments#182",
+        "3#Preprocessing Effectiveness Experiments#212",
+        "2#Controlled Variables and Parameters#267",
+        "3#SWT Algorithm Parameters#273",
+        "3#Image Processing Parameters#297",
+        "3#Evaluation Parameters#306",
+        "2#Limitations and Assumptions#314"
+    ],
+    "usercommands": [
+    ]
+}

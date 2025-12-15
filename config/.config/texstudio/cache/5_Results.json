@@ -1,0 +1,58 @@
+{
+    "bibitems": [
+    ],
+    "bibtexfiles": [
+    ],
+    "childdocs": [
+    ],
+    "filename": "/home/jj/Desktop/Masters/Dissertation/chapters/5_Results.tex",
+    "labels": [
+        "tab:og-denoised",
+        "tab:og-scores",
+        "fig:results-129-char-opencv",
+        "fig:results-162-char-opencv",
+        "fig:results-005-word-opencv",
+        "fig:results_162",
+        "fig:results-005-char-opencv",
+        "fig:results-162-word-opencv",
+        "fig:results_129",
+        "ch:results",
+        "fig:results-129-word-opencv",
+        "tab:prop-denoised",
+        "tab:pvalues-prop",
+        "tab:pvalues-og",
+        "fig:statisticalsigtestsetup",
+        "tab:prop-scores",
+        "fig:results_005"
+    ],
+    "modified": "Tue Nov 25 13:24:04 2025",
+    "packages": [
+    ],
+    "refs": [
+        "fig:results-129-word-opencv",
+        "fig:results-129-char-opencv",
+        "fig:results-005-word-opencv",
+        "fig:results-005-char-opencv",
+        "fig:results_005",
+        "fig:results_129",
+        "fig:results_162",
+        "fig:results-162-word-opencv",
+        "fig:results-162-char-opencv",
+        "fig:statisticalsigtestsetup",
+        "ch:methodology"
+    ],
+    "toc": [
+        "1#Results#0",
+        "2#\\titlecap{Original Method Performance}#16",
+        "2#\\titlecap{Performance of the Proposed Method}#39",
+        "2#\\titlecap{Baseline Method Performance using Denoised Images}#62",
+        "2#\\titlecap{Proposed Method Performance on the Denoised Dataset}#84",
+        "2#\\titlecap{Statistical Significance of Results}#107",
+        "3#Comparisons Against the Original Method (\\texttt{og})#113",
+        "3#Comparisons Against the Proposed Method (\\texttt{prop})#137",
+        "2#Results Demonstration#160",
+        "3#Samples#170"
+    ],
+    "usercommands": [
+    ]
+}

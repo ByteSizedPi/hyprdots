@@ -1,0 +1,42 @@
+
+output eDP-1 {
+    mode 1920x1080@60
+    scale 1
+    alias $LAPTOP
+}
+
+output "AOC 24G2W1G3- AYAM91A000341" {
+    mode 1920x1080@144
+    scale 1
+    alias $HOME
+}
+
+output "Samsung Electric Company SAMSUNG 0x01000E00" {
+    mode 4096x2160@60
+    scale 2
+    alias $TV
+}
+
+
+profile laptop {
+    output $LAPTOP position 0,0
+}
+
+profile home {
+    output $LAPTOP position 0,0
+    output $HOME position 1920,0
+}
+
+profile tv {
+    output $LAPTOP position 0,1080
+    output $TV position 0,0
+}
+
+profile office {
+    output $LAPTOP position 1920,0
+    output HDMI-A-1 mode 1920x1080@60 position 0,0
+}
+
+profile default {
+    output * enable
+}

@@ -1,0 +1,226 @@
+@import url("/home/jj/.config/matugen/generated_templates/colors-catppuccin.css");
+
+:root {
+  --mpris-album-art-icon-size: 20;
+}
+
+* {
+  font-family: "JetBrainsMono NFP";
+  font-size: 15px;
+  font-weight: bold;
+  border-radius: 6px;
+  background: none;
+  border: none;
+  box-shadow: none;
+  margin: 0;
+  padding: 0;
+  outline: none;
+}
+
+.control-center {
+  background: @bg_9;
+  padding: 1rem 0.5rem;
+  border: 2px solid @sky_2;
+  background: linear-gradient(170deg, @bg, @bg_6);
+}
+
+.widget-label {
+  font-weight: bold;
+  margin: 0 0.5rem 1rem 0.5rem;
+  color: white;
+}
+
+.widget-dnd {
+  font-weight: bold;
+  margin: 0.25rem 0.5rem 1rem 0.5rem;
+  color: @tertiary;
+}
+
+.widget-dnd > switch {
+  border: 1px solid @tertiary;
+  border-radius: 1rem;
+  background: @bg_9;
+  padding: 1px;
+}
+
+.widget-dnd > switch:checked {
+  background: @tertiary_3;
+}
+
+.widget-dnd > switch slider {
+  border-radius: 1rem;
+  color: @tertiary;
+  background: linear-gradient(170deg, @tertiary_8, @tertiary_3);
+  box-shadow: inset 1px 1px 0 0 @tertiary_4, inset -1px -1px 0 0 @tertiary_2;
+}
+
+.widget-title {
+  font-size: 15px;
+  color: @sky;
+  margin: 1.5rem 0.5rem 1rem 0.5rem;
+}
+
+.widget-title > button > label {
+  color: #b3f4ff;
+  background: linear-gradient(170deg, @sky_5, @sky_1);
+  box-shadow: inset 1px 1px 0 0 @sky_4, inset -1px -1px 0 0 @sky_2;
+  padding: 4px 8px 4px 4px;
+  border-radius: 6px;
+  font-size: 12px;
+}
+
+.widget-buttons-grid {
+  margin: 0.5rem 0;
+}
+
+.widget-buttons-grid > flowbox > flowboxchild {
+  margin: 0 0.5rem;
+}
+
+.widget-buttons-grid > flowbox > flowboxchild > button > label {
+  box-shadow: inset 0 0 0 1px @tertiary_7;
+  font-size: 20px;
+  padding: 10px;
+  color: @tertiary;
+  transition: background 0.1s, box-shadow 0.1s;
+}
+
+.widget-buttons-grid > flowbox > flowboxchild > button:checked > label {
+  background: linear-gradient(170deg, @tertiary_5, @tertiary_1);
+  box-shadow: inset 1px 1px 0 0 @tertiary_4, inset -1px -1px 0 0 @tertiary_2;
+}
+
+.widget-buttons-grid > flowbox > flowboxchild > button:hover {
+  background: black;
+}
+
+.widget-mpris {
+  margin: 1rem 0.5rem;
+  border-radius: 15px;
+  background: linear-gradient(170deg, @secondary_6, @secondary_1);
+  box-shadow: inset 1px 1px 0 0 @secondary_4, inset -1px -1px 0 0 @secondary_1;
+}
+
+.widget-mpris * {
+  color: white;
+}
+
+/* .widget-mpris-player {
+  margin: 0;
+  box-shadow: none;
+  background: none;
+} */
+
+.notification-group {
+  margin: 0 0.5rem;
+}
+
+.notification-group-headers {
+  margin-top: 0.5rem;
+}
+
+.notification-group-headers * {
+  color: #d2ffc3;
+}
+
+.notification-group-headers label {
+  /* margin-left: -35px; */
+  font-weight: normal;
+  font-size: 14px;
+}
+
+.notification-group-headers image {
+  min-width: 0;
+  margin-right: 0.25rem;
+}
+
+.notification-group-buttons image {
+  color: #d2ffc3;
+  font-size: 25px;
+  padding: 6px 0.5rem;
+  background: linear-gradient(170deg, @green_4, @green_1);
+  box-shadow: inset 1px 1px 0 0 @green_3, inset -1px -1px 0 0 @green_1;
+}
+
+.notification-group-buttons button {
+  font-size: 20px;
+}
+
+.notification {
+  margin: 0.5rem 0;
+}
+
+.notification,
+.notification-default-action {
+  color: @green;
+  background: linear-gradient(170deg, @green_4, @green_1);
+  box-shadow: inset 1px 1px 0 0 @green_3, inset -1px -1px 0 0 @green_1;
+  border: none;
+  border-radius: 12px;
+  padding: 0;
+}
+
+.notification * {
+  font-size: 14px;
+  color: white;
+  -gtk-icon-size: 32px;
+}
+
+.notification image {
+  margin-right: 0.5rem;
+}
+
+.notification-default-action:hover {
+  background-color: black;
+}
+
+.notification-content {
+  margin: 0.5rem;
+}
+
+/* .control-center .notification-row {
+  background: alpha(black, 0.2);
+  margin: 0;
+  padding: 0;
+} */
+
+.widget-volume,
+.widget-backlight {
+  /* margin: 0.5rem; */
+  padding: 0.5rem;
+  background: linear-gradient(170deg, @bg_6, @bg_2);
+  box-shadow: inset 1px 1px 0 0 @bg_4, inset -1px -1px 0 0 @bg_1;
+}
+
+.widget-volume > box > label,
+.widget-backlight > box > label {
+  color: @sky;
+  font-size: 20px;
+  margin-right: 0.5rem;
+}
+
+.widget-volume > box > scale,
+.widget-backlight > box > scale {
+  min-width: 200px;
+}
+
+.widget-volume > box > scale trough,
+.widget-backlight > box > scale trough {
+  min-height: 10px;
+  background: @bg_9;
+  border: 1px solid @tertiary_7;
+}
+
+.widget-volume > box > scale trough highlight,
+.widget-backlight > box > scale trough highlight {
+  background: linear-gradient(170deg, @tertiary_5, @tertiary_1);
+  box-shadow: inset 1px 1px 0 0 @tertiary_4, inset -1px -1px 0 0 @tertiary_2;
+}
+
+.widget-volume > box > scale trough slider,
+.widget-backlight > box > scale trough slider {
+  min-width: 18px;
+  min-height: 18px;
+  background: linear-gradient(170deg, @sky_5, @sky_1);
+  box-shadow: inset 1px 1px 0 0 @sky_4, inset -1px -1px 0 0 @sky_2;
+}

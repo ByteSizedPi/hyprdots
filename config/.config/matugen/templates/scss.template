@@ -1,0 +1,24 @@
+$bg: rgb(20, 20, 30);
+$bg_1: alpha($bg, 0.1);
+$bg_2: alpha($bg, 0.2);
+$bg_3: alpha($bg, 0.3);
+$bg_4: alpha($bg, 0.4);
+$bg_5: alpha($bg, 0.5);
+$bg_6: alpha($bg, 0.6);
+$bg_7: alpha($bg, 0.7);
+$bg_8: alpha($bg, 0.8);
+$bg_9: alpha($bg, 0.9);
+
+$primary_1: alpha({{colors.primary.default.rgb}}, 0.1);
+$primary_2: alpha({{colors.primary.default.rgb}}, 0.2);
+$primary_3: alpha({{colors.primary.default.rgb}}, 0.3);
+$primary_4: alpha({{colors.primary.default.rgb}}, 0.4);
+$primary_5: alpha({{colors.primary.default.rgb}}, 0.5);
+$primary_6: alpha({{colors.primary.default.rgb}}, 0.6);
+$primary_7: alpha({{colors.primary.default.rgb}}, 0.7);
+$primary_8: alpha({{colors.primary.default.rgb}}, 0.8);
+$primary_9: alpha({{colors.primary.default.rgb}}, 0.9);
+
+<* for name, value in colors *>
+${{name}}: {{value.default.hex}};
+<* endfor *>
