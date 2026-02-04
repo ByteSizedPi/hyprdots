@@ -7,39 +7,39 @@
     ],
     "filename": "/home/jj/Desktop/Masters/Dissertation/chapters/3_Methodology_Experimental_Design/chapter3_methodology_revised.tex",
     "labels": [
+        "fig:evaltree",
         "sec:eval_metrics",
-        "sec:parameters",
         "ch:methodology",
-        "fig:evaltree"
+        "sec:parameters"
     ],
-    "modified": "Thu Nov 13 18:53:23 2025",
+    "modified": "Wed Jan 14 17:18:14 2026",
     "packages": [
     ],
     "refs": [
-        "fig:evaltree",
-        "sec:eval_metrics"
+        "sec:eval_metrics",
+        "fig:evaltree"
     ],
     "toc": [
         "1#Methodology and Experimental Design#12",
         "2#Research Questions and Hypotheses#18",
-        "2#Research Framework#29",
-        "3#Experimental Methodology Overview#32",
-        "3#Baseline Implementation: OpenCV SWT#49",
-        "3#Proposed Modifications Summary#63",
-        "2#Dataset Selection and Preparation#80",
-        "3#ICDAR 2013 Robust Reading Competition Dataset#83",
-        "3#Data Preprocessing and Standardization#97",
-        "2#Evaluation Methodology#115",
-        "3#Performance Metrics#119",
-        "3#Statistical Significance Testing#147",
-        "2#Experimental Design#177",
-        "3#Implementation Optimization Experiments#182",
-        "3#Preprocessing Effectiveness Experiments#212",
-        "2#Controlled Variables and Parameters#267",
-        "3#SWT Algorithm Parameters#273",
-        "3#Image Processing Parameters#297",
-        "3#Evaluation Parameters#306",
-        "2#Limitations and Assumptions#314"
+        "2#Research Framework#32",
+        "3#Experimental Methodology Overview#35",
+        "3#Baseline Implementation: OpenCV SWT#56",
+        "3#Proposed Modifications Summary#71",
+        "2#Dataset Selection and Preparation#91",
+        "3#ICDAR 2013 Robust Reading Competition Dataset#94",
+        "3#Data Preprocessing and Standardization#112",
+        "2#Evaluation Methodology#134",
+        "3#Performance Metrics#138",
+        "3#Statistical Significance Testing#170",
+        "2#Experimental Design#204",
+        "3#Implementation Optimization Experiments#209",
+        "3#Preprocessing Effectiveness Experiments#240",
+        "2#Controlled Variables and Parameters#302",
+        "3#SWT Algorithm Parameters#308",
+        "3#Image Processing Parameters#332",
+        "3#Evaluation Parameters#341",
+        "2#Limitations and Assumptions#349"
     ],
     "usercommands": [
     ]

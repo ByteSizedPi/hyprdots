@@ -10,41 +10,41 @@
   "editor.overviewRulerBorder": false,
   "editor.codeActionsOnSave": {
     "source.organizeImports": "explicit",
-    "source.fixAll": "explicit"
+    "source.fixAll": "explicit",
   },
   "editor.formatOnSave": true,
   "editor.accessibilitySupport": "off",
   "explorer.confirmDelete": false,
   "[jsonc]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
   },
   "[typescript]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode",
     "editor.codeActionsOnSave": {
-      "source.fixAll.eslint": "explicit"
-    }
+      "source.fixAll.eslint": "explicit",
+    },
   },
   "[properties]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode",
-    "editor.formatOnSave": true
+    "editor.formatOnSave": true,
   },
   "[scss]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
   },
   "[html]": {
     "editor.codeActionsOnSave": {
-      "source.fixAll.eslint": "explicit"
+      "source.fixAll.eslint": "explicit",
     },
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
   },
   "[python]": {
-    "editor.formatOnType": true
+    "editor.formatOnType": true,
   },
   "[dockercompose]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
   },
   "[json]": {
-    "editor.defaultFormatter": "vscode.json-language-features"
+    "editor.defaultFormatter": "vscode.json-language-features",
   },
   "explorer.confirmDragAndDrop": false,
   "editor.wordWrap": "on",
@@ -62,14 +62,14 @@
     "latex": false,
     "java": false,
     "javascript": false,
-    "qml": false
+    "qml": false,
   },
   "editor.linkedEditing": true,
   "python.defaultInterpreterPath": "/sbin/python3.14",
   "git.openRepositoryInParentFolders": "never",
   "git.confirmSync": false,
   "[javascript]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
   },
   "terminal.integrated.shellIntegration.decorationsEnabled": "never",
   "editor.cursorSmoothCaretAnimation": "on",
@@ -90,11 +90,11 @@
   "redhat.telemetry.enabled": false,
   "[html][typescript]": {
     "editor.codeActionsOnSave": {
-      "source.fixAll.eslint": "explicit"
-    }
+      "source.fixAll.eslint": "explicit",
+    },
   },
   "[nginx]": {
-    "editor.defaultFormatter": "raynigon.nginx-formatter"
+    "editor.defaultFormatter": "raynigon.nginx-formatter",
   },
   "code-runner.runInTerminal": true,
   "workbench.layoutControl.enabled": false,
@@ -105,10 +105,10 @@
   "diffEditor.ignoreTrimWhitespace": false,
   "workbench.editorAssociations": {
     "*.copilotmd": "vscode.markdown.preview.editor",
-    "*.mlx": "default"
+    "*.mlx": "default",
   },
   "[css]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
   },
   "workbench.editor.empty.hint": "hidden",
   "totalTypeScript.hideAllTips": false,
@@ -141,17 +141,18 @@
     "terminal.ansiBrightBlue": "#8aadf4",
     "terminal.ansiBrightMagenta": "#f5bde6",
     "terminal.ansiBrightCyan": "#8bd5ca",
-    "terminal.ansiBrightWhite": "#a5adcb"
+    "terminal.ansiBrightWhite": "#a5adcb",
   },
   "terminal.integrated.stickyScroll.enabled": false,
   "animations.Install-Method": "Apc Customize UI++",
   "apc.imports": [
-    "file://${userHome}/.vscode/extensions/brandonkirbyson.vscode-animations-2.0.7/dist/updateHandler.js"
+    "file://${userHome}/.vscode/extensions/brandonkirbyson.vscode-animations-2.0.7/dist/updateHandler.js",
   ],
   "glassit.alpha": 255,
   "workbench.colorTheme": "Catppuccin Macchiato",
-  "python.analysis.typeCheckingMode": "standard",
+  "python.analysis.typeCheckingMode": "strict",
   "workbench.preferredHighContrastColorTheme": "Alt Catppuccin Macchiato",
   "claudeCode.preferredLocation": "panel",
-  "extensions.ignoreRecommendations": true
+  "extensions.ignoreRecommendations": true,
+  "rust-analyzer.workspace.discoverConfig": null,
 }

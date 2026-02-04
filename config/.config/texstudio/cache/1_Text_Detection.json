@@ -7,23 +7,23 @@
     ],
     "filename": "/home/jj/Desktop/Masters/Dissertation/chapters/2_LiteratureReview/1_Text_Detection.tex",
     "labels": [
-        "fig:moire",
-        "fig:barrel",
-        "fig:alias",
         "fig:nonplanar",
         "fig:illum",
-        "fig:perspective"
+        "fig:alias",
+        "fig:barrel",
+        "fig:perspective",
+        "fig:moire"
     ],
-    "modified": "Fri Dec 5 14:28:44 2025",
+    "modified": "Sat Jan 3 19:41:43 2026",
     "packages": [
     ],
     "refs": [
+        "fig:nonplanar",
+        "fig:perspective",
+        "fig:illum",
         "fig:barrel",
         "fig:alias",
-        "fig:moire",
-        "fig:illum",
-        "fig:nonplanar",
-        "fig:perspective"
+        "fig:moire"
     ],
     "toc": [
         "2#\\titlecap{Text Detection Methods and Related Work}#0",

@@ -1,0 +1,8 @@
+show-summary: false
+show-tags: false
+show-fundamentals: false
+show-separator: true
+interval: 5
+watchlist:
+  - AAPL
+  - NVDA

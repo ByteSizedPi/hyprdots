@@ -7,26 +7,26 @@
     ],
     "filename": "/home/jj/Desktop/Masters/Dissertation/chapters/2_LiteratureReview/2_SWT.tex",
     "labels": [
-        "fig:swtcorner",
-        "eq:nearest_pair",
-        "fig:edgetheory",
-        "fig:strokewidth",
-        "fig:astroke",
         "fig:digitalstroke",
-        "eq:proprelations",
-        "fig:strokeray",
         "eq:gradientcomparisons",
+        "fig:swtparallelogram",
+        "fig:edgetheory",
+        "fig:swtcorner",
+        "eq:proprelations",
+        "eq:nearest_pair",
+        "fig:strokewidth",
+        "fig:strokeray",
         "sec:swt_algorithm",
-        "fig:swtparallelogram"
+        "fig:astroke"
     ],
-    "modified": "Fri Dec 5 14:37:58 2025",
+    "modified": "Wed Jan 14 17:09:42 2026",
     "packages": [
     ],
     "refs": [
+        "fig:strokeray",
         "fig:strokewidth",
         "fig:swtcorner",
         "fig:swtparallelogram",
-        "fig:strokeray",
         "fig:digitalstroke",
         "fig:edgetheory"
     ],
@@ -34,26 +34,14 @@
         "2#\\titlecap{Stroke Width Transform Foundations}#0",
         "3#\\titlecap{Theory and Mathematical Foundations}#3",
         "4#Mathematical Formalization#48",
-        "4#Mathematical Formalization#61",
-        "3#\\titlecap{Algorithm Description}#110",
-        "4#\\titlecap{Corners and Intersections}#135",
-        "3#\\titlecap{Qualifying Letter Candidates}#156"
+        "4#Mathematical Formalization#64",
+        "3#\\titlecap{Algorithm Description}#113",
+        "4#\\titlecap{Corners and Intersections}#140",
+        "3#\\titlecap{Qualifying Letter Candidates}#162"
     ],
     "usercommands": [
         [
             "",
-            "\\mathbb{R}"
-        ],
-        [
-            "",
-            "\\mathbb{N}"
-        ],
-        [
-            "",
-            "\\mathbb{N}"
-        ],
-        [
-            "",
             "\\mathbf{G}"
         ],
         [
@@ -63,34 +51,6 @@
         [
             "",
             "\\mathbf{G}"
-        ],
-        [
-            "",
-            "\\mathbb{R}"
-        ],
-        [
-            "",
-            "\\mathbb{N}"
-        ],
-        [
-            "",
-            "\\mathbb{N}"
-        ],
-        [
-            "",
-            "\\mathbb{N}"
-        ],
-        [
-            "",
-            "\\mathbb{N}"
-        ],
-        [
-            "",
-            "\\mathbf{g}"
-        ],
-        [
-            "",
-            "\\mathbf{g}"
         ],
         [
             "",
@@ -107,6 +67,22 @@
         [
             "",
             "\\mathbf{G}"
+        ],
+        [
+            "",
+            "\\mathbf{G}"
+        ],
+        [
+            "",
+            "\\mathbf{G}"
+        ],
+        [
+            "",
+            "\\mathbf{g}"
+        ],
+        [
+            "",
+            "\\mathbf{g}"
         ],
         [
             "",
@@ -118,19 +94,7 @@
         ],
         [
             "",
-            "\\mathbf{G}"
-        ],
-        [
-            "",
-            "\\mathbf{G}"
-        ],
-        [
-            "",
             "\\bar{x}"
-        ],
-        [
-            "",
-            "\\mathbf{G}"
         ],
         [
             "",
@@ -142,7 +106,51 @@
         ],
         [
             "",
-            "\\min_{(p, q) \\in P_{i,j}}"
+            "\\mathbb{R}"
+        ],
+        [
+            "",
+            "\\mathbb{N}"
+        ],
+        [
+            "",
+            "\\mathbb{N}"
+        ],
+        [
+            "",
+            "\\mathbb{N}"
+        ],
+        [
+            "",
+            "\\mathbb{R}"
+        ],
+        [
+            "",
+            "\\mathbb{N}"
+        ],
+        [
+            "",
+            "\\mathbb{N}"
+        ],
+        [
+            "",
+            "\\mathbb{N}"
+        ],
+        [
+            "",
+            "\\mathbb{N}"
+        ],
+        [
+            "",
+            "\\mathbf{g}"
+        ],
+        [
+            "",
+            "\\mathbf{g}"
+        ],
+        [
+            "",
+            "\\mathbf{g}"
         ],
         [
             "",
@@ -158,19 +166,11 @@
         ],
         [
             "",
-            "\\mathbf{g}"
+            "\\mathbf{G}"
         ],
         [
             "",
-            "\\mathbb{N}"
-        ],
-        [
-            "",
-            "\\mathbf{g}"
-        ],
-        [
-            "",
-            "\\mathbf{g}"
+            "\\min_{(p, q) \\in P_{i,j}}"
         ]
     ]
 }

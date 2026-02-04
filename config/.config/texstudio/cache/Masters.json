@@ -5,59 +5,51 @@
         "/home/jj/Desktop/Masters/Dissertation/main/refs.bib#refs"
     ],
     "childdocs": [
-        "/home/jj/Desktop/Masters/Dissertation/chapters/3_Methodology_Experimental_Design/chapter3_methodology_revised.tex",
         "/home/jj/Desktop/Masters/Dissertation/chapters/1_Introduction.tex",
-        "/home/jj/Desktop/Masters/Dissertation/chapters/4_Implementation_in_MATLAB.tex",
+        "/home/jj/Desktop/Masters/Dissertation/chapters/2_LiteratureReview/LiteratureReview.tex",
+        "/home/jj/Desktop/Masters/Dissertation/chapters/3_Methodology_Experimental_Design/chapter3_methodology_revised.tex",
         "/home/jj/Desktop/Masters/Dissertation/chapters/5_Results.tex",
         "/home/jj/Desktop/Masters/Dissertation/chapters/chapter6_conclusions_revised.tex",
-        "/home/jj/Desktop/Masters/Dissertation/chapters/2_LiteratureReview/LiteratureReview.tex"
+        "/home/jj/Desktop/Masters/Dissertation/chapters/4_Implementation_in_MATLAB.tex"
     ],
     "filename": "/home/jj/Desktop/Masters/Dissertation/main/Masters.tex",
     "labels": [
     ],
-    "modified": "Fri Nov 21 12:59:19 2025",
+    "modified": "Sat Jan 3 14:00:52 2026",
     "packages": [
-        "#hyperref",
-        "#nameref",
-        "#xcolor",
-        "#bm",
-        "#titlecaps",
-        "#amssymb",
-        "#xcolor",
-        "#csquotes",
-        "#url",
         "section#placeins",
         "#subcaption",
-        "#colortbl",
-        "#booktabs",
-        "#listings",
+        "#bm",
         "#./NWUStyle",
         "a4paper, oneside, 11pt#class-book",
         "a4paper, oneside, 11pt#latex-document",
-        "a4paper, oneside, 11pt#tex"
+        "a4paper, oneside, 11pt#tex",
+        "#xcolor",
+        "#colortbl",
+        "#csquotes",
+        "#listings",
+        "#hyperref",
+        "#nameref",
+        "#amssymb",
+        "#xcolor",
+        "#booktabs",
+        "#url",
+        "#titlecaps"
     ],
     "refs": [
     ],
     "toc": [
-        "-1#../chapters/1_Introduction#107",
-        "-1#../chapters/2_LiteratureReview/LiteratureReview#108",
-        "-1#../chapters/3_Methodology_Experimental_Design/chapter3_methodology_revised#109",
-        "-1#../chapters/4_Implementation_in_MATLAB#110",
-        "-1#../chapters/5_Results#111",
-        "-1#../chapters/chapter6_conclusions_revised#112"
+        "-1#../chapters/1_Introduction#115",
+        "-1#../chapters/2_LiteratureReview/LiteratureReview#116",
+        "-1#../chapters/3_Methodology_Experimental_Design/chapter3_methodology_revised#117",
+        "-1#../chapters/4_Implementation_in_MATLAB#118",
+        "-1#../chapters/5_Results#119",
+        "-1#../chapters/chapter6_conclusions_revised#120"
     ],
     "usercommands": [
         [
             "",
-            "%color%codegray"
-        ],
-        [
-            "",
             "%color%backcolour"
-        ],
-        [
-            "",
-            "%color%codepurple"
         ],
         [
             "",
@@ -65,7 +57,15 @@
         ],
         [
             "",
+            "%color%codegray"
+        ],
+        [
+            "",
             "%color%codegreen"
+        ],
+        [
+            "",
+            "%color%codepurple"
         ]
     ]
 }

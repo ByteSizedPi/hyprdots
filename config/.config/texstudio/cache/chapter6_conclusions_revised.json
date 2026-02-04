@@ -9,7 +9,7 @@
     "labels": [
         "ch:conclusions"
     ],
-    "modified": "Thu Nov 13 19:42:38 2025",
+    "modified": "Wed Jan 14 17:26:47 2026",
     "packages": [
     ],
     "refs": [
@@ -17,20 +17,20 @@
     "toc": [
         "1#Conclusions, Discussion And Future Research#4",
         "2#Summary of Contributions#10",
-        "2#Performance Analysis and Interpretation#37",
-        "3#Achievements and Limitations#40",
-        "3#Why Precision Remains Problematic#53",
-        "2#Denoising Insights and Contradictions#66",
-        "2#Theoretical Implications for Classical Computer Vision#87",
-        "3#When Are Classical Methods Appropriate?#92",
-        "3#Lessons for Algorithm Optimization#107",
-        "2#Critical Limitations#122",
-        "2#Future Research Directions#141",
-        "3#Refinements Within the Classical Framework#146",
-        "3#Hybrid Classical-Deep Learning Architectures#159",
-        "3#Extended Evaluation and Analysis#172",
-        "3#Fundamental Limitations Acknowledged#192",
-        "2#Concluding Remarks#205"
+        "2#Performance Analysis and Interpretation#43",
+        "3#Achievements and Limitations#46",
+        "3#Why Precision Remains Problematic#63",
+        "2#Denoising Insights and Contradictions#79",
+        "2#Theoretical Implications for Classical Computer Vision#103",
+        "3#When Are Classical Methods Appropriate?#108",
+        "3#Lessons for Algorithm Optimization#127",
+        "2#Critical Limitations#147",
+        "2#Future Research Directions#173",
+        "3#Refinements Within the Classical Framework#178",
+        "3#Hybrid Classical-Deep Learning Architectures#196",
+        "3#Extended Evaluation and Analysis#213",
+        "3#Fundamental Limitations Acknowledged#237",
+        "2#Concluding Remarks#253"
     ],
     "usercommands": [
     ]

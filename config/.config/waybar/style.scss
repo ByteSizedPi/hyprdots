@@ -1,10 +1,12 @@
-@use "/home/jj/.config/matugen/generated_templates/catppuccin-macchiato.scss" as *;
+@use "/home/jj/.config/matugen/generated_templates/catppuccin-macchiato.scss"
+  as *;
 @use "sass:color";
 
 @mixin glassify($color) {
   color: $color;
   background: linear-gradient(170deg, rgba($color, 0.3), rgba($color, 0.1));
-  box-shadow: inset 1px 1px 0 0 rgba($color, 0.2),
+  box-shadow:
+    inset 1px 1px 0 0 rgba($color, 0.2),
     inset -1px -1px 0 0 rgba($color, 0.1);
 }
 
@@ -77,7 +79,8 @@
 .modules-center .module {
   background-color: rgba($lavender, 0.1);
   color: $lavender;
-  box-shadow: inset 1px 1px 0 0 rgba($lavender, 0.2),
+  box-shadow:
+    inset 1px 1px 0 0 rgba($lavender, 0.2),
     inset -1px -1px 0 0 rgba($lavender, 0.1);
 
   min-width: 1.5rem;
@@ -117,7 +120,8 @@ menu {
   border-radius: 10px;
   padding: 0;
   background-color: $crust;
-  box-shadow: inset 1px 1px 0 0 rgba($sky, 0.2),
+  box-shadow:
+    inset 1px 1px 0 0 rgba($sky, 0.2),
     inset -1px -1px 0 0 rgba($sky, 0.1);
 }
 

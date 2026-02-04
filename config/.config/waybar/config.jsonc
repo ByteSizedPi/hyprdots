@@ -14,7 +14,7 @@
 
   "modules-left": [
     "hyprland/workspaces", // comment for fun
-    "hyprland/window"
+    "hyprland/window",
   ],
   "modules-center": [
     "group/actions",
@@ -23,7 +23,7 @@
     "bluetooth",
     "custom/power-profile",
     "custom/docker",
-    "custom/backlight"
+    "custom/backlight",
   ],
   "modules-right": ["clock", "network", "battery", "custom/power"],
 
@@ -35,7 +35,7 @@
     "exec": "swaync-client -swb",
     "on-click": "swaync-client -t -sw",
     "on-click-right": "swaync-client -d -sw",
-    "escape": true
+    "escape": true,
   },
 
   "bluetooth": {
@@ -51,24 +51,24 @@
     "tooltip-format-enumerate-connected": "{device_alias}\t{device_address}",
     "tooltip-format-enumerate-connected-battery": "{device_alias}\t{device_address}\t{device_battery_percentage}%",
     "on-click": "blueman-manager",
-    "on-click-right": "rfkill toggle bluetooth"
+    "on-click-right": "rfkill toggle bluetooth",
   },
 
   "hyprland/workspaces": {
-    "format": "{name}"
+    "format": "{name}",
   },
 
   "hyprland/window": {
     "format": "{class}",
     // "format": "{initialTitle}",
     "icon": true,
-    "icon-size": 20
+    "icon-size": 20,
   },
 
   "clock": {
     "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>",
     "format": "{:%H:%M %a %d %b}",
-    "tooltip": false
+    "tooltip": false,
   },
 
   // "group/cpu-gp": {
@@ -79,7 +79,7 @@
   "cpu": {
     "format": "{usage}% CPU",
     "on-click": "kitty -e btop",
-    "interval": 1
+    "interval": 1,
   },
 
   // "custom/cpu-text": {
@@ -89,7 +89,7 @@
   "memory": {
     "format": "{}% RAM",
     "on-click": "kitty -e btop",
-    "interval": 1
+    "interval": 1,
   },
 
   // "custom/ram-text": {
@@ -105,13 +105,13 @@
     "states": {
       "good": 100,
       "warning": 40,
-      "critical": 15
+      "critical": 15,
     },
     "format": "{capacity} {icon}",
     "format-charging": "{capacity} ",
     "format-plugged": "{capacity} ",
     "format-icons": ["", "", "", "", ""],
-    "interval": 1
+    "interval": 1,
   },
 
   "custom/power-profile": {
@@ -123,8 +123,8 @@
     "format-icons": {
       "performance": "",
       "balanced": "",
-      "power-saver": ""
-    }
+      "power-saver": "",
+    },
   },
 
   "network": {
@@ -136,19 +136,19 @@
     "format-disabled": "Disabled 󰤭",
     "interval": 1,
     "format-icons": {
-      "wifi": ["󰤯", "󰤟", "󰤢", "󰤥", "󰤨"]
+      "wifi": ["󰤯", "󰤟", "󰤢", "󰤥", "󰤨"],
     },
-    "on-click": "nmgui"
+    "on-click": "nmgui",
   },
 
   "group/actions": {
     "orientation": "inherit",
-    "modules": ["cpu", "memory", "pulseaudio", "brightness", "custom/updates"]
+    "modules": ["cpu", "memory", "pulseaudio", "brightness", "custom/updates"],
   },
 
   "custom/screenshot": {
     "format": "󰆟",
-    "on-click": "~/.local/bin/custom_bin/screenshot.sh"
+    "on-click": "~/.local/bin/custom_bin/screenshot.sh",
   },
 
   "custom/backlight": {
@@ -156,17 +156,17 @@
     "exec": "~/.config/waybar/scripts/backlight-status.sh &",
     "return-type": "json",
     "interval": 1,
-    "on-click": "/home/jj/.local/bin/custom_bin/toggle-backlight.sh"
+    "on-click": "/home/jj/.local/bin/custom_bin/toggle-backlight.sh",
   },
 
   "pulseaudio": {
     "format": "{volume} {icon}",
     "format-muted": "󰖁 {volume}",
     "format-icons": {
-      "default": ["󰕿", "󰖀", "󰕾"]
+      "default": ["󰕿", "󰖀", "󰕾"],
     },
     "scroll-step": 5,
-    "on-click": "pavucontrol"
+    "on-click": "pavucontrol",
   },
 
   "custom/power": {
@@ -178,8 +178,8 @@
       "lock": "hyprlock",
       "logout": "hyprctl dispatch exit",
       "shutdown": "shutdown now",
-      "reboot": "reboot"
-    }
+      "reboot": "reboot",
+    },
   },
 
   "custom/updates": {
@@ -192,8 +192,8 @@
     "format-icons": {
       "checking": "",
       "updating": "󰜷",
-      "idle": ""
-    }
+      "idle": "",
+    },
   },
 
   // "group/updates": {
@@ -213,6 +213,6 @@
     "interval": 1,
     "on-click": "~/.config/waybar/scripts/toggle-docker.sh toggle",
     "signal": 8,
-    "tooltip": true
-  }
+    "tooltip": true,
+  },
 }
