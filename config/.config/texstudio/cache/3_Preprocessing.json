@@ -8,17 +8,19 @@
     "filename": "/home/jj/Desktop/Masters/Dissertation/chapters/2_LiteratureReview/3_Preprocessing.tex",
     "labels": [
     ],
-    "modified": "Wed Jan 14 17:12:05 2026",
+    "modified": "Tue Mar 10 09:36:49 2026",
     "packages": [
     ],
     "refs": [
     ],
     "toc": [
-        "2#Preprocessing Techniques for Text Detection#0",
-        "3#Denoising#8",
-        "3#Edge-preserving Denoising#17",
-        "4#Weighted Median Filter#23",
-        "4#Bilateral Filters#37"
+        "2#Denoising methods for image preprocessing#0",
+        "3#Edge-preserving denoising#15",
+        "3#Weighted median filter#21",
+        "3#Bilateral filters#35",
+        "4#Bilateral texture filter#55",
+        "4#Guided filter#70",
+        "4#Joint Bilateral Filter#85"
     ],
     "usercommands": [
         [
@@ -31,51 +33,11 @@
         ],
         [
             "",
-            "\\mathcal{B}"
-        ],
-        [
-            "",
-            "\\mathcal{B}"
-        ],
-        [
-            "",
-            "\\mathcal{B}"
-        ],
-        [
-            "",
-            "\\mathcal{B}"
-        ],
-        [
-            "",
-            "\\mathcal{B}"
-        ],
-        [
-            "",
-            "\\bm{s}"
-        ],
-        [
-            "",
-            "\\bm{r}"
-        ],
-        [
-            "",
-            "\\mathcal{B}"
-        ],
-        [
-            "",
             "\\sum_{q \\epsilon \\mathcal{B}_p}"
         ],
         [
             "",
             "\\mathcal{W}"
-        ],
-        [
-            "",
-            "\\mathcal{B}"
-        ],
-        [
-            "",
-            "\\sum_{q \\epsilon \\mathcal{B}_p}"
         ],
         [
             "",
@@ -87,11 +49,23 @@
         ],
         [
             "",
-            "\\sum_{q = 1}"
+            "\\mu_{k}"
         ],
         [
             "",
-            "\\sum_{q = 1}"
+            "\\bar{p_{k}}"
+        ],
+        [
+            "",
+            "\\mathcal{B}"
+        ],
+        [
+            "",
+            "\\mathcal{B}"
+        ],
+        [
+            "",
+            "\\mathcal{B}"
         ],
         [
             "",
@@ -111,59 +85,15 @@
         ],
         [
             "",
-            "\\mathcal{B}"
+            "\\sum_{q \\epsilon \\mathcal{B}_p}"
         ],
         [
             "",
-            "\\sigma_{k}"
+            "\\sum_{q = 1}"
         ],
         [
             "",
-            "\\bar{p_{k}}"
-        ],
-        [
-            "",
-            "\\mu_{k}"
-        ],
-        [
-            "",
-            "\\omega_{k}"
-        ],
-        [
-            "",
-            "\\sum_{i\\epsilon \\omega _{k}}"
-        ],
-        [
-            "",
-            "\\mu_{k}"
-        ],
-        [
-            "",
-            "\\bar{p_{k}}"
-        ],
-        [
-            "",
-            "\\omega_k"
-        ],
-        [
-            "",
-            "\\omega_k"
-        ],
-        [
-            "",
-            "\\mathcal{W}"
-        ],
-        [
-            "",
-            "\\mathcal{B}"
-        ],
-        [
-            "",
-            "\\mathcal{B}"
-        ],
-        [
-            "",
-            "\\mathcal{B}"
+            "\\sum_{q = 1}"
         ],
         [
             "",
@@ -187,7 +117,71 @@
         ],
         [
             "",
+            "\\mu_{k}"
+        ],
+        [
+            "",
+            "\\mathcal{B}"
+        ],
+        [
+            "",
+            "\\omega_k"
+        ],
+        [
+            "",
+            "\\omega_k"
+        ],
+        [
+            "",
+            "\\mathcal{W}"
+        ],
+        [
+            "",
+            "\\sigma_{k}"
+        ],
+        [
+            "",
+            "\\bar{p_{k}}"
+        ],
+        [
+            "",
+            "\\mu_{k}"
+        ],
+        [
+            "",
             "\\omega_{k}"
+        ],
+        [
+            "",
+            "\\sum_{i\\epsilon \\omega _{k}}"
+        ],
+        [
+            "",
+            "\\mathcal{B}"
+        ],
+        [
+            "",
+            "\\mathcal{B}"
+        ],
+        [
+            "",
+            "\\mathcal{B}"
+        ],
+        [
+            "",
+            "\\mathcal{B}"
+        ],
+        [
+            "",
+            "\\mathcal{B}"
+        ],
+        [
+            "",
+            "\\mathcal{B}"
+        ],
+        [
+            "",
+            "\\mathcal{B}"
         ]
     ]
 }

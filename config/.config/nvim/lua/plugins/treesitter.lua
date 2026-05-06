@@ -1,27 +1,60 @@
+-- lua/plugins/treesitter.lua
+
+-- Languages you want parsers for
+local parsers = {
+	'lua',
+	'vim',
+	'vimdoc',
+	'query',
+	'bash',
+	'python',
+	'markdown',
+	'markdown_inline',
+	'json',
+	'yaml',
+	'toml',
+	'html',
+	'css',
+	'javascript',
+}
+
 return {
-	{ -- Highlight, edit, and navigate code
-		'nvim-treesitter/nvim-treesitter',
-		build = ':TSUpdate',
-		main = 'nvim-treesitter.configs', -- Sets main module to use for opts
-		-- [[ Configure Treesitter ]] See `:help nvim-treesitter`
-		opts = {
-			ensure_installed = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc' },
-			-- Autoinstall languages that are not installed
-			auto_install = true,
-			highlight = {
-				enable = true,
-				-- Some languages depend on vim's regex highlighting system (such as Ruby) for indent rules.
-				--  If you are experiencing weird indenting issues, add the language to
-				--  the list of additional_vim_regex_highlighting and disabled languages for indent.
-				additional_vim_regex_highlighting = { 'ruby' },
-			},
-			indent = { enable = true, disable = { 'ruby' } },
-		},
-		-- There are additional nvim-treesitter modules that you can use to interact
-		-- with nvim-treesitter. You should go explore a few and see what interests you:
-		--
-		--    - Incremental selection: Included, see `:help nvim-treesitter-incremental-selection-mod`
-		--    - Show your current context: https://github.com/nvim-treesitter/nvim-treesitter-context
-		--    - Treesitter + textobjects: https://github.com/nvim-treesitter/nvim-treesitter-textobjects
-	},
+	'nvim-treesitter/nvim-treesitter',
+	branch = 'main',
+	lazy = false,
+	build = ':TSUpdate',
+	config = function()
+		local ts = require 'nvim-treesitter'
+
+		-- Optional: override install location. Default is stdpath('data')..'/site'
+		ts.setup()
+
+		-- Install parsers (no-op if already installed)
+		ts.install(parsers)
+
+		-- Enable treesitter features per-buffer when a supported filetype loads
+		vim.api.nvim_create_autocmd('FileType', {
+			group = vim.api.nvim_create_augroup('johan_treesitter', { clear = true }),
+			callback = function(args)
+				local buf = args.buf
+				local lang = vim.treesitter.language.get_lang(args.match)
+
+				-- Bail out if there's no parser for this filetype
+				if not lang or not vim.treesitter.language.add(lang) then
+					return
+				end
+
+				-- Syntax highlighting
+				vim.treesitter.start(buf, lang)
+
+				-- Indentation (uses treesitter to compute indents)
+				vim.bo[buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+
+				-- Folding (comment these two lines out if you don't want it)
+				vim.wo.foldexpr = 'v:lua.vim.treesitter.foldexpr()'
+				vim.wo.foldmethod = 'expr'
+			end,
+			desc = 'Enable treesitter highlighting, indent, and folding',
+		})
+	end,
 }

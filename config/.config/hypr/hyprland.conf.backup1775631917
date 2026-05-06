@@ -1,0 +1,16 @@
+
+# DMS windows floating by default
+# ! Hyprland doesn't size these windows correctly so disabling by default here
+# windowrule = float on, match:class ^(org.quickshell)$
+
+
+
+source = ./dms/autostart.conf
+source = ./dms/monitors.conf
+source = ./dms/ui.conf
+source = ./dms/windowrules.conf
+# source = ./dms/colors.conf
+source = ./dms/outputs.conf
+# source = ./dms/layout.conf
+# source = ./dms/cursor.conf
+source = ./dms/binds.conf

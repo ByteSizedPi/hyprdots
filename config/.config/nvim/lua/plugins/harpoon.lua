@@ -2,6 +2,7 @@
 -- https://github.com/ThePrimeagen/harpoon/tree/harpoon2
 
 return {
+	enabled = false,
 	'ThePrimeagen/harpoon',
 	branch = 'harpoon2',
 	dependencies = { 'nvim-lua/plenary.nvim' },

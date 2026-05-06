@@ -8,17 +8,19 @@
     "filename": "/home/jj/Desktop/Masters/Dissertation/chapters/2_LiteratureReview/4_AlgorithmicOptimisations.tex",
     "labels": [
     ],
-    "modified": "Sat Jan 3 19:41:43 2026",
+    "modified": "Tue Mar 10 09:37:50 2026",
     "packages": [
     ],
     "refs": [
+        "ch:methodology"
     ],
     "toc": [
-        "2#\\titlecap{Optimisation Approaches for Classical Computer Vision Algorithms}#0",
-        "3#\\titlecap{Statistical Outlier Detection Methods}#3",
-        "4#\\titlecap{Tukey's Fences}#6",
-        "4#\\titlecap{Standard Score}#14",
-        "3#\\titlecap{Complexity Reduction through Spatial Constraints}#26"
+        "2#Optimisation approaches for classical computer vision algorithms#0",
+        "3#Statistical outlier detection methods#3",
+        "4#\\titlecap{Tukey's fences}#6",
+        "4#Standard score#14",
+        "3#Complexity reduction through spatial constraints#26",
+        "3#Chapter outlook#33"
     ],
     "usercommands": [
         [

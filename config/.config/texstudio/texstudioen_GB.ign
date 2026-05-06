@@ -1,9 +1,13 @@
 %Ignored-Words;encoding:utf-8;version:TeXstudio:1.8
+assistive
 beget
 binarisation
+Bresenham
 broadcastable
 Canny's
+convolutional
 curation
+debuggability
 denoised
 denoising
 discretised
@@ -24,8 +28,10 @@ Moiré
 numberplates
 online
 OpenCV
+OpenCV's
 performant
 precomputation
+priors
 processibility
 rasterised
 rasterization
@@ -35,10 +41,12 @@ reframing
 setup
 signage
 SQL
+study's
 SWT
 SWT's
 thresholding
 Timeline
 toolkit
 unweighted
+Wilcoxon
 Workflow

@@ -22,7 +22,7 @@
   border-radius: 8px;
   margin: 0;
   padding: 0;
-  transition: 0.5s;
+  transition: 0.2s;
 }
 
 #window {
@@ -55,15 +55,22 @@
 
   #workspaces {
     button {
-      label {
-        color: $pink;
-        min-width: 15px;
-      }
+      // color: $crust;
+      // background: linear-gradient(170deg, rgba($pink, 0.3), rgba($pink, 0.1));
+      // box-shadow:
+      //   inset 1px 1px 2px rgba($crust, 0.7),
+      //   inset -1px -1px 2px rgba($crust, 0.7),
+      //   inset 1px 1px 6px rgba($crust, 0.2),
+      //   inset -1px -1px 6px rgba($crust, 0.2);
 
-      @include glassify($pink);
+      background-color: rgba($lavender, 0.1);
+      color: $lavender;
+      box-shadow:
+        inset 1px 1px 0 0 rgba($lavender, 0.2),
+        inset -1px -1px 0 0 rgba($lavender, 0.1);
 
       margin: 0 2px;
-      transition: none;
+      transition: margin 0s;
 
       &:first-child {
         margin-left: 0;
@@ -71,6 +78,19 @@
 
       &:last-child {
         margin-right: 0;
+      }
+
+      label {
+        min-width: 15px;
+        color: $lavender;
+      }
+    }
+
+    .active {
+      @include glassify($pink);
+
+      label {
+        color: $pink;
       }
     }
   }

@@ -78,6 +78,7 @@ alias cat='bat'
 alias open='xdg-open'
 export ZSHCONF='/home/jj/dotfiles/zsh'
 source "$ZSHCONF/zellij-init.sh" # AUTO-START ZELLIJ
+source "$ZSHCONF/functions.sh"
 
 # Use kitten ssh when running in kitty (but not inside Zellij)
 [[ -n "$KITTY_PID" && -z "$ZELLIJ" ]] && alias ssh="kitten ssh" || true

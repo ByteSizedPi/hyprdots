@@ -7,74 +7,46 @@
     ],
     "filename": "/home/jj/Desktop/Masters/Dissertation/chapters/2_LiteratureReview/2_SWT.tex",
     "labels": [
-        "fig:digitalstroke",
-        "eq:gradientcomparisons",
-        "fig:swtparallelogram",
-        "fig:edgetheory",
-        "fig:swtcorner",
-        "eq:proprelations",
-        "eq:nearest_pair",
-        "fig:strokewidth",
         "fig:strokeray",
+        "fig:astroke",
+        "fig:swtparallelogram",
+        "fig:swtcorner",
         "sec:swt_algorithm",
-        "fig:astroke"
+        "fig:edgetheory",
+        "fig:strokewidth",
+        "fig:digitalstroke"
     ],
-    "modified": "Wed Jan 14 17:09:42 2026",
+    "modified": "Tue Mar 10 09:35:02 2026",
     "packages": [
     ],
     "refs": [
-        "fig:strokeray",
-        "fig:strokewidth",
         "fig:swtcorner",
         "fig:swtparallelogram",
+        "fig:edgetheory",
+        "ch:implementation",
         "fig:digitalstroke",
-        "fig:edgetheory"
+        "fig:astroke",
+        "fig:digitalstroke",
+        "fig:strokewidth",
+        "fig:strokeray",
+        "fig:strokewidth",
+        "fig:strokeray"
     ],
     "toc": [
-        "2#\\titlecap{Stroke Width Transform Foundations}#0",
-        "3#\\titlecap{Theory and Mathematical Foundations}#3",
-        "4#Mathematical Formalization#48",
-        "4#Mathematical Formalization#64",
-        "3#\\titlecap{Algorithm Description}#113",
-        "4#\\titlecap{Corners and Intersections}#140",
-        "3#\\titlecap{Qualifying Letter Candidates}#162"
+        "2#Stroke Width Transform foundations#0",
+        "3#Theory and mathematical foundations#3",
+        "3#Algorithm description#48",
+        "4#Corners and intersections#75",
+        "3#Qualifying letter candidates#97"
     ],
     "usercommands": [
         [
             "",
-            "\\mathbf{G}"
-        ],
-        [
-            "",
-            "\\mathbf{G}"
-        ],
-        [
-            "",
-            "\\mathbf{G}"
-        ],
-        [
-            "",
             "\\mathbf{g}"
         ],
         [
             "",
-            "\\mathbf{G}"
-        ],
-        [
-            "",
-            "\\mathbf{G}"
-        ],
-        [
-            "",
-            "\\mathbf{G}"
-        ],
-        [
-            "",
-            "\\mathbf{G}"
-        ],
-        [
-            "",
-            "\\mathbf{G}"
+            "\\mathbf{g}"
         ],
         [
             "",
@@ -83,6 +55,22 @@
         [
             "",
             "\\mathbf{g}"
+        ],
+        [
+            "",
+            "\\mathbf{g}"
+        ],
+        [
+            "",
+            "\\mathbf{g}"
+        ],
+        [
+            "",
+            "\\mathbf{g}"
+        ],
+        [
+            "",
+            "\\bar{x}"
         ],
         [
             "",
@@ -90,87 +78,7 @@
         ],
         [
             "",
-            "\\mathbf{G}"
-        ],
-        [
-            "",
-            "\\bar{x}"
-        ],
-        [
-            "",
-            "\\mathcal{P}"
-        ],
-        [
-            "",
-            "\\mathbb{N}"
-        ],
-        [
-            "",
-            "\\mathbb{R}"
-        ],
-        [
-            "",
-            "\\mathbb{N}"
-        ],
-        [
-            "",
-            "\\mathbb{N}"
-        ],
-        [
-            "",
-            "\\mathbb{N}"
-        ],
-        [
-            "",
-            "\\mathbb{R}"
-        ],
-        [
-            "",
-            "\\mathbb{N}"
-        ],
-        [
-            "",
-            "\\mathbb{N}"
-        ],
-        [
-            "",
-            "\\mathbb{N}"
-        ],
-        [
-            "",
-            "\\mathbb{N}"
-        ],
-        [
-            "",
             "\\mathbf{g}"
-        ],
-        [
-            "",
-            "\\mathbf{g}"
-        ],
-        [
-            "",
-            "\\mathbf{g}"
-        ],
-        [
-            "",
-            "\\mathbf{g}"
-        ],
-        [
-            "",
-            "\\mathbf{g}"
-        ],
-        [
-            "",
-            "\\mathbf{G}"
-        ],
-        [
-            "",
-            "\\mathbf{G}"
-        ],
-        [
-            "",
-            "\\min_{(p, q) \\in P_{i,j}}"
         ]
     ]
 }

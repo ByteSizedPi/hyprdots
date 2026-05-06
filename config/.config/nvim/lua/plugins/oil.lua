@@ -2,7 +2,7 @@
 -- https://github.com/stevearc/oil.nvim
 
 return {
-	'stevearc/oil.nvim',
+	'stevearc/oil.nvim',enabled = false,
 	dependencies = { 'nvim-tree/nvim-web-devicons' },
 	config = function()
 		require('oil').setup {

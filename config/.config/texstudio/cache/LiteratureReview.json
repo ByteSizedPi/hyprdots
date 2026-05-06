@@ -4,22 +4,23 @@
     "bibtexfiles": [
     ],
     "childdocs": [
-        "/home/jj/Desktop/Masters/Dissertation/chapters/2_LiteratureReview/1_Text_Detection.tex",
-        "/home/jj/Desktop/Masters/Dissertation/chapters/2_LiteratureReview/4_AlgorithmicOptimisations.tex",
         "/home/jj/Desktop/Masters/Dissertation/chapters/2_LiteratureReview/3_Preprocessing.tex",
-        "/home/jj/Desktop/Masters/Dissertation/chapters/2_LiteratureReview/2_SWT.tex"
+        "/home/jj/Desktop/Masters/Dissertation/chapters/2_LiteratureReview/2_SWT.tex",
+        "/home/jj/Desktop/Masters/Dissertation/chapters/2_LiteratureReview/4_AlgorithmicOptimisations.tex",
+        "/home/jj/Desktop/Masters/Dissertation/chapters/2_LiteratureReview/1_Text_Detection.tex"
     ],
     "filename": "/home/jj/Desktop/Masters/Dissertation/chapters/2_LiteratureReview/LiteratureReview.tex",
     "labels": [
         "ch:literature"
     ],
-    "modified": "Sat Jan 3 19:41:43 2026",
+    "modified": "Mon Mar 9 19:44:17 2026",
     "packages": [
     ],
     "refs": [
+        "ch:methodology"
     ],
     "toc": [
-        "1#Literature Review#0",
+        "1#Literature review#0",
         "-1#../chapters/2_LiteratureReview/1_Text_Detection#5",
         "-1#../chapters/2_LiteratureReview/2_SWT#6",
         "-1#../chapters/2_LiteratureReview/3_Preprocessing#7",

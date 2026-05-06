@@ -7,59 +7,65 @@
     ],
     "filename": "/home/jj/Desktop/Masters/Dissertation/chapters/4_Implementation_in_MATLAB.tex",
     "labels": [
-        "sec:boundary_merging",
-        "ch:implementation",
-        "sec:solidity_filtering",
-        "lst:gradients",
-        "lst:edge_detection",
-        "lst:gradient_restructure",
+        "sec:formal_definitions",
+        "eq:proprelations",
+        "sec:math_formalization",
         "lst:edge_gradients",
-        "sec:ray_filtering"
+        "lst:edge_detection",
+        "eq:gradientcomparisons",
+        "eq:nearest_pair",
+        "sec:ray_filtering",
+        "sec:boundary_merging",
+        "lst:gradients",
+        "ch:implementation",
+        "lst:gradient_restructure",
+        "sec:solidity_filtering"
     ],
-    "modified": "Wed Jan 14 17:21:01 2026",
+    "modified": "Mon Mar 16 13:46:25 2026",
     "packages": [
     ],
     "refs": [
-        "ch:methodology",
-        "ch:literature",
-        "ch:literature",
         "eq:proprelations",
         "eq:gradientcomparisons",
+        "sec:ray_filtering",
+        "sec:solidity_filtering",
         "sec:boundary_merging",
+        "sec:ray_filtering",
+        "ch:methodology",
+        "sec:math_formalization",
+        "sec:math_formalization",
+        "ch:methodology",
         "ch:literature",
-        "sec:swt_algorithm",
-        "sec:ray_filtering",
-        "sec:ray_filtering",
-        "sec:solidity_filtering"
+        "sec:swt_algorithm"
     ],
     "toc": [
-        "1#Implementation and Optimisations#0",
-        "2#\\titlecap{Platform Selection and Implementation Considerations}#17",
-        "3#\\titlecap{MATLAB as Implementation Platform}#19",
-        "3#\\titlecap{Optimisation Strategies for Interpreted Languages}#37",
-        "2#\\titlecap{Baseline SWT Implementation}#84",
-        "3#\\titlecap{Practical Considerations}#88",
-        "3#\\titlecap{Auxiliary Data Structures}#133",
-        "3#\\titlecap{Edge Map}#136",
-        "3#\\titlecap{Directional Gradients}#144",
-        "3#\\titlecap{Point Projection}#172",
-        "3#\\titlecap{Final Initialisations}#213",
-        "3#\\titlecap{Main SWT Algorithm}#229",
-        "3#\\titlecap{First Iteration}#232",
-        "4#\\titlecap{Second Iteration}#282",
-        "2#\\titlecap{Proposed Optimisation 1: Statistical Ray Filtering}#303",
-        "3#\\titlecap{Motivation}#306",
-        "3#\\titlecap{Z-Score-Based Outlier Detection}#311",
-        "3#\\titlecap{Implementation}#322",
-        "2#\\titlecap{Proposed Optimisation 2: Boundary-Based Component Merging}#343",
-        "3#\\titlecap{Motivation}#346",
-        "3#\\titlecap{Boundary Extraction and Adjacency Detection}#351",
-        "3#\\titlecap{Stroke Width-Based Merging}#392",
-        "2#\\titlecap{Proposed Optimisation 3: Solidity-Based Component Filtering}#417",
-        "3#\\titlecap{Motivation}#420",
-        "3#\\titlecap{Solidity Metric Definition}#425",
-        "3#\\titlecap{Implementation}#433",
-        "2#\\titlecap{Text Line Aggregation}#492"
+        "1#Implementation and optimisations#0",
+        "2#Platform selection and implementation considerations#8",
+        "3#MATLAB as implementation platform#12",
+        "3#Optimisation strategies for interpreted languages#17",
+        "2#Mathematical formalisation of stroke detection#58",
+        "3#Formal definitions#67",
+        "2#Baseline SWT implementation#118",
+        "3#Practical considerations#122",
+        "3#Auxiliary data structures#167",
+        "3#Edge map#170",
+        "3#Directional gradients#178",
+        "3#Point projection#206",
+        "3#Final initialisations#240",
+        "3#Main SWT algorithm#256",
+        "3#First iteration#259",
+        "4#Second iteration#309",
+        "2#Proposed optimisation 1: statistical ray filtering#330",
+        "3#Z-Score-Based outlier detection#337",
+        "3#Implementation#348",
+        "2#Proposed optimisation 2: boundary-based component merging#369",
+        "3#Boundary extraction and adjacency detection#376",
+        "3#Stroke width-based merging#412",
+        "2#Proposed optimisation 3: solidity-based component filtering#437",
+        "3#Solidity metric definition#444",
+        "3#Implementation#452",
+        "2#Text line aggregation#511",
+        "2#Chapter summary#548"
     ],
     "usercommands": [
         [
@@ -72,11 +78,103 @@
         ],
         [
             "",
-            "\\mathbb{R}"
+            "\\mathbf{G}"
+        ],
+        [
+            "",
+            "\\mathcal{P}"
+        ],
+        [
+            "",
+            "\\mathbb{N}"
         ],
         [
             "",
             "\\mathbb{R}"
+        ],
+        [
+            "",
+            "\\mathbf{G}"
+        ],
+        [
+            "",
+            "\\mathbf{G}"
+        ],
+        [
+            "",
+            "\\mathbf{G}"
+        ],
+        [
+            "",
+            "\\mathbf{G}"
+        ],
+        [
+            "",
+            "\\mathbb{R}"
+        ],
+        [
+            "",
+            "\\mathbb{N}"
+        ],
+        [
+            "",
+            "\\mathbb{N}"
+        ],
+        [
+            "",
+            "\\mathbb{N}"
+        ],
+        [
+            "",
+            "\\min_{(p, q) \\in P_{i,j}}"
+        ],
+        [
+            "",
+            "\\mathbf{G}"
+        ],
+        [
+            "",
+            "\\mathbb{R}"
+        ],
+        [
+            "",
+            "\\mathbf{G}"
+        ],
+        [
+            "",
+            "\\mathbb{N}"
+        ],
+        [
+            "",
+            "\\mathbb{N}"
+        ],
+        [
+            "",
+            "\\mathbb{R}"
+        ],
+        [
+            "",
+            "\\mathbb{N}"
+        ],
+        [
+            "",
+            "\\mathbb{N}"
+        ],
+        [
+            "",
+            "\\mathbf{G}"
+        ],
+        [
+            "",
+            "\\mathbf{G}"
+        ],
+        [
+            "",
+            "\\mathbf{G}"
+        ],
+        [
+            "",
+            "\\mathbf{G}"
         ]
     ]
 }

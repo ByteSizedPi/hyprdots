@@ -7,26 +7,29 @@
     ],
     "filename": "/home/jj/Desktop/Masters/Dissertation/chapters/1_Introduction.tex",
     "labels": [
-        "fig:natural_scene_images"
+        "fig:natural_scene_images",
+        "ch:introduction"
     ],
-    "modified": "Sat Jan 3 19:41:43 2026",
+    "modified": "Wed Mar 18 11:15:28 2026",
     "packages": [
     ],
     "refs": [
+        "fig:natural_scene_images",
         "ch:conclusions",
         "ch:results",
         "ch:implementation",
         "ch:methodology",
-        "ch:literature",
-        "fig:natural_scene_images"
+        "ch:literature"
     ],
     "toc": [
-        "1#Introduction#0",
-        "2#\\titlecap{Scene Text Detection: Problem Definition and Challenges}#6",
-        "2#\\titlecap{Applications of Robust Text Detection}#31",
-        "2#\\titlecap{The Stroke Width Transform: A Case Study}#36",
-        "2#\\titlecap{Research Motivation and Scope}#44",
-        "2#\\titlecap{Contributions and Dissertation Structure}#57"
+        "1#Introduction#1",
+        "2#Scene text detection: problem definition and challenges#8",
+        "2#Applications of robust text detection#33",
+        "2#The Stroke Width Transform#38",
+        "2#Research motivation and scope#46",
+        "3#Aims and objectives#66",
+        "3#Research methodology#80",
+        "2#Dissertation structure#86"
     ],
     "usercommands": [
     ]

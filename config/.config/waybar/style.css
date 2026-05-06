@@ -10,7 +10,7 @@
   border-radius: 8px;
   margin: 0;
   padding: 0;
-  transition: 0.5s;
+  transition: 0.2s;
 }
 
 #window {
@@ -39,21 +39,29 @@
   padding: 0;
 }
 .modules-left #workspaces button {
-  color: #f5bde6;
-  background: linear-gradient(170deg, rgba(245, 189, 230, 0.3), rgba(245, 189, 230, 0.1));
-  box-shadow: inset 1px 1px 0 0 rgba(245, 189, 230, 0.2), inset -1px -1px 0 0 rgba(245, 189, 230, 0.1);
+  background-color: rgba(183, 189, 248, 0.1);
+  color: #b7bdf8;
+  box-shadow: inset 1px 1px 0 0 rgba(183, 189, 248, 0.2), inset -1px -1px 0 0 rgba(183, 189, 248, 0.1);
   margin: 0 2px;
-  transition: none;
-}
-.modules-left #workspaces button label {
-  color: #f5bde6;
-  min-width: 15px;
+  transition: margin 0s;
 }
 .modules-left #workspaces button:first-child {
   margin-left: 0;
 }
 .modules-left #workspaces button:last-child {
   margin-right: 0;
+}
+.modules-left #workspaces button label {
+  min-width: 15px;
+  color: #b7bdf8;
+}
+.modules-left #workspaces .active {
+  color: #f5bde6;
+  background: linear-gradient(170deg, rgba(245, 189, 230, 0.3), rgba(245, 189, 230, 0.1));
+  box-shadow: inset 1px 1px 0 0 rgba(245, 189, 230, 0.2), inset -1px -1px 0 0 rgba(245, 189, 230, 0.1);
+}
+.modules-left #workspaces .active label {
+  color: #f5bde6;
 }
 
 .modules-center .module {

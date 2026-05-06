@@ -7,39 +7,39 @@
     ],
     "filename": "/home/jj/Desktop/Masters/Dissertation/chapters/2_LiteratureReview/1_Text_Detection.tex",
     "labels": [
-        "fig:nonplanar",
-        "fig:illum",
         "fig:alias",
         "fig:barrel",
+        "fig:moire",
         "fig:perspective",
-        "fig:moire"
+        "fig:illum",
+        "fig:nonplanar"
     ],
-    "modified": "Sat Jan 3 19:41:43 2026",
+    "modified": "Mon Mar 9 20:12:11 2026",
     "packages": [
     ],
     "refs": [
-        "fig:nonplanar",
-        "fig:perspective",
-        "fig:illum",
         "fig:barrel",
         "fig:alias",
-        "fig:moire"
+        "fig:moire",
+        "fig:nonplanar",
+        "fig:perspective",
+        "fig:illum"
     ],
     "toc": [
-        "2#\\titlecap{Text Detection Methods and Related Work}#0",
-        "3#\\titlecap{Technical Challenges in Scene Text Detection}#4",
-        "4#\\titlecap{Complex Scenes}#10",
-        "4#\\titlecap{Resolution}#13",
-        "4#\\titlecap{Lighting}#45",
-        "4#\\titlecap{Perspective Distortion}#48",
-        "4#Barrel and Pincushion Distortion#75",
-        "3#\\titlecap{Previous Work in Text Detection}#79",
-        "4#\\titlecap{Maximally Stable Extremal Regions}#82",
-        "4#\\titlecap{AdaBoost}#91",
-        "4#\\titlecap{Colour Enhanced Contrasting Extremal Regions}#98",
-        "4#\\titlecap{Rule-based Connected Component Filtering}#105",
-        "4#\\titlecap{Adaptive Method using Text Cues}#112",
-        "4#\\titlecap{Remarks}#117"
+        "2#Text detection methods and related work#0",
+        "3#Technical challenges in scene text detection#4",
+        "4#Complex scenes#10",
+        "4#Resolution#13",
+        "4#Lighting#45",
+        "4#Perspective distortion#48",
+        "4#Barrel and pincushion distortion#75",
+        "3#Previous work in text detection#79",
+        "4#Maximally Stable Extremal Regions#82",
+        "4#AdaBoost#91",
+        "4#Colour enhanced contrasting extremal regions#98",
+        "4#Rule-based connected component filtering#105",
+        "4#Adaptive method using text cues#112",
+        "4#Remarks#117"
     ],
     "usercommands": [
     ]
