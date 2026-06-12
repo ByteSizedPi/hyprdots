@@ -9,6 +9,12 @@ config/.config/Code/User/*
 !config/.config/Code/User/tasks.json
 !config/.config/Code/User/snippets/
 
+# zellij — zjstatus binary (install manually: download from github.com/dj95/zjstatus/releases)
+zellij/.config/zellij/plugins/*.wasm
+
+# home/.config is NOT managed here — use nvim/, zellij/, kitty/ packages instead
+home/.config/
+
 # General patterns to avoid
 *.log
 *.tmp

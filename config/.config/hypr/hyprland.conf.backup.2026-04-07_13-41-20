@@ -1,7 +1,0 @@
-source = ./modules/env.conf
-source = ./modules/autostart.conf
-source = ./modules/monitors.conf
-source = ./modules/ui.conf
-source = ./modules/keybinds.conf
-source = ./modules/windowrules.conf
-source = ./modules/plugins.conf

@@ -1,2 +1,0 @@
-export SH_PRIMARY="{{colors.primary.default.hex}}"
-export SH_BG="#14141E"

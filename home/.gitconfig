@@ -1,0 +1,9 @@
+[user]
+	email = johann12venter@gmail.com
+	name = Johan Venter
+[credential "https://github.com"]
+	helper = 
+	helper = !/usr/bin/gh auth git-credential
+[credential "https://gist.github.com"]
+	helper = 
+	helper = !/usr/bin/gh auth git-credential
