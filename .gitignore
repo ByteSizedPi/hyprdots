@@ -17,6 +17,22 @@ home/.config/
 # old XFWM theme assets, not in use
 home/.themes/
 
+# Noctalia-generated files — regenerated on every theme change.
+# These are outputs, not inputs — no need to track them in git.
+#
+# Packages where ~/.config/<app> is a directory symlink into dotfiles
+# (noctalia writes directly here):
+hyprland/.config/hypr/noctalia.lua
+kitty/.config/kitty/themes/noctalia.conf
+zellij/.config/zellij/themes/noctalia.kdl
+noctalia/.config/noctalia/colors.json
+#
+# Packages using --no-folding (generated files stay in real ~/.config dirs,
+# not in dotfiles). These patterns are a safety net for fresh-machine stows.
+alacritty/.config/alacritty/themes/
+btop/.config/btop/themes/
+yazi/.config/yazi/flavors/
+
 # General patterns to avoid
 *.log
 *.tmp

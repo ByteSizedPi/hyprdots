@@ -264,97 +264,6 @@ plugins {
     //     welcome_screen true
     // }
 
-    zjstatus location="file:~/.config/zellij/plugins/zjstatus.wasm" {
-    // ── THEME PALETTE: tokyonight-storm ── (run scripts/set-theme.sh to swap)
-        color_rosewater "#c0caf5"
-        color_flamingo "#f7768e"
-        color_pink "#bb9af7"
-        color_mauve "#bb9af7"
-        color_red "#f7768e"
-        color_maroon "#db4b4b"
-        color_peach "#ff9e64"
-        color_yellow "#e0af68"
-        color_green "#9ece6a"
-        color_teal "#73daca"
-        color_sky "#7dcfff"
-        color_sapphire "#2ac3de"
-        color_blue "#7aa2f7"
-        color_lavender "#89ddff"
-        color_text "#c0caf5"
-        color_subtext1 "#a9b1d6"
-        color_subtext0 "#9aa5ce"
-        color_overlay2 "#7a8597"
-        color_overlay1 "#737aa2"
-        color_overlay0 "#565f89"
-        color_surface2 "#414868"
-        color_surface1 "#3b4261"
-        color_surface0 "#292e42"
-        color_base "#24283b"
-        color_mantle "#1f2335"
-        color_crust "#1a1b26"
-    // ── END THEME PALETTE ─────────────────────────────────────────────────────
-    //
-        format_left   "{mode}#[bg=$surface0,fg=$text] {session}#[fg=$surface0]#[bg=none,fg=none] {tabs}"
-        // format_left   "{tabs} {mode}#[bg=$surface0,fg=$text] {session}#[fg=$surface0]#[bg=none,fg=none]"
-        format_center ""
-        // format_right  "{mode}#[bg=$surface0,fg=$text] {session}#[fg=$surface0]#[bg=none,fg=none]"
-        format_right ""
-        format_space  ""
-        format_hide_on_overlength "true"
-        format_precedence "lrc"
-    //
-        border_enabled  "true"
-        border_char     "─"
-        border_format   "#[bg=$surface0]{char}"
-        border_position "top"
-    //
-    //
-        mode_normal        "#[fg=$blue]#[bg=$blue,fg=$crust,bold]NORMAL#[fg=$blue,bg=$surface0]"
-        mode_tmux          "#[fg=$mauve]#[bg=$mauve,fg=$crust,bold] TMUX #[fg=$mauve,bg=$surface0]"
-        mode_locked        "#[fg=$red]#[bg=$red,fg=$crust,bold]LOCKED#[fg=$red,bg=$surface0]"
-        mode_session       "#[fg=$red]#[bg=$red,fg=$crust,bold]SESSION#[fg=$red,bg=$surface0]"
-        mode_pane          "#[fg=$green]#[bg=$green,fg=$crust,bold] PANE #[fg=$green,bg=$surface0]"
-        mode_tab           "#[fg=$green]#[bg=$green,fg=$crust,bold] TAB  #[fg=$green,bg=$surface0]"
-        mode_rename_tab    "#[fg=$peach]#[bg=$peach,fg=$crust,bold]RENAME-TAB#[fg=$peach,bg=$surface0]"
-        mode_rename_pane   "#[fg=$peach]#[bg=$peach,fg=$crust,bold]RENAME-PANE#[fg=$peach,bg=$surface0]"
-        mode_scroll        "#[fg=$flamingo]#[bg=$flamingo,fg=$crust,bold]SCROLL#[fg=$flamingo,bg=$surface0]"
-        mode_enter_search  "#[fg=$flamingo]#[bg=$flamingo,fg=$crust,bold]ENT-SEARCH#[fg=$flamingo,bg=$surface0]"
-        mode_search        "#[fg=$flamingo]#[bg=$flamingo,fg=$crust,bold]SEARCH#[fg=$flamingo,bg=$surface0]"
-        mode_resize        "#[fg=$peach]#[bg=$peach,fg=$crust,bold]RESIZE#[fg=$peach,bg=$surface0]"
-        mode_move          "#[fg=$yellow]#[bg=$yellow,fg=$crust,bold] MOVE #[fg=$yellow,bg=$surface0]"
-        mode_prompt        "#[fg=$pink]#[bg=$pink,fg=$crust,bold]PROMPT#[fg=$pink,bg=$surface0]"
-    //
-        tab_normal              "#[fg=$blue]#[bg=$blue,fg=$crust,bold]{index}#[fg=$blue,bg=$surface0]#[bg=$surface0,fg=$blue,bold] {name}{floating_indicator}#[fg=$surface0]"
-        tab_normal_fullscreen   "#[fg=$blue]#[bg=$blue,fg=$crust,bold]{index}#[fg=$blue,bg=$surface0]#[bg=$surface0,fg=$blue,bold] {name}{fullscreen_indicator}#[fg=$surface0]"
-        tab_normal_sync         "#[fg=$blue]#[bg=$blue,fg=$crust,bold]{index}#[fg=$blue,bg=$surface0]#[bg=$surface0,fg=$blue,bold] {name}{sync_indicator}#[fg=$surface0]"
-        tab_active              "#[fg=$green]#[bg=$green,fg=$crust,bold]{index}#[fg=$green,bg=$surface0]#[bg=$surface0,fg=$green,bold] {name}{floating_indicator}#[fg=$surface0]"
-        tab_active_fullscreen   "#[fg=$green]#[bg=$green,fg=$crust,bold]{index}#[fg=$green,bg=$surface0]#[bg=$surface0,fg=$green,bold] {name}{fullscreen_indicator}#[fg=$surface0]"
-        tab_active_sync         "#[fg=$green]#[bg=$green,fg=$crust,bold]{index}#[fg=$green,bg=$surface0]#[bg=$surface0,fg=$green,bold] {name}{sync_indicator}#[fg=$surface0]"
-        tab_separator           " "
-    //
-        tab_sync_indicator       " "
-        tab_fullscreen_indicator " 󰊓"
-        tab_floating_indicator   " 󰹙"
-    //
-        notification_format_unread "#[bg=surface0,fg=$yellow]#[bg=$yellow,fg=$crust] #[bg=$surface1,fg=$yellow] {message}#[bg=$surface0,fg=$yellow]"
-        notification_format_no_notifications ""
-        notification_show_interval "10"
-    //
-        command_host_command    "uname -n"
-        command_host_format     "{stdout}"
-        command_host_interval   "0"
-        command_host_rendermode "static"
-    //
-        command_user_command    "whoami"
-        command_user_format     "{stdout}"
-        command_user_interval   "10"
-        command_user_rendermode "static"
-    //
-        datetime          "{format}"
-        datetime_format   "%Y-%m-%d 󰅐 %H:%M"
-        datetime_timezone "Africa/Johannesburg"
-    //
-    }
 }
 
 // Plugins to load in the background when a new session starts
@@ -370,9 +279,10 @@ load_plugins {
 // 
 simplified_ui true
  
-// ── ACTIVE THEME ── change this line to switch (also run scripts/set-theme.sh for zjstatus colors) ──
-// Available: tokyonight-storm, dracula, catppuccin-macchiato-custom
-theme "tokyonight-storm"
+// ── ACTIVE THEME ── managed by noctalia (noctalia msg templates-apply) ──
+// Available: noctalia (dynamic), tokyonight-storm, dracula, catppuccin-macchiato-custom
+theme "noctalia"
+// noctalia-theme-applied: 1781633153
 
 ui {
 	pane_frames {

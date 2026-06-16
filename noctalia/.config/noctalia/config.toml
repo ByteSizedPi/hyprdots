@@ -1,0 +1,2 @@
+[hooks]
+colors_changed = ["bash ~/.config/noctalia/scripts/zellij-theme-update.sh"]
