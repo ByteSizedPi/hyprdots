@@ -11,15 +11,16 @@ hl.config({
 		-- },
 		--
 		resize_on_border = true,
-		allow_tearing = true,
+		allow_tearing = false,
 	},
 
 	decoration = {
 		rounding = 8,
 		rounding_power = 2,
 
-		active_opacity = 1.0,
-		inactive_opacity = 1.0,
+		active_opacity = 0.8,
+		inactive_opacity = 0.8,
+		dim_special = 0,
 
 		shadow = {
 			enabled = false,
@@ -32,6 +33,8 @@ hl.config({
 			enabled = true,
 			size = 10,
 			passes = 3,
+			special = false,
+			xray = true,
 			-- vibrancy = 0.1696,
 		},
 	},
@@ -85,5 +88,12 @@ hl.config({
 	misc = {
 		force_default_wallpaper = -1,
 		disable_hyprland_logo = false,
+		render_unfocused_fps = 60,
+	},
+})
+
+hl.config({
+	debug = {
+		vfr = false,
 	},
 })

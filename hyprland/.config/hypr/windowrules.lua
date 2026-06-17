@@ -73,7 +73,13 @@ hl.window_rule({
 -- Launch zellij in the special:zellij scratchpad when first opened
 local _t = os.getenv("TERMINAL")
 local _terminal = (_t ~= nil and _t ~= "" and _t) or "xdg-terminal-exec"
+
 hl.workspace_rule({
 	workspace = "special:zellij",
 	on_created_empty = _terminal .. " zellij attach main --create",
+})
+
+hl.workspace_rule({
+	workspace = "special:jjserver",
+	on_created_empty = _terminal .. " ssh -t jjserver@100.68.211.32 zellij attach jjserver --create",
 })
