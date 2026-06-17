@@ -69,3 +69,11 @@ hl.window_rule({
 	match = { class = "^dev\\.noctalia\\.Noctalia\\.Settings$" },
 	opacity = "0.8 override 0.8 override",
 })
+
+-- Launch zellij in the special:zellij scratchpad when first opened
+local _t = os.getenv("TERMINAL")
+local _terminal = (_t ~= nil and _t ~= "" and _t) or "xdg-terminal-exec"
+hl.workspace_rule({
+	workspace = "special:zellij",
+	on_created_empty = _terminal .. " zellij attach main --create",
+})
