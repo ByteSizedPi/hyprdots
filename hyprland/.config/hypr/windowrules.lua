@@ -22,6 +22,7 @@ hl.layer_rule({
 	match = { namespace = "^noctalia-bar.*" },
 	blur = true,
 	blur_popups = true,
+	xray = true,
 	ignore_alpha = 0.5,
 })
 
