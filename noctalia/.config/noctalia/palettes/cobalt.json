@@ -1,0 +1,32 @@
+{
+  "_about": "Predefined Material-role palette for the SERVER theme. Same role names Noctalia extracts from the wallpaper, but fixed. Fed through the SAME templates in ../templates/ by scripts/render-theme.py. Edit a hex value (or copy this file to a new name) to change the server theme, then run scripts/deploy-server-theme.sh.",
+
+  "background":               "#0d1b29",
+  "on_background":            "#ffffff",
+
+  "surface":                  "#122436",
+  "surface_container":        "#16304a",
+  "surface_container_high":   "#1d3f5e",
+  "surface_container_highest":"#244a66",
+  "on_surface":               "#cfe3f2",
+  "on_surface_variant":       "#8fb0c8",
+
+  "primary":                  "#8ff586",
+  "on_primary":               "#122436",
+  "primary_container":        "#1d3f5e",
+  "primary_fixed_dim":        "#3aa5ff",
+
+  "secondary":                "#ffd966",
+  "secondary_container":      "#16304a",
+  "secondary_fixed_dim":      "#c792ea",
+
+  "tertiary":                 "#ff9e64",
+  "tertiary_container":       "#2a3f52",
+  "tertiary_fixed_dim":       "#5ad1ff",
+
+  "error":                    "#ff5c8a",
+  "error_container":          "#d4312e",
+
+  "outline":                  "#4d6b85",
+  "outline_variant":          "#2a3f52"
+}
