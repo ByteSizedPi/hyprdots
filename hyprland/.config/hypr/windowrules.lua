@@ -87,3 +87,17 @@ hl.workspace_rule({
 	workspace = "special:jjserver",
 	on_created_empty = "kitty kitten ssh -t jjserver@100.68.211.32 zellij attach jjserver --create",
 })
+
+-- jjserver border: colored by the palette primary (generated into jjserver-colors.lua
+-- by scripts/deploy-server-theme.sh) so the special-workspace border matches the cobalt
+-- nvim/zellij/kitty theme rather than the wallpaper. pcall so a machine without the
+-- generated file still loads cleanly.
+local ok, jj = pcall(require, "jjserver-colors")
+if ok and type(jj) == "table" and jj.primary then
+	local c = "rgb(" .. jj.primary .. ")"
+	hl.window_rule({
+		name = "jjserver-border",
+		match = { workspace = "special:jjserver" },
+		border_color = c .. " " .. c,
+	})
+end

@@ -15,16 +15,17 @@ import json
 import re
 import sys
 
-TOKEN = re.compile(r"\{\{colors\.([a-z_]+)\.default\.(red|green|blue|hex)\}\}")
+TOKEN = re.compile(r"\{\{colors\.([a-z_]+)\.default\.(red|green|blue|hex_stripped|hex)\}\}")
 
 
 def components(hexv):
-    h = hexv.lstrip("#")
+    h = hexv.lstrip("#").lower()
     return {
         "red": int(h[0:2], 16),
         "green": int(h[2:4], 16),
         "blue": int(h[4:6], 16),
-        "hex": "#" + h.lower(),
+        "hex": "#" + h,
+        "hex_stripped": h,
     }
 
 

@@ -40,7 +40,13 @@ kitty_theme="$repo/kitty/.config/kitty/themes/${palette_name}-server.conf"
 python3 "$render" "$palette" "$tpl/kitty-theme.conf" \
 	| sed "1,/^## name:/ s/^## name:.*/## name: ${title} Server/" >"$kitty_theme"
 
+# hyprland: client-side jjserver special-workspace border color (the palette primary),
+# consumed by windowrules.lua. Local render; reload hyprland to apply.
+hypr_colors="$repo/hyprland/.config/hypr/jjserver-colors.lua"
+python3 "$render" "$palette" "$tpl/hyprland-jjserver-colors.lua" >"$hypr_colors"
+
 echo "Done:"
 echo "  server: ~/.config/nvim/lua/noctalia-theme.lua, ~/.config/zellij/themes/noctalia.kdl"
 echo "  client: $kitty_theme  (ssh.conf should use: color_scheme ${title} Server)"
+echo "  client: $hypr_colors  (jjserver border = palette primary; hyprctl reload to apply)"
 echo "(reload nvim / restart the zellij session; new kitten-ssh windows pick up kitty colors)"
