@@ -25,7 +25,7 @@ ZSH_THEME="bira"
 
 # Uncomment one of the following lines to change the auto-update behavior
 # zstyle ':omz:update' mode disabled  # disable automatic updates
-# zstyle ':omz:update' mode auto      # update automatically without asking
+zstyle ':omz:update' mode auto      # update automatically without asking
 # zstyle ':omz:update' mode reminder  # just remind me to update when it's time
 
 # Uncomment the following line to change how often to auto-update (in days).
@@ -83,7 +83,7 @@ plugins=(
 
 source $ZSH/oh-my-zsh.sh
 
-export EDITOR='nvim'
+export EDITOR="nvim"
 # User configuration
 
 # export MANPATH="/usr/local/man:$MANPATH"
@@ -113,3 +113,15 @@ export EDITOR='nvim'
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 alias i="sudo dnf5 install -y"
+
+alias ls="eza --icons"
+compdef ls=eza
+
+alias la="eza -lah --icons --git"
+compdef la=eza
+
+alias tree="eza --tree --icons"
+compdef tree=eza
+
+alias grep="rg --color=auto"
+alias cat="bat"
