@@ -1,0 +1,32 @@
+{
+  "_about": "Catppuccin Macchiato mapped onto the Material roles the templates use. ANSI/base16 slots kept faithful: primary=green (strings/ANSI green/border), primary_fixed_dim=blue, secondary=yellow, secondary_fixed_dim=mauve (keywords/ANSI magenta), tertiary_fixed_dim=teal (cyan), error=red. Change 'primary' if you want a different accent/border color.",
+
+  "background":               "#1e2030",
+  "on_background":            "#cad3f5",
+
+  "surface":                  "#24273a",
+  "surface_container":        "#363a4f",
+  "surface_container_high":   "#494d64",
+  "surface_container_highest":"#5b6078",
+  "on_surface":               "#cad3f5",
+  "on_surface_variant":       "#a5adcb",
+
+  "primary":                  "#a6da95",
+  "on_primary":               "#24273a",
+  "primary_container":        "#494d64",
+  "primary_fixed_dim":        "#8aadf4",
+
+  "secondary":                "#eed49f",
+  "secondary_container":      "#363a4f",
+  "secondary_fixed_dim":      "#c6a0f6",
+
+  "tertiary":                 "#f5a97f",
+  "tertiary_container":       "#363a4f",
+  "tertiary_fixed_dim":       "#8bd5ca",
+
+  "error":                    "#ed8796",
+  "error_container":          "#ee99a0",
+
+  "outline":                  "#6e738c",
+  "outline_variant":          "#494d64"
+}
