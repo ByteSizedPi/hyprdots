@@ -14,4 +14,4 @@ require("windowrules")
 
 -- Noctalia color template integration (must be last)
 require("noctalia")
-require("noctalia-windowrules")
+-- require("noctalia-windowrules")
