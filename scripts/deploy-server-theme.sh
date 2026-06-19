@@ -32,7 +32,15 @@ python3 "$render" "$palette" "$tpl/zellij-theme.kdl" >"$tmp/noctalia.kdl"
 echo "Rendered palette '$palette_name' -> pushing to $remote"
 scp -q "$tmp/noctalia-theme.lua" "$remote:.config/nvim/lua/noctalia-theme.lua"
 scp -q "$tmp/noctalia.kdl"       "$remote:.config/zellij/themes/noctalia.kdl"
+
+# kitty: client-side terminal palette for the jjserver window (kitten ssh color_scheme
+# in ssh.conf). kitty runs on the client, so this is rendered locally, not pushed.
+title="$(printf '%s' "${palette_name:0:1}" | tr '[:lower:]' '[:upper:]')${palette_name:1}"
+kitty_theme="$repo/kitty/.config/kitty/themes/${palette_name}-server.conf"
+python3 "$render" "$palette" "$tpl/kitty-theme.conf" \
+	| sed "1,/^## name:/ s/^## name:.*/## name: ${title} Server/" >"$kitty_theme"
+
 echo "Done:"
-echo "  ~/.config/nvim/lua/noctalia-theme.lua"
-echo "  ~/.config/zellij/themes/noctalia.kdl"
-echo "(reload nvim / restart the zellij session to pick it up)"
+echo "  server: ~/.config/nvim/lua/noctalia-theme.lua, ~/.config/zellij/themes/noctalia.kdl"
+echo "  client: $kitty_theme  (ssh.conf should use: color_scheme ${title} Server)"
+echo "(reload nvim / restart the zellij session; new kitten-ssh windows pick up kitty colors)"
