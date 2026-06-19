@@ -80,7 +80,10 @@ hl.workspace_rule({
 	on_created_empty = _terminal .. " zellij attach main --create",
 })
 
+-- jjserver: launch via kitty's ssh kitten so ssh.conf applies a distinct
+-- color_scheme (Cobalt Neon) to this window only — see ~/.config/kitty/ssh.conf.
+-- Hardcoded to kitty (not _terminal) because the ssh kitten is kitty-specific.
 hl.workspace_rule({
 	workspace = "special:jjserver",
-	on_created_empty = _terminal .. " ssh -t jjserver@100.68.211.32 zellij attach jjserver --create",
+	on_created_empty = "kitty kitten ssh -t jjserver@100.68.211.32 zellij attach jjserver --create",
 })

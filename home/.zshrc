@@ -113,15 +113,12 @@ export EDITOR="nvim"
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 alias i="sudo dnf5 install -y"
-
 alias ls="eza --icons"
-compdef ls=eza
-
 alias la="eza -lah --icons --git"
-compdef la=eza
-
 alias tree="eza --tree --icons"
-compdef tree=eza
-
 alias grep="rg --color=auto"
 alias cat="bat"
+
+setopt COMPLETE_ALIASES
+_eza_path_complete() { _files }
+compdef _eza_path_complete ls la tree

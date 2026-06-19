@@ -1,0 +1,139 @@
+// Fixed "cobalt" zellij theme — hand-authored, matched to kitty's "Cobalt Neon"
+// and nvim's cobalt base16. TRACKED source: scripts/apply-server-theme.sh renames the
+// block to "noctalia" and writes themes/noctalia.kdl (gitignored, per-machine) so the
+// synced config.kdl (theme "noctalia") renders cobalt on a server. Primary accent: blue.
+themes {
+    cobalt {
+        text_unselected {
+            base       207 227 242   // fg (#cfe3f2)
+            background 13 27 41      // bg_darker (#0d1b29)
+            emphasis_0 255 158 100   // orange (#ff9e64)
+            emphasis_1 90 209 255    // cyan (#5ad1ff)
+            emphasis_2 199 146 234   // purple (#c792ea)
+            emphasis_3 255 92 138    // pink (#ff5c8a)
+        }
+        text_selected {
+            base       207 227 242   // fg
+            background 29 63 94      // current_line (#1d3f5e)
+            emphasis_0 255 158 100   // orange
+            emphasis_1 90 209 255    // cyan
+            emphasis_2 212 49 46     // red (#d4312e)
+            emphasis_3 255 92 138    // pink
+        }
+
+        ribbon_selected {
+            base       13 27 41      // bg_darker - text on active tab
+            background 58 165 255    // blue (#3aa5ff) - active tab background
+            emphasis_0 212 49 46     // red
+            emphasis_1 255 158 100   // orange
+            emphasis_2 199 146 234   // purple
+            emphasis_3 255 217 102   // yellow (#ffd966)
+        }
+        ribbon_unselected {
+            base       207 227 242   // fg - text for inactive tabs
+            background 13 27 41      // bg_darker
+            emphasis_0 212 49 46     // red
+            emphasis_1 29 63 94      // current_line
+            emphasis_2 18 36 54      // bg (#122436)
+            emphasis_3 77 107 133    // comment (#4d6b85)
+        }
+
+        table_title {
+            base       143 245 134   // green (#8ff586)
+            background 0 0 0
+            emphasis_0 255 92 138    // pink
+            emphasis_1 255 217 102   // yellow
+            emphasis_2 143 245 134   // green
+            emphasis_3 90 209 255    // cyan
+        }
+        table_cell_selected {
+            base       207 227 242   // fg
+            background 29 63 94      // current_line
+            emphasis_0 255 92 138    // pink
+            emphasis_1 255 217 102   // yellow
+            emphasis_2 143 245 134   // green
+            emphasis_3 90 209 255    // cyan
+        }
+        table_cell_unselected {
+            base       207 227 242   // fg
+            background 18 36 54      // bg
+            emphasis_0 255 92 138    // pink
+            emphasis_1 255 217 102   // yellow
+            emphasis_2 143 245 134   // green
+            emphasis_3 90 209 255    // cyan
+        }
+
+        list_selected {
+            base       207 227 242   // fg
+            background 29 63 94      // current_line
+            emphasis_0 255 92 138    // pink
+            emphasis_1 255 217 102   // yellow
+            emphasis_2 143 245 134   // green
+            emphasis_3 90 209 255    // cyan
+        }
+        list_unselected {
+            base       207 227 242   // fg
+            background 18 36 54      // bg
+            emphasis_0 255 92 138    // pink
+            emphasis_1 255 217 102   // yellow
+            emphasis_2 143 245 134   // green
+            emphasis_3 90 209 255    // cyan
+        }
+
+        frame_selected {
+            base       58 165 255    // blue - active border
+            background 0 0 0
+            emphasis_0 255 158 100   // orange
+            emphasis_1 255 217 102   // yellow
+            emphasis_2 143 245 134   // green
+            emphasis_3 0 0 0
+        }
+        frame_unselected {
+            base       77 107 133    // comment - dimmed border
+            background 0 0 0
+            emphasis_0 29 63 94      // current_line
+            emphasis_1 207 227 242   // fg
+            emphasis_2 77 107 133    // comment
+            emphasis_3 0 0 0
+        }
+
+        frame_highlight {
+            base       58 165 255    // blue - highlight
+            background 0 0 0
+            emphasis_0 58 165 255    // blue
+            emphasis_1 58 165 255    // blue
+            emphasis_2 58 165 255    // blue
+            emphasis_3 58 165 255    // blue
+        }
+
+        exit_code_success {
+            base       143 245 134   // green
+            background 0 0 0
+            emphasis_0 90 209 255    // cyan
+            emphasis_1 0 0 0
+            emphasis_2 255 92 138    // pink
+            emphasis_3 29 63 94      // current_line
+        }
+        exit_code_error {
+            base       212 49 46     // red
+            background 0 0 0
+            emphasis_0 255 217 102   // yellow
+            emphasis_1 0 0 0
+            emphasis_2 0 0 0
+            emphasis_3 0 0 0
+        }
+
+        multiplayer_user_colors {
+            player_1 255 92 138    // pink
+            player_2 90 209 255    // cyan
+            player_3 255 217 102   // yellow
+            player_4 143 245 134   // green
+            player_5 212 49 46     // red
+            player_6 255 158 100   // orange
+            player_7 199 146 234   // purple
+            player_8 58 165 255    // blue
+            player_9 207 227 242   // fg
+            player_10 29 63 94     // current_line
+        }
+    }
+}

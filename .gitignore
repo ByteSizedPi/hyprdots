@@ -25,6 +25,7 @@ home/.themes/
 hyprland/.config/hypr/noctalia.lua
 kitty/.config/kitty/themes/noctalia.conf
 zellij/.config/zellij/themes/noctalia.kdl
+nvim/.config/nvim/lua/noctalia-theme.lua
 noctalia/.config/noctalia/colors.json
 #
 # Packages using --no-folding (generated files stay in real ~/.config dirs,
@@ -40,3 +41,4 @@ yazi/.config/yazi/flavors/
 *~
 *.swp
 *.swo
+.claude
