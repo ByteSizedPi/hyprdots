@@ -80,12 +80,14 @@ hl.workspace_rule({
 	on_created_empty = _terminal .. " zellij attach main --create",
 })
 
--- jjserver: launch via kitty's ssh kitten so ssh.conf applies a distinct
--- color_scheme (Cobalt Neon) to this window only — see ~/.config/kitty/ssh.conf.
--- Hardcoded to kitty (not _terminal) because the ssh kitten is kitty-specific.
+-- jjserver: launch with a dedicated kitty config (jjserver.conf) that re-pins the
+-- cobalt theme after the wallpaper include, so a live theme reload (SIGUSR1) keeps
+-- this window cobalt instead of reverting to the wallpaper palette. kitten ssh +
+-- ssh.conf also set the color_scheme on connect. Hardcoded to kitty (not _terminal)
+-- because the ssh kitten and --config are kitty-specific.
 hl.workspace_rule({
 	workspace = "special:jjserver",
-	on_created_empty = "kitty kitten ssh -t jjserver@100.68.211.32 zellij attach jjserver --create",
+	on_created_empty = "kitty --config ~/.config/kitty/jjserver.conf kitten ssh -t jjserver@100.68.211.32 zellij attach jjserver --create",
 })
 
 -- jjserver border: colored by the palette primary (generated into jjserver-colors.lua
