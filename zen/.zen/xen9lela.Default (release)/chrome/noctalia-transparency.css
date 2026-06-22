@@ -1,0 +1,61 @@
+/* BASELINE: everything we control at 0% opacity (fully transparent). We build the
+   0.8 back up from here once we can see which surfaces actually go see-through.
+   The appearance:none block stays — it's what lets native XUL widgets honor a
+   background at all. */
+
+/* --- SINGLE GLOBAL TINT ---
+   Paint the whole-window root container once. Every pane above it is transparent,
+   so this one color shows through uniformly across the entire window — toolbar,
+   tabs, viewport, all of it, at the same opacity. Dial just this one value:
+   12% = barely there, 40% = obvious, 80% = nearly solid. */
+:root:root {
+  background-color: color-mix(in srgb, var(--base) 80%, transparent) !important;
+
+  --zen-main-browser-background:  transparent !important;
+  --zen-themed-toolbar-bg:        transparent !important;
+  --toolbar-bgcolor:              transparent !important;
+  --toolbox-bgcolor-inactive:     transparent !important;
+  --lwt-sidebar-background-color: transparent !important;
+}
+
+/* --- Noctalia main-surface elements --- */
+:root #navigator-toolbox,
+:root #zen-tabbox-wrapper,
+:root .sidebar-panel,
+:root #zen-sidebar-splitter,
+:root #zen-appcontent-navbar-container,
+:root #TabsToolbar,
+:root hbox#titlebar,
+:root .sidebar-placesTree,
+:root #zen-workspaces-button,
+/* --- Zen structural panes --- */
+:root #zen-main-app-wrapper,
+:root #zen-appcontent-wrapper,
+:root #tabbrowser-tabpanels,
+:root #tabbrowser-tabs,
+:root #vertical-pinned-tabs-container,
+:root .zen-essentials-container,
+:root #sidebar-box,
+:root #sidebar-header,
+:root #sidebar,
+:root .browserSidebarContainer,
+:root hbox.browserSidebarContainer {
+  background-color: transparent !important;
+}
+
+/* --- Native widget appearance reset (so backgrounds aren't painted by platform) --- */
+:root #navigator-toolbox,
+:root #navigator-toolbox toolbar,
+:root #TabsToolbar,
+:root #titlebar,
+:root #tabbrowser-tabs,
+:root #vertical-pinned-tabs-container,
+:root #sidebar-box,
+:root #sidebar,
+:root #sidebar-header,
+:root .sidebar-panel,
+:root .browserSidebarContainer {
+  -moz-default-appearance: none !important;
+  appearance: none !important;
+  background-image: none !important;
+}
