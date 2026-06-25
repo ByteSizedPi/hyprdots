@@ -12,26 +12,30 @@ set -euo pipefail
 
 # Repo root (this script lives in <repo>/scripts) and the paths we read from.
 repo="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-pal_dir="$repo/noctalia/.config/noctalia/palettes"   # palette JSONs + the `active` pointer
-tpl="$repo/noctalia/.config/noctalia/templates"      # shared Noctalia templates
-render="$repo/scripts/render-theme.py"               # substitutes a palette into a template
+pal_dir="$repo/noctalia/.config/noctalia/palettes" # palette JSONs + the `active` pointer
+tpl="$repo/noctalia/.config/noctalia/templates"    # shared Noctalia templates
+render="$repo/scripts/render-theme.py"             # substitutes a palette into a template
 
 # Resolve the active palette: arg 1 > $SERVER_THEME > palettes/active > "cobalt".
-active="cobalt"                                                          # last-resort default
-[ -f "$pal_dir/active" ] && active="$(tr -d '[:space:]' <"$pal_dir/active")"  # the single source of truth
-name="${1:-${SERVER_THEME:-$active}}"                                   # let arg/env override ad-hoc
-remote="${2:-jjserver@100.68.211.32}"                                   # target host (arg 2 overrides)
+active="cobalt"                                                              # last-resort default
+[ -f "$pal_dir/active" ] && active="$(tr -d '[:space:]' <"$pal_dir/active")" # the single source of truth
+name="${1:-${SERVER_THEME:-$active}}"                                        # let arg/env override ad-hoc
+remote="${2:-jjserver@100.68.211.32}"                                        # target host (arg 2 overrides)
 
-palette="$pal_dir/$name.json"                                           # the chosen palette file
-[ -f "$palette" ] || { echo "no such palette: $palette" >&2; exit 1; }  # fail early if it's missing
+palette="$pal_dir/$name.json" # the chosen palette file
+[ -f "$palette" ] || {
+  echo "no such palette: $palette" >&2
+  exit 1
+} # fail early if it's missing
 
-tmp="$(mktemp -d)"; trap 'rm -rf "$tmp"' EXIT                           # scratch dir, auto-cleaned
+tmp="$(mktemp -d)"
+trap 'rm -rf "$tmp"' EXIT # scratch dir, auto-cleaned
 
 # --- server side: render with fixed output names, push, then poke the live session ---
-python3 "$render" "$palette" "$tpl/nvim-theme.lua"   >"$tmp/noctalia-theme.lua"  # render nvim theme
-python3 "$render" "$palette" "$tpl/zellij-theme.kdl" >"$tmp/noctalia.kdl"        # render zellij theme
-scp -q "$tmp/noctalia-theme.lua" "$remote:.config/nvim/lua/noctalia-theme.lua"  # ship nvim theme
-scp -q "$tmp/noctalia.kdl"       "$remote:.config/zellij/themes/noctalia.kdl"   # ship zellij theme
+python3 "$render" "$palette" "$tpl/nvim-theme.lua" >"$tmp/noctalia-theme.lua"  # render nvim theme
+python3 "$render" "$palette" "$tpl/zellij-theme.kdl" >"$tmp/noctalia.kdl"      # render zellij theme
+scp -q "$tmp/noctalia-theme.lua" "$remote:.config/nvim/lua/noctalia-theme.lua" # ship nvim theme
+scp -q "$tmp/noctalia.kdl" "$remote:.config/zellij/themes/noctalia.kdl"        # ship zellij theme
 
 # One ssh trip that: writes the breadcrumb, signals the running nvim to reload, and
 # nudges the watched zellij config in place (same inode-preserving trick as the local
@@ -50,11 +54,10 @@ EOSSH
 
 # --- client side: fixed names so ssh.conf/jjserver.conf stay stable across theme swaps ---
 python3 "$render" "$palette" "$tpl/kitty-theme.conf" \
-	>"$repo/kitty/.config/kitty/themes/server-theme.conf"           # kitty 'Server' scheme
+  >"$repo/kitty/.config/kitty/themes/server-theme.conf" # kitty 'Server' scheme
 python3 "$render" "$palette" "$tpl/hyprland-jjserver-colors.lua" \
-	>"$repo/hyprland/.config/hypr/jjserver-colors.lua"             # hypr jjserver border colors
+  >"$repo/hyprland/.config/hypr/jjserver-colors.lua" # hypr jjserver border colors
 
 echo "Deployed server theme: palette '$name' -> $remote"
 echo "  server: nvim + zellij theme files, ~/.config/server-theme.txt (live-poked)"
 echo "  client: kitty 'Server' scheme + hypr jjserver border"
-echo "Now (client only): hyprctl reload; relaunch the jjserver window (META+A)."

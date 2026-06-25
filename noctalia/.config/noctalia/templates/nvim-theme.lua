@@ -67,12 +67,21 @@ function M.setup()
 	hi("TelescopeMatching", { fg = "{{colors.primary.default.hex}}", bold = true })
 
 	-- Bufferline links to these groups so DevIcon bgs are generated correctly
-	hi("NoctaliaTabFill",     { bg = "{{colors.surface.default.hex}}" })
-	hi("NoctaliaTabInactive", { fg = "{{colors.on_surface_variant.default.hex}}", bg = "{{colors.surface_container.default.hex}}" })
-	hi("NoctaliaTabVisible",  { fg = "{{colors.on_surface_variant.default.hex}}", bg = "{{colors.surface_container.default.hex}}" })
-	hi("NoctaliaTabSelected", { fg = "{{colors.surface.default.hex}}",             bg = "{{colors.primary.default.hex}}" })
+	hi("NoctaliaTabFill", { bg = "{{colors.surface.default.hex}}" })
+	hi(
+		"NoctaliaTabInactive",
+		{ fg = "{{colors.on_surface_variant.default.hex}}", bg = "{{colors.surface_container.default.hex}}" }
+	)
+	hi(
+		"NoctaliaTabVisible",
+		{ fg = "{{colors.on_surface_variant.default.hex}}", bg = "{{colors.surface_container.default.hex}}" }
+	)
+	hi("NoctaliaTabSelected", {
+		fg = "{{colors.surface.default.hex}}",
+		bg = "{{colors.primary.default.hex}}",
+	})
 
-	vim.notify("Noctalia: theme applied", vim.log.levels.INFO)
+	-- vim.notify("Noctalia: theme applied", vim.log.levels.INFO)
 end
 
 return M
