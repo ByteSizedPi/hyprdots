@@ -13,5 +13,5 @@ require("keybinds")
 require("windowrules")
 
 -- Noctalia color template integration (must be last)
-require("noctalia")
+require("noctalia").apply_theme()
 -- require("noctalia-windowrules")
