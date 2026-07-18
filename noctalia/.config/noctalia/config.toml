@@ -1,2 +1,19 @@
-# [idle.behavior.screen-off]
-# enabled = false
+# Noctalia user override (merged over ~/.local/state/noctalia/settings.toml,
+# which is GUI-managed and NOT stowed). Keep idle taming here so it survives.
+#
+# 2026-06-25: ALL idle behaviours disabled. noctalia's idle locked@600s,
+# screen-off@660s, lock-and-suspend@900s; when noctalia crashed mid-sequence it
+# left the tty1 session locked + screen-off with nothing to recover it. Until
+# noctalia's crash-looping is fixed, leave these off. Re-enable selectively
+# later (prefer a long `lock` timeout; leave `screen_off`/`lock_and_suspend`
+# off while the lid/seat display bug is unsolved).
+# See ~/dotfiles/docs/problems.md (noctalia idle / tty1 dead screen).
+
+[idle.behavior.lock]
+enabled = false
+
+[idle.behavior.screen-off]
+enabled = false
+
+[idle.behavior.lock-and-suspend]
+enabled = false

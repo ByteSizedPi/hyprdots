@@ -117,8 +117,45 @@ alias ls="eza --icons"
 alias la="eza -lah --icons --git"
 alias tree="eza --tree --icons"
 alias grep="rg --color=auto"
-alias cat="bat"
+# alias cat="bat"
 
 setopt COMPLETE_ALIASES
 _eza_path_complete() { _files }
 compdef _eza_path_complete ls la tree
+
+# ── Hyprland instance signature: recompute, never inherit ──────────────
+# The zellij server is persistent (session_serialization) and outlives the
+# graphical session, so it keeps the environment frozen from whenever it first
+# started. Panes inherit that, so after a logout/login
+# HYPRLAND_INSTANCE_SIGNATURE names a DEAD compositor and every hyprctl call
+# fails with "is Hyprland running?".
+#
+# The live instance is identifiable without any inherited state: its directory
+# under $XDG_RUNTIME_DIR/hypr/ is the one holding hyprland.lock (dead instances
+# leave their socket dir behind but no lock). So derive it rather than trust it.
+#
+# Only this var needs it — verified 2026-07-18: WAYLAND_DISPLAY (wayland-1) is
+# recreated with the same name each session, and DBUS_SESSION_BUS_ADDRESS is the
+# per-user bus, so both survive. XDG_SESSION_ID does go stale but nothing here
+# reads it.
+#
+# Limitation: if two Hyprland instances ever run at once (Plasma on another tty
+# doing its own thing is fine — this only counts *Hyprland*), both have locks
+# and the newest wins, which may not be this tty's. Not currently possible here.
+_hypr_refresh_signature() {
+	emulate -L zsh
+	local d newest
+	for d in ${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/hypr/*(/N); do
+		[[ -e $d/hyprland.lock ]] || continue
+		[[ -z $newest || $d/hyprland.lock -nt $newest/hyprland.lock ]] && newest=$d
+	done
+	[[ -n $newest ]] && export HYPRLAND_INSTANCE_SIGNATURE=${newest:t}
+}
+
+# At init (new panes) and per-prompt (panes already open across a logout, whose
+# shell still holds the stale value). Costs one glob + stat; unnoticeable.
+if [[ -d ${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/hypr ]]; then
+	_hypr_refresh_signature
+	autoload -Uz add-zsh-hook
+	add-zsh-hook precmd _hypr_refresh_signature
+fi
