@@ -48,6 +48,16 @@ hl.monitor({
 	scale = 1,
 })
 
+-- Positioned above the laptop panel (logical size 1920x1080 at scale 2,
+-- matching eDP-1's footprint), so the top edge of eDP-1 borders the bottom
+-- edge of the TV.
+hl.monitor({
+	output = "desc:Hisense Electric Co. Ltd. HISENSE 0x00000001",
+	mode = "3840x2160@60",
+	position = "0x-1080",
+	scale = 2,
+})
+
 -- Catch-all for anything not named above: native resolution, placed to the
 -- right, scale 1. Keep LAST. An unknown monitor comes up usable rather than
 -- dark. (Hyprland's documented empty-output fallback rule.)
