@@ -53,9 +53,16 @@ hl.monitor({
 -- edge of the TV.
 hl.monitor({
 	output = "desc:Hisense Electric Co. Ltd. HISENSE 0x00000001",
-	mode = "3840x2160@60",
+	mode = "3840x2160@30",
 	position = "0x-1080",
 	scale = 2,
+})
+
+hl.monitor({
+	output = "desc:XXX AAA",
+	mode = "1920x1080@60",
+	position = "0x-1080",
+	scale = 1,
 })
 
 -- Catch-all for anything not named above: native resolution, placed to the
