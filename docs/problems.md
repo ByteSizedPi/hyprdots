@@ -662,6 +662,131 @@ nothing to do here but wait on upstream.
 
 ---
 
+## 🟧 noctalia can't turn Bluetooth *on* (only manage it once it's already up)
+*Mechanism fully identified and fixed; the original trigger is bounded to one
+overnight window but not retro-provable — hence MITIGATED, not SOLVED.*
+**Symptom:** with Bluetooth off, noctalia's Bluetooth toggle does nothing — it
+can't bring the radio up at all. Once it's up by some other means, noctalia
+manages devices and toggles on/off normally. Asymmetric: it can power *down* but
+never *instantiate*.
+
+**Root cause — two layers of rfkill, and noctalia only reaches the upper one.**
+```
+dell-bluetooth   <- platform killswitch, dell_laptop driver (ACPI/SMBIOS)
+      |             cuts POWER to the BT radio on the USB bus
+      v
+    hci0         <- per-adapter rfkill; only EXISTS when the radio has power
+      |
+      v
+   BlueZ /org/bluez/hci0   <- the only thing noctalia talks to
+```
+While `dell-bluetooth` is soft-blocked the radio is unpowered, so no `hci0`
+device is created, so **`/org/bluez/hci0` does not exist**. Verified: with the
+block on, `rfkill list` shows no `hci0` entry, `bluetoothctl list` is empty, and
+`busctl tree org.bluez` returns a bare `/org/bluez` with no children.
+
+noctalia toggles Bluetooth the way bluedevil / gnome-bluetooth / waybar do — by
+setting `Powered` on `org.bluez.Adapter1` at `/org/bluez/hci0`. With no adapter
+object there is no property to set. Nothing in the desktop layer can fix this;
+the platform killswitch is below BlueZ entirely.
+
+**Not a permissions problem.** `/dev/rfkill` carries a logind uaccess ACL giving
+`jj` `rw` while our session is active on seat0 — `rfkill block/unblock bluetooth`
+round-trips fine *unprivileged*. noctalia could implement this; it just doesn't.
+
+**Also corrupts boot.** `systemd-rfkill` restores the saved block mid-firmware-
+download, so a blocked boot logs alarming Intel errors that are a *symptom*, not
+a separate fault (`-19` = `ENODEV`, device yanked out from under the loader):
+```
+09:42:07 systemd-rfkill.service starting...        <- restores block=1
+09:42:07 hci0: Found device firmware: intel/ibt-0180-0041.sfi
+09:42:07 hci0: Failed to send firmware data (-19)
+09:42:07 hci0: FW download error recovery failed (-19)
+```
+It persists across reboots via `/var/lib/systemd/rfkill/platform-dell-laptop:bluetooth`.
+
+**noctalia cannot recover from this, proven via its own IPC.** With the platform
+switch blocked:
+```
+$ noctalia msg bluetooth-status   -> off
+$ noctalia msg bluetooth-enable   -> error: bluetooth adapter unavailable
+```
+noctalia 5.0.0 *does* ship rfkill-unblock code (`strings` shows `setPowered:
+rfkill unblock failed ({}), trying BlueZ Powered anyway`, `setRfkillSoftBlocked`,
+`applyRfkillState`) — but that code is **gated behind an adapter already
+existing**. It bails at the `adapter unavailable` check before ever reaching the
+unblock. Ordering bug; worth filing upstream. That gate is the whole reason a
+recoverable rfkill state became a one-way trap from the UI.
+
+**Ruled out as the cause (don't re-investigate these):**
+- **noctalia's own disable.** `noctalia msg bluetooth-disable` only sets BlueZ
+  `Powered=false`; verified both rfkill switches stay clear and `hci0` stays
+  present. It does *not* touch the platform switch. Exonerated.
+- **Plasma / bluedevil.** Not logged into Plasma for 10+ days, and BT was working
+  Jul 20 — well after the last Plasma session. Exonerated.
+- **Own config.** `grep -rn rfkill` across the whole repo returns only this unit;
+  no Hyprland bind or script touches rfkill or airplane mode. Exonerated.
+- **`systemctl start bluetooth`** is *not* what revives it, despite seeming to.
+  `bluetooth.service` had been active 7h with zero adapters. bluetoothd starting
+  cannot clear a platform killswitch.
+
+**Timeline.** Last verified working: **2026-07-20 20:18**, wireplumber streaming
+audio to paired device `88:C6:26:EE:5F:0B` over `/org/bluez/hci0`. Dead from boot
+`-7` (**2026-07-21 08:16**) onward — 6 boots with no adapter at all. Journal only
+goes back to Jul 11, and the Jul 20→21 shutdown has no system-phase records (its
+journal ends at user-manager `exit.target`), so the original trigger is **not
+retro-provable** — only bounded to that overnight window.
+
+**Leading hypothesis for the origin (unproven).** Every shutdown that *does* have
+records (boots -4, -3, -2, -1) shows the kernel emitting an rfkill state change
+**~1s after `systemd-rfkill`'s watcher was already torn down**:
+```
+22:01:41 systemd-rfkill.socket: Deactivated successfully.
+22:01:41 Closed systemd-rfkill.socket ... /dev/rfkill Watch.
+22:01:42 sys-devices-virtual-misc-rfkill.device: Failed to enqueue SYSTEMD_WANTS
+         job, ignoring: Transaction for systemd-rfkill.socket/start is destructive
+```
+So the `dell_laptop` driver asserts the killswitch as part of radio power-down on
+every poweroff. Normally that lands too late to be persisted — but the teardown
+and the event are ~1s apart, so a shutdown where the event wins the race would
+have `systemd-rfkill` save `soft=1`, poisoning every subsequent boot. Not caught
+in the act; would need a reboot with the state file watched to confirm.
+
+**The "Dell wireless Fn key" angle.** `dell_rbtn` is loaded but has **no active
+input device** (refcount 0). The device that carries an rfkill handler is
+`Dell WMI hotkeys` — `/dev/input/event18`, `H: Handlers=kbd event18 rfkill`. So a
+Dell WMI hotkey *can* toggle rfkill, making an accidental press a live candidate,
+but there is no evidence one was pressed. To test: run `rfkill event` and press
+the airplane/radio key. (`evtest` is not installed on this machine.)
+
+**Fix (2026-07-27):** `bluetooth-unblock.service` in the `systemd` stow package —
+`Type=oneshot` running `rfkill unblock bluetooth`, `WantedBy=default.target`.
+Deliberately *not* `graphical-session.target` (same reasoning as
+`power-profile-auto.service`: two graphical sessions at once, and this only
+touches `/dev/rfkill`). `ExecStartPre` waits up to 30s for `/dev/rfkill` to
+become writable, because the uaccess ACL can land *after* the user manager
+reaches `default.target`.
+
+**Verified on hardware:** blocked bluetooth → `bluetoothctl list` empty and
+`org.bluez` not even activatable → started the unit → `hci0` rfkill entry back,
+controller `A0:D3:65:F5:10:67` present, `/org/bluez/hci0` and its paired-device
+child back on the bus. Note this only runs at login, so deliberately blocking BT
+mid-session for battery still works and is respected until next login.
+
+Login-time is the right layer *because* the persisted-block mechanism is a
+boot-time restore — the unit is idempotent and doesn't depend on ever identifying
+every possible blocker. Remaining gap: a block asserted **mid-session** (e.g. the
+WMI hotkey) still needs a manual `rfkill unblock bluetooth` until next login.
+
+**Still open / next steps if it recurs:**
+1. Confirm the shutdown race — watch `/var/lib/systemd/rfkill/platform-dell-laptop:bluetooth`
+   across a reboot and see whether it comes back as `1`.
+2. File the noctalia gating bug (rfkill unblock unreachable when no adapter exists).
+3. If it recurs often, consider masking `systemd-rfkill` — but that also drops
+   wifi rfkill persistence, so prefer the unit.
+
+---
+
 ## See also (existing deep dives)
 - 🟧/🟩 **Greeter ghost + dwindle crash + hybrid-GPU + Lua gotchas** —
   [hyprland-plasma-diagnosis.md](hyprland-plasma-diagnosis.md). Read first when

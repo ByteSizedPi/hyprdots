@@ -1,0 +1,25 @@
+[Unit]
+Description=Clear the Dell platform Bluetooth killswitch so BlueZ gets an adapter
+Documentation=file:///home/jj/dotfiles/docs/problems.md
+# The dell-laptop platform rfkill sits BELOW BlueZ: while it is soft-blocked the
+# radio is unpowered, so no hci0 device exists, so there is no /org/bluez/hci0
+# for noctalia to set Powered=true on. Nothing in the desktop can undo this —
+# it has to be cleared at the rfkill layer, which is what this unit does.
+#
+# Same reasoning as power-profile-auto.service: deliberately NOT tied to
+# graphical-session.target. This machine runs two graphical sessions at once and
+# this only touches /dev/rfkill, so default.target (one run per login) is right.
+ConditionPathExists=/dev/rfkill
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+# /dev/rfkill is root-owned; our write access arrives as a logind uaccess ACL
+# when this user's session becomes active on seat0, which can land *after* the
+# user manager has already reached default.target. Wait for it instead of racing.
+ExecStartPre=/bin/sh -c 'for i in $(seq 30); do [ -w /dev/rfkill ] && exit 0; sleep 1; done; exit 1'
+ExecStart=/usr/bin/rfkill unblock bluetooth
+Slice=background.slice
+
+[Install]
+WantedBy=default.target

@@ -143,6 +143,17 @@ is root-owned and this user isn't in `video`). Backlight scope is `intel_backlig
 = eDP-1 only; external monitors would need `ddcutil`. Nothing outside the repo;
 no `SYSTEM.md` entry. See [power-profiles.md](power-profiles.md).
 
+## Bluetooth
+
+Two layers of rfkill matter here. The `dell-bluetooth` **platform** killswitch
+(`dell_laptop` driver, ACPI/SMBIOS) sits *below* BlueZ and cuts power to the USB
+radio; while it's soft-blocked no `hci0` device exists, so there is no
+`/org/bluez/hci0` and **no desktop applet (noctalia included) can turn Bluetooth
+on** — they only ever set `Powered` on an adapter object that has to already
+exist. `bluetooth-unblock.service` (user unit, stow package `systemd`) clears
+that block at login. Nothing outside the repo; no `SYSTEM.md` entry. See
+[problems.md](problems.md) → "noctalia can't turn Bluetooth *on*".
+
 ## Stow packages
 `alacritty, btop, environment, home, hyprland, kanshi, kitty, noctalia, nvim,
 systemd, yazi, zellij, zen` — each `stow <pkg>` symlinks into `$HOME`.
