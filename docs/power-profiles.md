@@ -159,6 +159,10 @@ tuned-adm active                         # what tuned actually landed on
   watcher did not revert either
 - `once` corrected `power-saver`/30% → `performance`/100%
 - service restart re-synced `balanced`/40% → `performance`/100%
-- **not yet tested on a real hardware transition** — needs a physical unplug;
-  watch the journal for `on battery: profile performance -> power-saver` and
-  `on battery: brightness 100% -> 50%`.
+- **real hardware transition confirmed working** — physical unplug/replug drives
+  both the profile and the backlight as intended.
+
+To re-check after any change here, watch `journalctl --user -u
+power-profile-auto.service -f` across a physical unplug and look for
+`on battery: profile performance -> power-saver` and
+`on battery: brightness 100% -> 50%`.
