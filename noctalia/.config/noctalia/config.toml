@@ -1,19 +1,33 @@
-# Noctalia user override (merged over ~/.local/state/noctalia/settings.toml,
-# which is GUI-managed and NOT stowed). Keep idle taming here so it survives.
+# Noctalia FRESH-MACHINE SEED — not an override.
 #
-# 2026-06-25: ALL idle behaviours disabled. noctalia's idle locked@600s,
-# screen-off@660s, lock-and-suspend@900s; when noctalia crashed mid-sequence it
-# left the tty1 session locked + screen-off with nothing to recover it. Until
-# noctalia's crash-looping is fixed, leave these off. Re-enable selectively
-# later (prefer a long `lock` timeout; leave `screen_off`/`lock_and_suspend`
-# off while the lid/seat display bug is unsolved).
-# See ~/dotfiles/docs/problems.md (noctalia idle / tty1 dead screen).
+# PRECEDENCE (verified 2026-07-27 with `noctalia config export merged` against
+# sandboxed NOCTALIA_CONFIG_HOME/NOCTALIA_STATE_HOME):
+#
+#     ~/.local/state/noctalia/settings.toml   WINS, per key
+#     ~/.config/noctalia/config.toml          fills only keys settings.toml omits
+#     built-in defaults                       last
+#
+# So this file is a FALLBACK LAYER UNDERNEATH the GUI-managed settings.toml, not a
+# layer on top of it. Anything the Settings UI has ever written is masked here.
+# (The old comment claimed the opposite; the idle block below was therefore inert —
+# see docs/problems.md → "noctalia config.toml precedence".)
+#
+# To change the RUNNING system, edit settings.toml (or use the GUI). Keep this file
+# for what a NEW machine should boot with before any GUI has touched it.
+# Only `config.toml` and `user-templates.toml` are read — arbitrary *.toml here are
+# NOT merged (tested).
+#
+# Appearance is NOT seeded here: it lives in themes/<name>/noctalia.toml and is
+# applied into settings.toml by scripts/desktop-theme/apply.sh. See themes/README.md.
 
-[idle.behavior.lock]
-enabled = false
-
-[idle.behavior.screen-off]
-enabled = false
-
-[idle.behavior.lock-and-suspend]
-enabled = false
+# --- Idle: blank the screen only. No lock, no suspend. ---
+# Noctalia's stock defaults have ALL idle behaviours disabled, so a fresh machine
+# would never blank the screen — hence seeding screen-off explicitly.
+#
+# lock and lock-and-suspend are deliberately NOT listed: they default to disabled
+# already, and stating it here would be redundant. They must stay off — noctalia
+# crashing mid-lock stranded the tty1 session (docs/problems.md, docs/hyprland-
+# tty1-dead-screen.md). Screen-off alone is recoverable: any input wakes it.
+idle.behavior.screen-off.enabled = true
+idle.behavior.screen-off.timeout = 660.0
+idle.pre_action_fade_seconds = 5

@@ -2,9 +2,9 @@
 
 Single source of truth for the recurring Hyprland/Plasma issues on this machine, so
 diagnosis doesn't start from scratch each time. Companion to `SYSTEM.md` (the actual
-system changes) and `bugreport-hyprland-dwindle.md` (the upstream crash report).
+system changes).
 
-Last updated: 2026-06-25.
+Last updated: 2026-07-27.
 
 ---
 
@@ -13,13 +13,15 @@ Last updated: 2026-06-25.
 ```
 Machine:  laptop (BOE eDP-1 internal panel, 1920x1080@60)
 OS:       Fedora Linux 44 (KDE Plasma Desktop Edition)
-Kernel:   7.0.12-201.fc44.x86_64
+Kernel:   7.1.4-204.fc44.x86_64
 GPU:      HYBRID —
             card1 = Intel Arc Graphics (Meteor Lake-P), driver i915, PCI 0000:00:02.0  ← drives the display (eDP-1)
             card0 = NVIDIA RTX 500 Ada Laptop,          driver nvidia, PCI 0000:01:00.0 ← dGPU
-Compositor: Hyprland 0.55.4 (COPR lionheartp/Hyprland), Lua config, launched via uwsm
-DM:       plasma-login-manager (pkg plasma-login-manager 6.7.0; binary /usr/bin/plasmalogin)
-            greeter compositor = kwin_wayland
+Compositor: Hyprland 0.56.0 (Fedora pkg), Lua config, launched via uwsm
+DM:       greetd + tuigreet (console TTY, no Wayland compositor) — current.
+            HISTORICAL: plasma-login-manager (greeter compositor kwin_wayland) was
+            the DM when Issue 1 below was diagnosed; that package is now removed.
+            Issue 1 is therefore historical unless plasma-login-manager returns.
 Shell/UI: noctalia (bar, wallpaper, notifications, lockscreen, etc.)
 ```
 
@@ -100,21 +102,31 @@ worked around. See SYSTEM.md ("Display manager: greetd + tuigreet") for the full
 
 ## ISSUE 2 — Hyprland SIGSEGV on shutdown (dwindle + special workspace)
 
-Separate from the ghost (ghost happens without any crash). Full writeup in
-`bugreport-hyprland-dwindle.md`. Summary:
+Separate from the ghost (ghost happens without any crash). This is the full record —
+a standalone draft bug report previously lived in `bugreport-hyprland-dwindle.md`,
+deleted 2026-07-27 as stale (written against 0.55.4, never filed). Summary:
 
 - **Crash:** on exit, `main` → `CCompositor::cleanup()` → a special-workspace window
   unmaps → `setSpecialWorkspace` → `CDwindleAlgorithm::calculateWorkspace` →
   `ITarget::setPositionGlobal` on freed state → SIGSEGV. Use-after-free during teardown.
-- **Trigger:** windows present in special workspaces (`special:zellij`, `special:jjserver`)
-  at exit. noctalia logout uses `hyprctl dispatch exit`, so logout hits it.
+- **Reproduction (was 100% on 0.55.4):** 1. use the **dwindle** layout; 2. open windows
+  in special workspaces (`special:zellij`, `special:jjserver`); 3. exit with
+  `hyprctl dispatch exit`. No crash if the special workspaces are empty at exit.
+- **Trigger:** windows present in special workspaces at exit. noctalia logout uses
+  `hyprctl dispatch exit`, so logout hits it.
 - **Downstream:** xdph then segfaults in its atexit destructor; the failed exit is why
   the greeter comes back (and re-leaks the plane — see Issue 1).
-- **Mitigation applied:** switched layout from `dwindle` to `master` in `ui.lua` (crash is
-  entirely inside `CDwindleAlgorithm`). Do NOT add `Restart=on-failure` to
-  `wayland-wm@hyprland.desktop.service` — it breaks logout (see SYSTEM.md).
-- **Upstream:** same bug as #15096 (0.55.2) and #13778 (0.54.2), both closed *not planned*
-  for lack of a reliable repro. Ours is 100% reproducible. 0.55.4 is the latest release.
+- **Mitigation available but NOT currently applied:** switching layout `dwindle` →
+  `master` in `ui.lua` avoids it (the crash is entirely inside `CDwindleAlgorithm`).
+  As of 2026-07-27 that line is **commented out**, so the running layout is dwindle.
+  Do NOT add `Restart=on-failure` to `wayland-wm@hyprland.desktop.service` — it
+  breaks logout (see SYSTEM.md).
+- **Upstream:** same bug as hyprwm/Hyprland#15096 (0.55.2) and #13778 (0.54.2), both
+  closed *not planned* for lack of a reliable repro. See also PR #5498, a prior fix in
+  this same exit/cleanup path — shutdown ordering here is historically fragile.
+  Ours was 100% reproducible **on 0.55.4**. Not yet
+  re-verified on 0.56.0 (installed 2026-07-21) — no Hyprland coredump has been
+  recorded since that upgrade.
 
 ---
 

@@ -11,6 +11,23 @@ tried on it. Read order for a new session:
    full content + reapply steps. (Lives at repo root because the global rule
    writes there.)
 
+## Theming
+
+- **[theming.md](theming.md)** — saving, switching and defining looks. Usage
+  examples for `scripts/desktop-theme/{save,apply,reset}.sh`, the measured Noctalia config
+  precedence (state `settings.toml` beats stowed `config.toml`), the `ui.lua` /
+  `ui-theme.lua` behaviour-vs-appearance split, the theme key surface, safety and
+  undo, and troubleshooting.
+- **[../themes/README.md](../themes/README.md)** — quick reference for what's in
+  `themes/`.
+
+## Power
+
+- **[power-profiles.md](power-profiles.md)** — `power-profile-auto.service`:
+  performance on AC, power-saver on battery, via UPower's `OnBattery` instead of
+  a udev rule (udev has no per-user rules). Covers the tuned/tuned-ppd stack on
+  this machine, the polkit reasoning, and how to change the target profiles.
+
 ## Homelab (second machine)
 
 - **[homelab.md](homelab.md)** — R720xd + jjserver homelab: hardware inventory,
@@ -25,8 +42,6 @@ tried on it. Read order for a new session:
 - **[hyprland-tty1-dead-screen.md](hyprland-tty1-dead-screen.md)** — tty1 panel
   physically dead while Plasma runs on tty2 (unsolved; leading hypothesis =
   dual-session seat/DRM-master contention).
-- **[bugreport-hyprland-dwindle.md](bugreport-hyprland-dwindle.md)** — dwindle
-  layout crash bug report.
 
 ## How to maintain this
 
@@ -35,3 +50,5 @@ tried on it. Read order for a new session:
   symptom + tried(worked/didn't) + root cause + next steps). Long investigations
   get their own file here, linked from `problems.md`.
 - Change outside the repo → `../SYSTEM.md`.
+- New theme, or a change to the theme tooling / key surface → `theming.md`
+  (and re-save affected themes with `scripts/desktop-theme/save.sh <name> --force`).

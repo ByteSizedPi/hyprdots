@@ -7,14 +7,15 @@
 # All outputs use FIXED names, so ssh.conf / jjserver.conf never need editing when you
 # switch themes. Override the active palette ad-hoc with arg 1 or $SERVER_THEME.
 #
-# Usage: scripts/deploy-server-theme.sh [palette-name] [user@host]
+# Usage: scripts/server-theme/deploy.sh [palette-name] [user@host]
 set -euo pipefail
 
-# Repo root (this script lives in <repo>/scripts) and the paths we read from.
-repo="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-pal_dir="$repo/noctalia/.config/noctalia/palettes" # palette JSONs + the `active` pointer
-tpl="$repo/noctalia/.config/noctalia/templates"    # shared Noctalia templates
-render="$repo/scripts/render-theme.py"             # substitutes a palette into a template
+# Repo root (this script lives in <repo>/scripts/server-theme) and the paths we read from.
+here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)" # scripts/server-theme
+repo="$(cd "$here/../.." && pwd)"                    # repo root
+pal_dir="$repo/noctalia/.config/noctalia/palettes"   # palette JSONs + the `active` pointer
+tpl="$repo/noctalia/.config/noctalia/templates"      # shared Noctalia templates
+render="$here/render.py"                             # substitutes a palette into a template
 
 # Resolve the active palette: arg 1 > $SERVER_THEME > palettes/active > "cobalt".
 active="cobalt"                                                              # last-resort default

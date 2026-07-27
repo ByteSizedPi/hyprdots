@@ -23,6 +23,9 @@ home/.themes/
 # Packages where ~/.config/<app> is a directory symlink into dotfiles
 # (noctalia writes directly here):
 hyprland/.config/hypr/noctalia.lua
+# Hyprland appearance fragment — installed by scripts/theme-apply.sh from
+# themes/<name>/hypr-theme.lua. The themes/ copy is the tracked input.
+hyprland/.config/hypr/ui-theme.lua
 kitty/.config/kitty/themes/noctalia.conf
 zellij/.config/zellij/themes/noctalia.kdl
 nvim/.config/nvim/lua/noctalia-theme.lua

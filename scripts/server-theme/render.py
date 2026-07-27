@@ -4,12 +4,12 @@
 Reuses the SAME templates Noctalia uses for the wallpaper theme
 (noctalia/.config/noctalia/templates/), but substitutes a predefined palette
 instead of wallpaper-extracted colors. Used to generate the server theme without
-running Noctalia/matugen — see scripts/deploy-server-theme.sh.
+running Noctalia/matugen — see scripts/server-theme/deploy.sh.
 
 Palette JSON: { "<role>": "#rrggbb", ... }  (keys starting with "_" are ignored)
 Templates reference {{colors.<role>.default.<red|green|blue|hex>}}.
 
-Usage: render-theme.py <palette.json> <template-file>   # rendered output -> stdout
+Usage: render.py <palette.json> <template-file>   # rendered output -> stdout
 """
 import json
 import re
@@ -31,7 +31,7 @@ def components(hexv):
 
 def main():
     if len(sys.argv) != 3:
-        sys.exit("usage: render-theme.py <palette.json> <template-file>")
+        sys.exit("usage: render.py <palette.json> <template-file>")
     palette = {k: v for k, v in json.load(open(sys.argv[1])).items() if not k.startswith("_")}
     text = open(sys.argv[2]).read()
 

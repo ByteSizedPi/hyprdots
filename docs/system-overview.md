@@ -26,7 +26,7 @@ seat/DRM-master contention (see problems.md → "tty1 dead screen").
   Details + reapply/rollback in [../SYSTEM.md](../SYSTEM.md).
 
 ## Compositor: Hyprland
-- **Version 0.55.4**, **aquamarine** backend.
+- **Version 0.56.0**, **aquamarine** backend.
 - **Lua config** (not the classic `hyprland.conf`). Entry: `hyprland.lua` →
   `require("monitors")`, `require("noctalia")`, plus `ui.lua`, `keybinds.lua`.
   Stow package: `hyprland/.config/hypr/`.
@@ -55,16 +55,42 @@ seat/DRM-master contention (see problems.md → "tty1 dead screen").
 - **Log: `~/.cache/noctalia/noctalia.log`** (+ rotated `.log.1`) — check this
   first when noctalia "crashes"; fatals and 100s-long main-loop stalls (DNS!)
   are recorded there. See problems.md → "noctalia idle stranded".
-- **Config (stowed):** `~/.config/noctalia` → `noctalia/.config/noctalia/`.
-  `config.toml` is a **user override merged over** the live settings.
+- **Config precedence (measured 2026-07-27, NOT what this doc used to claim):**
+
+  | layer | wins? |
+  | --- | --- |
+  | `~/.local/state/noctalia/settings.toml` (GUI-managed, **not** stowed) | **yes, per key** |
+  | `~/.config/noctalia/config.toml` (stowed) | only for keys settings.toml omits |
+  | built-in defaults | last |
+
+  `config.toml` is a **fallback layer *underneath*** the live settings, not an
+  override on top. To change the running system, edit `settings.toml` or use the
+  GUI; `config.toml` is the **fresh-machine seed**. Verify with
+  `noctalia config export merged`. Only `config.toml` and `user-templates.toml`
+  are read from the config dir — extra `*.toml` files there are ignored.
 - **Live settings (NOT stowed, GUI-managed):**
-  `~/.local/state/noctalia/settings.toml` — holds idle behaviours, keybinds,
-  wallpaper, lockscreen widgets, etc. Mirror any change here into the stowed
-  `config.toml`.
+  `~/.local/state/noctalia/settings.toml` — idle behaviours, keybinds, wallpaper,
+  lockscreen widgets, and the whole theme surface.
+- **`~/.local/state/noctalia/state.toml` holds live Google OAuth access + refresh
+  tokens.** Never commit, sync, or paste it.
+- **Useful CLI:** `noctalia config export merged|full` (effective config as TOML),
+  `noctalia config validate`, `noctalia msg config-reload`. `NOCTALIA_CONFIG_HOME`
+  / `NOCTALIA_STATE_HOME` point it at a sandbox dir — the safe way to test config
+  changes without touching the live session.
 - **Stability caveat:** noctalia has been observed **crash-looping** on this box
-  (leaking layer surfaces with `pid:-1`). Its idle (lock/screen-off/
-  lock-and-suspend) + a crash mid-sequence can strand the session — idle is
-  currently disabled (see problems.md).
+  (leaking layer surfaces with `pid:-1`). A crash mid-lock can strand the session,
+  so `lock` and `lock-and-suspend` idle stay **off**; only `screen-off` (660s) is
+  enabled, which any input recovers. See problems.md.
+
+## Theming
+- **`themes/<name>/`** — swappable looks; `scripts/desktop-theme/{save,apply,reset}.sh`.
+  A theme is two inputs: `noctalia.toml` (merged into `settings.toml`, since that
+  outranks `config.toml`) and `hypr-theme.lua`. Full guide: [theming.md](theming.md).
+- **`hypr/ui.lua` = behaviour; `hypr/ui-theme.lua` = appearance** (generated,
+  gitignored, `require`d from `ui.lua`). Split so a theme swap can't revert the
+  dwindle-crash workaround or `misc`/`debug`.
+- Everything Noctalia templates (`noctalia.lua`, `hyprtoolkit.conf`, kitty/zellij/
+  nvim/gtk themes) is **regenerated output** — gitignored, never snapshotted.
 
 ## Plasma / KDE
 - `plasmashell` + `startplasma-wayland` present; Plasma Wayland is the "other"
@@ -88,9 +114,36 @@ seat/DRM-master contention (see problems.md → "tty1 dead screen").
   across compositor restarts — reattach after), alacritty, nvim, yazi, btop,
   zen browser.
 
+## Session environment / PATH
+`~/.config/environment.d/dotfiles-path.conf` (stow package `environment`) adds
+`~/.local/bin` and `~/bin` to `PATH` **for the whole systemd --user session** —
+read by the environment-d generator at login, so it reaches everything
+long-lived processes spawn (Hyprland's `exec-once` chain, the zellij
+*server*), not just interactive shells that source `~/.zshrc`. Needed because
+those processes never source `.zshrc` themselves and otherwise only see
+`PATH=/usr/local/bin:/usr/bin`. **Only takes effect on next login/reboot** —
+already-running sessions (and their already-started zellij servers) keep
+their old env. See problems.md → "zellij resurrection: command not found".
+
+## Power profiles
+Fedora 44 ships **tuned + tuned-ppd** (not `power-profiles-daemon`, which is
+inactive; `powerprofilesctl` isn't installed). `tuned-ppd` exposes the standard
+`org.freedesktop.UPower.PowerProfiles` D-Bus API with
+`power-saver`/`balanced`/`performance`, mapped to tuned profiles by
+`/etc/tuned/ppd.conf` (distro default).
+
+`power-profile-auto.service` (user unit, stow package `systemd`) follows the AC
+adapter: plugged in → `performance`, on battery → `power-saver`, applied only on
+transition and once at startup, so manual changes in between stick. It watches
+UPower's `OnBattery` on the system bus rather than using a udev rule — **udev has
+no per-user rules**, and a user unit is allowed to switch profiles because polkit
+treats the systemd `--user` manager session as active. Nothing outside the repo;
+no `SYSTEM.md` entry. See [power-profiles.md](power-profiles.md).
+
 ## Stow packages
-`alacritty, btop, home, hyprland, kanshi, kitty, noctalia, nvim, scripts,
+`alacritty, btop, environment, home, hyprland, kanshi, kitty, noctalia, nvim,
 systemd, yazi, zellij, zen` — each `stow <pkg>` symlinks into `$HOME`.
+Not packages (never `stow` these): `docs`, `scripts`, `themes`.
 
 ## Out-of-tree changes
 Tracked in [../SYSTEM.md](../SYSTEM.md): `/etc/systemd/logind.conf.d/…`

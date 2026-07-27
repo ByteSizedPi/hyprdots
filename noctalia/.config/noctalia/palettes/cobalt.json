@@ -1,5 +1,5 @@
 {
-  "_about": "Predefined Material-role palette for the SERVER theme. Same role names Noctalia extracts from the wallpaper, but fixed. Fed through the SAME templates in ../templates/ by scripts/render-theme.py. Edit a hex value (or copy this file to a new name) to change the server theme, then run scripts/deploy-server-theme.sh.",
+  "_about": "Predefined Material-role palette for the SERVER theme. Same role names Noctalia extracts from the wallpaper, but fixed. Fed through the SAME templates in ../templates/ by scripts/server-theme/render.py. Edit a hex value (or copy this file to a new name) to change the server theme, then run scripts/server-theme/deploy.sh.",
 
   "background":               "#0d1b29",
   "on_background":            "#ffffff",

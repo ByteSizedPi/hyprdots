@@ -428,6 +428,20 @@ with nothing left to recover it. (Compounded by the lid/seat display bug above.)
 in both the live `~/.local/state/noctalia/settings.toml` (effective now) and the
 stowed `noctalia/.config/noctalia/config.toml` (tracked override).
 
+**⚠️ That fix was PARTLY INERT — found 2026-07-27.** `config.toml` does **not**
+override `settings.toml`; it's a fallback *underneath* it (see the precedence
+problem below). `settings.toml` had `screen-off.enabled = true` the whole time, so
+the `config.toml` block never suppressed it — **screen-off@660s was live**, not
+disabled. `lock` and `lock-and-suspend` were genuinely off, but only because
+`settings.toml` also said so.
+
+**Current, deliberate state (2026-07-27):** `screen-off` **enabled** @660s;
+`lock` and `lock-and-suspend` **off**. This is the wanted behaviour — the screen
+blanks and any input recovers it, with no lock screen to get stranded behind. The
+redundant `enabled = false` lines were removed from `config.toml`, which now seeds
+only `screen-off` (noctalia's stock default is *all* idle off, so a fresh machine
+would never blank without it).
+
 **Root cause of the crashes found (2026-07-17):** noctalia keeps its own log —
 **`~/.cache/noctalia/noctalia.log`** (+ rotated `.log.1`) — and it shows the
 mechanism. When DNS is broken/unreachable, noctalia's HTTP client (telemetry
@@ -451,6 +465,66 @@ only once noctalia is stable. → MITIGATED, not solved.
 
 **Worked, also useful:** `noctalia msg caffeine-enable` inhibits idle live;
 killing noctalia clears its leaked lock/corner surfaces.
+
+---
+
+## 🟩 noctalia `config.toml` precedence is the reverse of what we assumed
+**Symptom:** settings written to the stowed `noctalia/.config/noctalia/config.toml`
+appeared to have no effect. Documented as an "override merged over" the live
+settings; it isn't.
+
+**Measured (2026-07-27)** with sandboxed `NOCTALIA_CONFIG_HOME` /
+`NOCTALIA_STATE_HOME` + `noctalia config export merged`:
+
+| `state/settings.toml` | `config/config.toml` | effective |
+| --- | --- | --- |
+| `2.0` | `9.0` | **2.0** |
+| *(key absent)* | `9.0` | **9.0** |
+
+So: **`settings.toml` wins per key; `config.toml` only fills keys it omits.**
+`config.toml` is a fallback layer *underneath* the GUI-managed state — i.e. a
+**fresh-machine seed**, not a live override. Any key the Settings UI has ever
+written is permanently masked from `config.toml`.
+
+**Consequences:** the 2026-06-25 idle fix above was partly inert. The old advice in
+`CLAUDE.md`/`system-overview.md` to "mirror runtime changes into the stowed
+`config.toml`" produces silently dead config — corrected in both.
+
+**Also tested (don't re-try):**
+- Extra `*.toml` files in `~/.config/noctalia/` are **not** merged — only
+  `config.toml` and `user-templates.toml` are read. A drop-in `theme.toml` does
+  nothing.
+- Flat dotted keys (`bar.default.border_width = 2.0`) and inline-table arrays
+  both validate and round-trip exactly (536 keys, 0 drift) — this is what the
+  `themes/` tooling emits.
+
+**Fix:** `themes/` + `scripts/desktop-theme/{save,apply,reset}.sh` write the theme surface
+**into `settings.toml`**, preserving non-theme keys. See themes/README.md.
+
+---
+
+## 🟩 Launcher settings silently inert — legacy `shell.panel.launcher_*` names
+**Symptom (found 2026-07-27):** `noctalia config validate` reported three
+`unknown setting` warnings, and the launcher didn't match its configuration.
+
+**Cause:** the keys were renamed upstream. `settings.toml` still carried the old
+`shell.panel.launcher_*` names, which noctalia parses but ignores, so the real
+`shell.launcher.*` keys sat at their defaults — the **opposite** of what was set:
+
+| stale key (ignored) | set to | real key | was actually |
+| --- | --- | --- | --- |
+| `shell.panel.launcher_app_grid` | `true` | `shell.launcher.app_grid` | `false` |
+| `shell.panel.launcher_categories` | `false` | `shell.launcher.categories` | `true` |
+| `shell.panel.launcher_session_search` | `true` | *(removed from schema)* | n/a |
+
+**Fix:** migrated to `shell.launcher.{app_grid,categories}` preserving the original
+intent (grid on, categories off); dropped `launcher_session_search`. Validate is now
+clean (0 warnings). Added `shell.launcher.*` appearance keys to
+`scripts/desktop-theme/keys.conf` so they travel with a theme.
+
+**Lesson:** `noctalia config validate` warnings are not cosmetic — an
+`unknown setting` means that setting is doing nothing. Run it after any
+config_version bump.
 
 ---
 
@@ -540,8 +614,58 @@ anything cross-compositor.
 
 ---
 
+## 🟩 zellij resurrection: "Waiting to run: claude" → "Command not found"
+**Symptom:** zellij persists sessions (`session_serialization true`) and after
+a resurrection, a pane that was running `claude` shows `Waiting to run:
+claude` (intended — same as any other app). Pressing Enter, though, prints
+`Command not found: claude`, even though typing `claude` manually in that same
+pane immediately afterward works fine.
+
+**Root cause — confirmed by reading `/proc/<pid>/environ` of the running
+zellij server:** `PATH=/usr/local/bin:/usr/bin`, no `~/.local/bin`. `claude`
+lives at `~/.local/bin/claude`, which only ever gets onto `PATH` via line 2 of
+`.zshrc` — i.e. only once a real interactive zsh starts and sources it. The
+zellij **server** was never started by an interactive shell (it's spawned via
+the Hyprland `exec-once`/kitty chain), so it kept whatever bare PATH it
+inherited at launch, for its entire lifetime. When resurrection runs the
+captured command on Enter, it execs the literal binary name directly using
+the *server's* environment, not a fresh login shell — so anything living only
+in `~/.local/bin` or `~/bin` fails, while anything in `/usr/local/bin` or
+`/usr/bin` resolves fine. Pressing Esc (or typing manually afterward) gets you
+a real interactive shell, `.zshrc` runs, `PATH` gains the prepend, and it
+works — hence "worked when I typed it right after."
+
+Compounds with an open upstream zellij bug where resurrected panes always
+start suspended ("Waiting to run") regardless of config —
+[zellij#4754](https://github.com/zellij-org/zellij/issues/4754), similar to
+[#4413](https://github.com/zellij-org/zellij/issues/4413) and
+[#4129](https://github.com/zellij-org/zellij/issues/4129). That part isn't
+fixable locally; the command-not-found part is.
+
+**Fix (2026-07-27):** added `~/.config/environment.d/dotfiles-path.conf` (stow
+package `environment`, see system-overview.md → "Session environment / PATH")
+prepending `~/.local/bin:~/bin` to `PATH` at the systemd --user session level,
+so it reaches the zellij server (and anything else long-lived spawned in the
+session) instead of only interactive shells. **Requires a fresh
+login/reboot** to take effect — already-running zellij servers keep their old
+env until restarted.
+
+**Separately, still open (not fixed by the above):** resize-induced duplicate
+prompt lines / scrollback corruption with the two-line `bira` prompt. Confirmed
+upstream zellij bug, not kitty- or Alacritty-specific — reproduces with
+Kitty + zsh/Powerlevel10k too, and the reporter confirmed the *same* resize
+works fine in Kitty without zellij, isolating it to zellij's own VT/redraw
+handling. [zellij#321](https://github.com/zellij-org/zellij/issues/321),
+[#3675](https://github.com/zellij-org/zellij/issues/3675),
+[#36](https://github.com/zellij-org/zellij/issues/36). No known workaround;
+nothing to do here but wait on upstream.
+
+---
+
 ## See also (existing deep dives)
 - 🟧/🟩 **Greeter ghost + dwindle crash + hybrid-GPU + Lua gotchas** —
   [hyprland-plasma-diagnosis.md](hyprland-plasma-diagnosis.md). Read first when
   revisiting greeter/login or Plasma↔Hyprland interactions.
-- **Dwindle layout crash** — [bugreport-hyprland-dwindle.md](bugreport-hyprland-dwindle.md).
+- **Dwindle layout crash on shutdown** — [hyprland-plasma-diagnosis.md](hyprland-plasma-diagnosis.md)
+  → ISSUE 2. (The standalone draft bug report was deleted 2026-07-27 as stale: written
+  against 0.55.4, never filed, and no Hyprland coredump since the 0.56.0 upgrade.)

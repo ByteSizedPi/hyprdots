@@ -91,7 +91,7 @@ hl.workspace_rule({
 })
 
 -- jjserver border: colored by the palette primary (generated into jjserver-colors.lua
--- by scripts/deploy-server-theme.sh) so the special-workspace border matches the cobalt
+-- by scripts/server-theme/deploy.sh) so the special-workspace border matches the cobalt
 -- nvim/zellij/kitty theme rather than the wallpaper. pcall so a machine without the
 -- generated file still loads cleanly.
 local ok, jj = pcall(require, "jjserver-colors")
