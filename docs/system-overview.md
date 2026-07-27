@@ -133,11 +133,14 @@ inactive; `powerprofilesctl` isn't installed). `tuned-ppd` exposes the standard
 `/etc/tuned/ppd.conf` (distro default).
 
 `power-profile-auto.service` (user unit, stow package `systemd`) follows the AC
-adapter: plugged in → `performance`, on battery → `power-saver`, applied only on
-transition and once at startup, so manual changes in between stick. It watches
-UPower's `OnBattery` on the system bus rather than using a udev rule — **udev has
-no per-user rules**, and a user unit is allowed to switch profiles because polkit
-treats the systemd `--user` manager session as active. Nothing outside the repo;
+adapter: plugged in → `performance` + internal panel at 100%, on battery →
+`power-saver` + 50%. Applied only on transition and once at startup, so manual
+changes in between stick. It watches UPower's `OnBattery` on the system bus
+rather than using a udev rule — **udev has no per-user rules**, and a user unit
+is allowed to switch profiles (polkit treats the systemd `--user` manager
+session as active) and to set the backlight (`brightnessctl` via logind; sysfs
+is root-owned and this user isn't in `video`). Backlight scope is `intel_backlight`
+= eDP-1 only; external monitors would need `ddcutil`. Nothing outside the repo;
 no `SYSTEM.md` entry. See [power-profiles.md](power-profiles.md).
 
 ## Stow packages

@@ -1,6 +1,10 @@
-# Power profiles — follow the AC adapter
+# Power profiles + backlight — follow the AC adapter
 
-Plug the laptop in → **performance**. Unplug it → **power-saver**.
+| | plugged in | on battery |
+|---|---|---|
+| power profile | `performance` | `power-saver` |
+| internal panel brightness | 100% | 50% |
+
 Anything you pick by hand in between is left alone until the next plug/unplug.
 
 Nothing here lives outside the repo, so there is **no `SYSTEM.md` entry** for it
@@ -52,6 +56,25 @@ If that ever stops working (a polkit or systemd change flipping the manager
 session to inactive), the fallback is a `/etc/polkit-1/rules.d/` rule granting
 uid 1000 that action — and *that* would need a `SYSTEM.md` entry.
 
+## Backlight
+
+`/sys/class/backlight/intel_backlight/brightness` is `root:root 0644` and this
+user is **not** in the `video` group, so writing sysfs directly does not work.
+`brightnessctl` does, because it reaches the backlight through logind — and,
+verified the same way as above, it works from a `systemd --user` unit:
+
+```sh
+systemd-run --user --wait --pipe brightnessctl --device=intel_backlight set 80%   # → success
+```
+
+Scope is the **internal panel only**. `intel_backlight` is the sole entry in
+`/sys/class/backlight` and points at `card1-eDP-1`, the laptop screen on the
+Intel side of the hybrid GPU. External monitors expose no sysfs backlight; doing
+them too would mean `ddcutil` over DDC-CI (installed, but not wired up here).
+
+Percentages are linear on the raw value (max 192000), not perceptual, so 50%
+looks brighter than half.
+
 ## This machine's profile stack: tuned, not power-profiles-daemon
 
 Fedora 44 ships **tuned + tuned-ppd**, not `power-profiles-daemon`.
@@ -78,8 +101,10 @@ to while on battery (that's the `[battery]` section, which only remaps
 ## How the watcher behaves
 
 - **On start** (login, and every `Restart=`): reads AC state and applies the
-  matching profile. This is the "whenever it couldn't observe the transition"
-  path — boot, login, or a missed event.
+  matching profile *and* brightness. This is the "whenever it couldn't observe
+  the transition" path — boot, login, or a missed event. Note the side effect: a
+  service restart resets a hand-set brightness. Set
+  `POWER_BRIGHTNESS_ON_START=0` to sync only the profile at startup.
 - **On transition**: `gdbus monitor` on `/org/freedesktop/UPower`; every line
   mentioning `OnBattery` triggers a fresh read of the real state, and it acts
   only when the state actually flipped. A single plug event emits several
@@ -93,8 +118,16 @@ so hanging it off the graphical session would start one instance per compositor.
 
 ## Changing the targets
 
-Profiles come from `POWER_PROFILE_AC` / `POWER_PROFILE_BATTERY` (defaults
-`performance` / `power-saver`). To use `balanced` on battery instead:
+| env var | default |
+|---|---|
+| `POWER_PROFILE_AC` | `performance` |
+| `POWER_PROFILE_BATTERY` | `power-saver` |
+| `POWER_BRIGHTNESS_AC` | `100` |
+| `POWER_BRIGHTNESS_BATTERY` | `50` |
+| `POWER_BACKLIGHT_DEVICE` | `intel_backlight` |
+| `POWER_BRIGHTNESS_ON_START` | `1` |
+
+To use `balanced` on battery instead:
 
 ```sh
 systemctl --user edit power-profile-auto.service
@@ -120,9 +153,12 @@ tuned-adm active                         # what tuned actually landed on
 
 ## Verified 2026-07-27
 
-- user unit can switch profiles with no polkit prompt (test above)
-- manual change to `balanced` while plugged in survived — watcher did not revert it
-- `once` corrected `balanced` → `performance`
-- service restart while set to `power-saver` re-synced to `performance`
-- **not yet tested on real hardware transition** — needs a physical unplug; watch
-  the journal for `on battery: performance -> power-saver`.
+- user unit can switch profiles with no polkit prompt, and set the backlight
+  through logind (both `systemd-run --user` tests above)
+- manual `balanced` + 40% brightness while plugged in survived — the running
+  watcher did not revert either
+- `once` corrected `power-saver`/30% → `performance`/100%
+- service restart re-synced `balanced`/40% → `performance`/100%
+- **not yet tested on a real hardware transition** — needs a physical unplug;
+  watch the journal for `on battery: profile performance -> power-saver` and
+  `on battery: brightness 100% -> 50%`.

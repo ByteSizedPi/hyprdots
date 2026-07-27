@@ -1,5 +1,5 @@
 [Unit]
-Description=Follow the AC adapter with the system power profile
+Description=Follow the AC adapter with the power profile and laptop backlight
 Documentation=file:///home/jj/dotfiles/docs/power-profiles.md
 # Deliberately NOT tied to graphical-session.target: this only talks to the
 # system bus, and this machine runs two graphical sessions at once. Hanging it
