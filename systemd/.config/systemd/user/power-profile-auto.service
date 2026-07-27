@@ -1,0 +1,18 @@
+[Unit]
+Description=Follow the AC adapter with the system power profile
+Documentation=file:///home/jj/dotfiles/docs/power-profiles.md
+# Deliberately NOT tied to graphical-session.target: this only talks to the
+# system bus, and this machine runs two graphical sessions at once. Hanging it
+# off default.target means one instance per login, not one per compositor.
+
+[Service]
+Type=simple
+ExecStart=%h/dotfiles/scripts/power/auto-profile.sh watch
+# gdbus monitor dying (UPower restart, bus hiccup) should not end the watch;
+# restarting also re-syncs the profile, since watch() applies once at startup.
+Restart=always
+RestartSec=5s
+Slice=background.slice
+
+[Install]
+WantedBy=default.target
