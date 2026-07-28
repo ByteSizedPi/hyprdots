@@ -51,10 +51,10 @@ cp "$themes/_base/hypr/layers.lua" "$hypr_layers"
 write_glass_disabled
 
 # --- Per-app overlays: back to placeholders ---
-while IFS=$'\t' read -r app dest reload; do
+while IFS=$'\t' read -r app app_dest app_reload; do
   [ -n "$app" ] || continue
-  write_app_placeholder "$app" "$dest"
-  [ -z "$reload" ] || sh -c "$reload" >/dev/null 2>&1 || true
+  write_app_placeholder "$app" "$app_dest"
+  [ -z "$app_reload" ] || sh -c "$app_reload" >/dev/null 2>&1 || true
 done < <(apps_list)
 
 # No named theme is applied any more; leave the pointer empty rather than lying.

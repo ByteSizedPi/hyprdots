@@ -68,16 +68,16 @@ printf '%s\n' "$name" >"$themes/active"
 # Written for EVERY configured app, not just the ones this theme customises: a
 # placeholder is how switching away from a theme that had settings clears them.
 apps_note=""
-while IFS=$'\t' read -r app dest reload; do
+while IFS=$'\t' read -r app app_dest app_reload; do
   [ -n "$app" ] || continue
   if [ -f "$src/apps/$app.conf" ]; then
-    mkdir -p "$(dirname "$dest")"
-    cp "$src/apps/$app.conf" "$dest"
+    mkdir -p "$(dirname "$app_dest")"
+    cp "$src/apps/$app.conf" "$app_dest"
     apps_note="$apps_note $app"
   else
-    write_app_placeholder "$app" "$dest"
+    write_app_placeholder "$app" "$app_dest"
   fi
-  [ -z "$reload" ] || sh -c "$reload" >/dev/null 2>&1 || true
+  [ -z "$app_reload" ] || sh -c "$app_reload" >/dev/null 2>&1 || true
 done < <(apps_list)
 
 reload_live

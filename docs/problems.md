@@ -971,6 +971,47 @@ call. Verified: running the post_hook by hand no longer appends.
 
 ---
 
+## 🟩 save.sh "Permission denied", and it silently clobbered a theme
+**Symptom (2026-07-28):** the Noctalia theme-switcher panel's **Update** button
+reported `Permission denied`. From a shell:
+`save.sh: line 103: /NOTES.md: Permission denied`.
+
+**Cause: a shell variable clash I introduced.** `save.sh` sets `dest="$themes/$name"`
+at the top, and the per-app overlay loop added later read into the *same* name:
+
+```bash
+while IFS=$'\t' read -r app dest reload; do   # <-- clobbers $dest
+```
+
+Process substitution (`< <(apps_list)`) runs the loop in the current shell, not a
+subshell, so `$dest` really was overwritten — and the final failing `read` clears
+its variables, leaving `dest=""`. Everything after the loop then wrote to `/`:
+`"$dest/NOTES.md"` → `/NOTES.md` → denied. Fixed by renaming the loop variables to
+`app_dest` / `app_reload` in apply.sh, reset.sh and save.sh. (`common.sh`'s own loop
+was already safe — it declares `local app dest reload`.)
+
+**The damage was worse than the error suggested.** `save.sh` wrote its outputs
+one-by-one directly into `themes/<name>/`, so dying part-way left a *half-updated*
+theme. During the confusion `themes/liquidglass` ended up overwritten with a
+non-glass look — `hyprglass = on` flipped to `off`, `apps/kitty.conf` deleted,
+`hypr/layers.lua` replaced with the long base version. Recovered with
+`git checkout -- themes/liquidglass`; the lesson is that **committing a theme is
+what makes it recoverable.**
+
+**Hardening:** `save.sh` now builds the whole theme in a staging dir
+(`themes/.<name>.staging.XXXXXX`, seeded from the existing theme so NOTES.md and an
+off-state glass.lua survive) and only swaps it into place once every write has
+succeeded. A mid-run failure now leaves the theme byte-for-byte untouched — tested
+by making the target unwritable mid-save.
+
+**Also worth knowing:** `bar.*` is a theme key, so **which widgets are on your bar
+travels with the theme.** Adding the theme-switcher widget and saving `comicmono`
+captured it into that theme only; applying a different theme will remove it until
+that theme is re-saved too. Deliberate (widget layout is part of a look) but easy to
+trip over — see `keys.conf`.
+
+---
+
 ## See also (existing deep dives)
 - 🟧/🟩 **Greeter ghost + dwindle crash + hybrid-GPU + Lua gotchas** —
   [hyprland-plasma-diagnosis.md](hyprland-plasma-diagnosis.md). Read first when

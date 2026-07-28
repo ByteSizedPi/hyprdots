@@ -29,30 +29,39 @@ dest="$themes/$name"
   die "theme '$name' already exists — pass --force to overwrite"
 
 [ -f "$settings" ] || die "no live settings at $settings"
-mkdir -p "$dest"
+
+# Build the whole theme in a staging dir and swap it in at the very end, so a
+# failure part-way through can't leave a half-updated theme behind. It can:
+# 2026-07-28, a variable clash made this script die after rewriting most of a
+# theme, which silently replaced a glass theme's definition with a non-glass one.
+# Seeded from the existing theme so anything we don't rewrite (NOTES.md, and
+# glass.lua when the live session has glass off) survives untouched.
+staging="$(mktemp -d "$themes/.$name.staging.XXXXXX")"
+trap 'rm -rf "$staging"' EXIT
+[ -d "$dest" ] && cp -a "$dest/." "$staging/"
 
 # --- Noctalia: pull the theme surface out of the live GUI-managed settings ---
-python3 "$toml" extract "$settings" "$keys" >"$dest/noctalia.toml.new"
-n=$(grep -c '=' "$dest/noctalia.toml.new" || true)
+python3 "$toml" extract "$settings" "$keys" >"$staging/noctalia.toml.new"
+n=$(grep -c '=' "$staging/noctalia.toml.new" || true)
 [ "$n" -gt 0 ] || die "extracted 0 theme keys — is $settings empty?"
-mv "$dest/noctalia.toml.new" "$dest/noctalia.toml"
+mv "$staging/noctalia.toml.new" "$staging/noctalia.toml"
 
 # --- Hyprland appearance: gaps, radius, opacity, blur, animations ---
-mkdir -p "$dest/hypr"
-dest_apps="$dest/apps"
+mkdir -p "$staging/hypr"
+dest_apps="$staging/apps"
 mkdir -p "$dest_apps"
 if [ -f "$hypr_appearance" ]; then
-  cp "$hypr_appearance" "$dest/hypr/appearance.lua"
+  cp "$hypr_appearance" "$staging/hypr/appearance.lua"
 else
   echo "note: $hypr_appearance missing — copying the neutral base instead" >&2
-  cp "$themes/_base/hypr/appearance.lua" "$dest/hypr/appearance.lua"
+  cp "$themes/_base/hypr/appearance.lua" "$staging/hypr/appearance.lua"
 fi
 
 # --- Hyprland layer rules: which noctalia surfaces Hyprland blurs itself ---
 if [ -f "$hypr_layers" ]; then
-  cp "$hypr_layers" "$dest/hypr/layers.lua"
+  cp "$hypr_layers" "$staging/hypr/layers.lua"
 else
-  cp "$themes/_base/hypr/layers.lua" "$dest/hypr/layers.lua"
+  cp "$themes/_base/hypr/layers.lua" "$staging/hypr/layers.lua"
 fi
 
 # --- hyprglass: captured like everything else, when the live theme uses it ---
@@ -65,7 +74,7 @@ fi
 # hg.layer()/hg.preset() are Lua-side registrations with no readback, so a live poke
 # exists only in the running plugin. Edit the file if you want to keep it.
 if [ -f "$hypr_glass" ] && ! grep -qF -e "$glass_stub_marker" "$hypr_glass"; then
-  cp "$hypr_glass" "$dest/hypr/glass.lua"
+  cp "$hypr_glass" "$staging/hypr/glass.lua"
   glass_on="on"
   glass_note="captured from live"
 else
@@ -76,7 +85,7 @@ fi
 # Manifest tracks the live state: saving means "bank what I'm looking at". An
 # existing glass.lua is left on disk when flipping to off — apply.sh ignores it
 # while the manifest says off, so switching back on later costs one word.
-cat >"$dest/manifest.conf" <<EOF
+cat >"$staging/manifest.conf" <<EOF
 # Non-Noctalia theme keys. Read by scripts/desktop-theme/apply.sh.
 #
 # hyprglass = on   requires hypr/glass.lua alongside this file
@@ -88,11 +97,11 @@ EOF
 # Skips apply.sh's placeholders, so "this theme has no kitty settings" stays that way
 # instead of being banked as an empty look.
 apps_note=""
-while IFS=$'\t' read -r app dest reload; do
+while IFS=$'\t' read -r app app_dest app_reload; do
   [ -n "$app" ] || continue
-  if [ -f "$dest" ] && ! grep -qF -e "$app_placeholder_marker" "$dest"; then
+  if [ -f "$app_dest" ] && ! grep -qF -e "$app_placeholder_marker" "$app_dest"; then
     mkdir -p "$dest_apps"
-    cp "$dest" "$dest_apps/$app.conf"
+    cp "$app_dest" "$dest_apps/$app.conf"
     apps_note="$apps_note $app"
   else
     rm -f "$dest_apps/$app.conf"
@@ -100,14 +109,24 @@ while IFS=$'\t' read -r app dest reload; do
 done < <(apps_list)
 
 # --- a place to describe the look, since the TOML won't say what you were going for ---
-[ -f "$dest/NOTES.md" ] || cat >"$dest/NOTES.md" <<EOF
+[ -f "$staging/NOTES.md" ] || cat >"$staging/NOTES.md" <<EOF
 # theme: $name
 
 Saved $(date -u +%F). Describe the intent here — the key list won't.
 
 - **Feel:**
-- **Palette:** $(grep -m1 '^theme\.' "$dest/noctalia.toml" 2>/dev/null || echo "see noctalia.toml")
+- **Palette:** $(grep -m1 '^theme\.' "$staging/noctalia.toml" 2>/dev/null || echo "see noctalia.toml")
 EOF
+
+# --- swap the finished theme into place ---
+# Everything above wrote to staging only; this is the first moment $dest changes.
+if [ -d "$dest" ]; then
+  rm -rf "$dest.old"
+  mv "$dest" "$dest.old"
+fi
+mv "$staging" "$dest"
+trap - EXIT
+rm -rf "$dest.old"
 
 # What you just saved is what you're running, so it becomes the active theme.
 printf '%s\n' "$name" >"$themes/active"
