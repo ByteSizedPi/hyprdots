@@ -1,6 +1,5 @@
 local mainMod = "SUPER"
-local t = os.getenv("TERMINAL")
-local terminal = (t ~= nil and t ~= "" and t) or "xdg-terminal-exec"
+local terminal = require("lib.terminal")
 local fileManager = "dolphin"
 
 -- Terminal / apps

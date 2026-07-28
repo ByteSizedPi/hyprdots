@@ -1,4 +1,5 @@
--- Hyprland BEHAVIOUR. Appearance lives in ui-theme.lua (generated per theme).
+-- Hyprland BEHAVIOUR — what the compositor DOES. Appearance lives in
+-- theme/appearance.lua, generated per theme.
 --
 -- The split exists so switching themes can't silently revert the dwindle-crash
 -- workaround, misc/, or debug/ — see themes/README.md.
@@ -38,7 +39,3 @@ hl.config({
 		-- damage_tracking = 0,
 	},
 })
-
--- Appearance: gaps, border_size, rounding, opacity, shadow, blur, animations.
--- Installed by scripts/desktop-theme/apply.sh; gitignored (generated output).
-require("ui-theme")

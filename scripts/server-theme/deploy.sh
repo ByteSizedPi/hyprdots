@@ -57,7 +57,7 @@ EOSSH
 python3 "$render" "$palette" "$tpl/kitty-theme.conf" \
   >"$repo/kitty/.config/kitty/themes/server-theme.conf" # kitty 'Server' scheme
 python3 "$render" "$palette" "$tpl/hyprland-jjserver-colors.lua" \
-  >"$repo/hyprland/.config/hypr/jjserver-colors.lua" # hypr jjserver border colors
+  >"$repo/hyprland/.config/hypr/theme/jjserver.lua" # hypr jjserver border colors
 
 echo "Deployed server theme: palette '$name' -> $remote"
 echo "  server: nvim + zellij theme files, ~/.config/server-theme.txt (live-poked)"

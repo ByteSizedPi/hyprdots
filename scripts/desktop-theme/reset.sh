@@ -3,7 +3,7 @@
 #
 # Removes every theme key from Noctalia's live settings.toml, so those settings fall
 # through to noctalia/.config/noctalia/config.toml and then to Noctalia's built-in
-# defaults. Hyprland gets the neutral themes/_base/hypr-theme.lua.
+# defaults. Hyprland gets the neutral themes/_base/hypr/ fragments, with hyprglass off.
 #
 # NOTHING else is touched: monitors, widget positions, idle, keybinds and calendar all
 # survive. The previous settings.toml is kept at settings.toml.bak.
@@ -15,7 +15,7 @@
 # Intended loop:
 #   scripts/desktop-theme/save.sh oldlook     # bank what you have
 #   scripts/desktop-theme/reset.sh            # blank slate
-#   ...tweak in Noctalia's Settings UI + edit ~/.config/hypr/ui-theme.lua...
+#   ...tweak in Noctalia's Settings UI + edit ~/.config/hypr/theme/appearance.lua...
 #   scripts/desktop-theme/save.sh newlook     # bank the result
 #
 # Usage: scripts/desktop-theme/reset.sh [--yes]
@@ -29,7 +29,7 @@ cur="$(active_theme)"
 if [ "${1:-}" != "--yes" ]; then
   n=$(python3 "$toml" extract "$settings" "$keys" | grep -c '=' || true)
   echo "This clears $n theme keys from $settings"
-  echo "and resets ~/.config/hypr/ui-theme.lua to the neutral base."
+  echo "and resets the ~/.config/hypr/theme/ fragments to the neutral base."
   [ -n "$cur" ] && echo "Active theme is '$cur' — make sure it's saved (themes/$cur/) first."
   printf 'Continue? [y/N] '
   read -r reply
@@ -44,9 +44,11 @@ validate_candidate "$candidate"
 install_settings "$candidate"
 trap - EXIT
 
-# --- Hyprland: neutral starting point ---
-mkdir -p "$(dirname "$hypr_theme")"
-cp "$themes/_base/hypr-theme.lua" "$hypr_theme"
+# --- Hyprland: neutral starting point, glass explicitly off ---
+mkdir -p "$hypr_theme_dir"
+cp "$themes/_base/hypr/appearance.lua" "$hypr_appearance"
+cp "$themes/_base/hypr/layers.lua" "$hypr_layers"
+write_glass_disabled
 
 # No named theme is applied any more; leave the pointer empty rather than lying.
 : >"$themes/active"

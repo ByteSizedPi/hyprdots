@@ -175,3 +175,67 @@ Then re-render the templates for the current palette:
 ```
 noctalia msg templates-apply
 ```
+
+---
+
+## hyprpm build toolchain — `cmake`, `gcc-c++`, `hyprland-devel`
+
+`hyprpm` compiles plugins from source against your exact Hyprland version, so it
+needs a full C++ toolchain plus Hyprland's own build dependencies. A stock
+install has neither, and `hyprpm update` fails with:
+```
+✖ Missing dependency: cmake
+✖ Missing dependency: g++
+✖ Could not update. Dependencies not satisfied. Hyprpm requires:
+  cmake, cpio, pkg-config, git, g++, gcc
+```
+(`cpio`, `pkg-config`, `git` and `gcc` were already present.)
+
+**Change (2026-07-27, dnf transaction 81):**
+```
+sudo dnf install -y cmake gcc-c++ hyprland-devel
+```
+93 packages, ~392 MiB installed. `hyprland-devel` comes from the **same COPR as
+the running Hyprland** (`copr:lionheartp:Hyprland`, 0.56.0-1.fc44) — version
+must match, so pin it to whatever `hyprland` itself is at.
+
+Note `hyprpm` does *not* actually consume `hyprland-devel`'s headers: it clones
+hyprwm/Hyprland at the running commit and builds its own header set. The reason
+to install it anyway is that it drags in the whole `-devel` dependency closure
+that build needs (`wayland-devel`, `aquamarine-devel`, `hyprutils-devel`,
+`hyprlang-devel`, `hyprgraphics-devel`, `tomlplusplus-devel`, `glaze-devel`, …).
+It is a shorter, version-pinned stand-in for `dnf builddep hyprland`.
+
+**To undo:** `sudo dnf history undo 81`
+
+### hyprpm state store lives in `/var/cache/hyprpm/$USER/`, not `~/.local/share`
+
+This Fedora/COPR build patches the state path. Worth knowing because every
+upstream doc and issue thread says `~/.local/share/hyprpm`:
+```
+/var/cache/hyprpm/jj/
+├── headersRoot/          # Hyprland headers hyprpm built for itself
+├── state.toml            # hash = <hl-commit>_aq_<ver>_hu_<ver>_...
+└── HyprGlass/
+    ├── hyprglass.so
+    └── state.toml
+```
+Root-owned, outside the stow tree, and **not** backed up by this repo — after a
+reinstall, plugins must be re-added with `hyprpm add`. The `hash` in `state.toml`
+pins the Hyprland commit plus aquamarine/hyprutils/hyprgraphics/hyprcursor/
+hyprlang ABI versions, which is why a Hyprland update requires
+`hyprpm update` before plugins will load again.
+
+### Plugins added
+
+- **HyprGlass** (`https://github.com/hyprnux/hyprglass`) — "liquid glass" visual
+  effects: frosted blur, edge refraction, chromatic aberration, specular
+  highlights. Configured in Lua via `hl.plugin.hyprglass`, so it belongs behind
+  an `if hl.plugin.hyprglass then` guard in the `hyprland` stow package.
+  **Added but deliberately left disabled** — see `docs/problems.md` for this
+  machine's history of Hyprland crashes on a hybrid GPU; a heavy per-window
+  shader plugin is a plausible new instability source, so enable it knowingly:
+  ```
+  hyprpm enable hyprglass
+  hyprpm disable hyprglass    # if things get unstable
+  ```

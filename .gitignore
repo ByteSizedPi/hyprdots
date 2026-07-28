@@ -21,11 +21,19 @@ home/.themes/
 # These are outputs, not inputs — no need to track them in git.
 #
 # Packages where ~/.config/<app> is a directory symlink into dotfiles
-# (noctalia writes directly here):
+# (noctalia writes directly here). Both of these are BUILTIN Noctalia templates
+# with hardcoded output paths — they can't be moved into hypr/theme/ without
+# re-authoring them as user templates.
 hyprland/.config/hypr/noctalia.lua
-# Hyprland appearance fragment — installed by scripts/desktop-theme/apply.sh from
-# themes/<name>/hypr-theme.lua. The themes/ copy is the tracked input.
-hyprland/.config/hypr/ui-theme.lua
+hyprland/.config/hypr/hyprtoolkit.conf
+# Hyprland theme fragments — installed by scripts/desktop-theme/apply.sh from
+# themes/<name>/hypr/. The themes/ copies are the tracked inputs.
+# (theme/jjserver.lua is deliberately NOT here: it's written by the far rarer
+# scripts/server-theme/deploy.sh, and committing it records which server palette
+# this machine is pinned to.)
+hyprland/.config/hypr/theme/appearance.lua
+hyprland/.config/hypr/theme/layers.lua
+hyprland/.config/hypr/theme/glass.lua
 kitty/.config/kitty/themes/noctalia.conf
 zellij/.config/zellij/themes/noctalia.kdl
 nvim/.config/nvim/lua/noctalia-theme.lua
