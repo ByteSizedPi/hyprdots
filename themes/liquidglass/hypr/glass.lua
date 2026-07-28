@@ -108,7 +108,13 @@ local surfaces = {
 -- same effect across half the pane and reads as mush. 0.06 is the plugin default
 -- and about the sharpest that still shows depth; 0.035 is tighter still, which
 -- concentrates the fresnel rim into a hard edge line rather than a soft band.
-local window = { edge = 0.035, dome = 0.5 }
+-- Two independent things, easy to confuse:
+--   strength       sets how BRIGHT the rim is — peak is strength * 0.15 at the
+--                  boundary, where edgeProximity is 1, so it does not depend on this
+--   edge_thickness sets how DEEP the effect fades inward
+-- 0.022 keeps the rim as bright as before while cutting the fresnel tail from ~54px
+-- to ~34px into the window; at 0.035 it read as too thick at the corners.
+local window = { edge = 0.022, dome = 0.5 }
 
 -- ═══ APPLY ════════════════════════════════════════════════════════════
 -- The baseline goes in the GLOBALS rather than a window preset, for two reasons:
