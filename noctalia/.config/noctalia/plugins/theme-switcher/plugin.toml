@@ -1,0 +1,38 @@
+id          = "jj/theme-switcher"
+name        = "Theme Switcher"
+version     = "0.1.0"
+plugin_api  = 9
+author      = "jj"
+license     = "MIT"
+icon        = "palette"
+description = "Switch, save and update the dotfiles themes in ~/dotfiles/themes"
+tags        = ["theming"]
+
+# plugin_api 9 is the floor because the panel passes closures as onClick handlers
+# (function pointer props landed at 9). Everything else here works further back.
+
+[[setting]]
+key             = "repo"
+type            = "string"
+label_key       = "settings.repo.label"
+description_key = "settings.repo.description"
+default         = "~/dotfiles"
+
+[[setting]]
+key             = "confirm_apply"
+type            = "bool"
+label_key       = "settings.confirm_apply.label"
+description_key = "settings.confirm_apply.description"
+default         = true
+
+[[widget]]
+id    = "widget"
+entry = "widget.luau"
+
+[[panel]]
+id        = "panel"
+entry     = "panel.luau"
+width     = 400
+height    = 520
+placement = "floating"
+position  = "center"

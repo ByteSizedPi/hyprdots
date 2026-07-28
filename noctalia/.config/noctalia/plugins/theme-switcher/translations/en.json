@@ -1,0 +1,12 @@
+{
+  "settings": {
+    "repo": {
+      "label": "Dotfiles repo",
+      "description": "Path to the dotfiles checkout holding themes/ and scripts/desktop-theme/"
+    },
+    "confirm_apply": {
+      "label": "Confirm before applying",
+      "description": "Applying a theme replaces the whole theme surface including the wallpaper. When on, Apply asks once before running."
+    }
+  }
+}

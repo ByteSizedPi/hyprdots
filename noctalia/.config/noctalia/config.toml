@@ -31,3 +31,16 @@
 idle.behavior.screen-off.enabled = true
 idle.behavior.screen-off.timeout = 660.0
 idle.pre_action_fade_seconds = 5
+
+# --- Local plugin source: the theme switcher lives in this repo ---
+# A `path` source is read-only to Noctalia (no git operations), which is what we
+# want for a plugin tracked here rather than installed from the catalog.
+# The directory holds plugin DIRECTORIES, one per plugin.
+#
+# Being listed here only makes it discoverable — it still has to be enabled:
+#   noctalia msg plugins enable jj/theme-switcher
+[[plugins.source]]
+name = "dotfiles"
+kind = "path"
+location = "~/.config/noctalia/plugins"
+enabled = true

@@ -446,6 +446,28 @@ worth it for a font size. Check for an include mechanism before adding an app.
 
 ---
 
+## Switching themes from the bar
+
+`jj/theme-switcher` is a Noctalia plugin in this repo
+([`noctalia/.config/noctalia/plugins/theme-switcher/`](../noctalia/.config/noctalia/plugins/theme-switcher/README.md))
+— a bar widget showing the active theme, and a panel to apply / update / save.
+
+It's a front end for `apply.sh` and `save.sh`, not a reimplementation: it shells out
+to them so the sandbox validation and `.bak` behaviour can't drift out of step with
+the CLI. Anything the scripts can't do, the panel can't either.
+
+Discovered via a `path` source in `noctalia/.config/noctalia/config.toml`, so it
+appears on any stowed machine — but enabling is a one-off:
+
+```bash
+noctalia msg plugins enable jj/theme-switcher
+noctalia msg panel-toggle jj/theme-switcher:panel   # works without the bar widget
+```
+
+Add the widget itself in **Settings → Bar → Add widget → Theme Switcher**.
+
+---
+
 ## Safety
 
 Every `apply` and `reset`:

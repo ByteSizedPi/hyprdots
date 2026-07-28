@@ -107,6 +107,11 @@ seat/DRM-master contention (see problems.md → "tty1 dead screen").
   for the same reason: hyprglass does not deconflict with Hyprland's layer blur.
 - Everything Noctalia templates (`noctalia.lua`, `hyprtoolkit.conf`, kitty/zellij/
   nvim/gtk themes) is **regenerated output** — gitignored, never snapshotted.
+- **`jj/theme-switcher`** — a Noctalia plugin in this repo
+  (`noctalia/.config/noctalia/plugins/theme-switcher/`) giving a bar widget + panel
+  for switching/saving themes. Discovered via a `[[plugins.source]]` of kind `path`
+  declared in `config.toml`; enable once with `noctalia msg plugins enable`. It
+  shells out to `apply.sh`/`save.sh` rather than reimplementing them.
 
 ## Plasma / KDE
 - `plasmashell` + `startplasma-wayland` present; Plasma Wayland is the "other"
