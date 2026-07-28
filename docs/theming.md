@@ -51,6 +51,7 @@ idle screen-off, which is off by default upstream).
 | `themes/<name>/hypr/layers.lua` | layer rules for the Noctalia shell surfaces — which ones Hyprland blurs itself. Optional; falls back to `_base`. |
 | `themes/<name>/hypr/glass.lua` | hyprglass config. Only read when the manifest opts in. |
 | `themes/<name>/manifest.conf` | non-Noctalia keys — currently just `hyprglass = on\|off` |
+| `themes/<name>/apps/<app>.conf` | per-app **non-colour** settings (kitty font size, padding, opacity). Wiring in [`../scripts/desktop-theme/apps.conf`](../scripts/desktop-theme/apps.conf). |
 
 Everything else is regenerated: `hypr/noctalia.lua`, `hypr/hyprtoolkit.conf`,
 `kitty/themes/noctalia.conf`, `zellij/themes/noctalia.kdl`,
@@ -405,6 +406,43 @@ reload, go through the plugin's own API:
 ```bash
 hyprctl repl 'hl.plugin.hyprglass.config({ blur_strength = 2.5 })'
 ```
+
+---
+
+## Per-app settings (kitty font size, padding, opacity…)
+
+Noctalia already pushes the **palette** into kitty, zellij, nvim, btop and friends.
+`apps.conf` covers the other half — the non-colour settings that make a look.
+
+```
+themes/<name>/apps/kitty.conf   ->   ~/.config/kitty/theme-extra.conf
+```
+
+`apply.sh` writes that file for **every** app listed in `apps.conf`, not just the
+ones a theme customises: when a theme ships nothing, it writes a placeholder. That's
+what makes switching *away* from a theme with custom settings actually clear them,
+rather than leaving the last theme's font size behind.
+
+It round-trips like everything else — edit `~/.config/kitty/theme-extra.conf`,
+then `save.sh <name> --force` banks it. `save.sh` skips placeholders, so "this theme
+has no kitty settings" stays that way.
+
+### Adding another app
+
+One line in `apps.conf`, plus an include on the app's side:
+
+```
+<app> | <destination> | <reload command>
+```
+
+The destination must be a file the theme owns **exclusively** — apply.sh overwrites
+it without asking. Point it at a dedicated overlay the app includes, never at a real
+config file. For kitty that's `include theme-extra.conf` at the end of `kitty.conf`,
+so its settings win over everything above.
+
+The limit is what the app supports. Kitty has `include`. Zellij's KDL doesn't, so a
+per-theme zellij setting would mean the theme owning the whole config file — not
+worth it for a font size. Check for an include mechanism before adding an app.
 
 ---
 

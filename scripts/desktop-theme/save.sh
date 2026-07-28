@@ -39,6 +39,8 @@ mv "$dest/noctalia.toml.new" "$dest/noctalia.toml"
 
 # --- Hyprland appearance: gaps, radius, opacity, blur, animations ---
 mkdir -p "$dest/hypr"
+dest_apps="$dest/apps"
+mkdir -p "$dest_apps"
 if [ -f "$hypr_appearance" ]; then
   cp "$hypr_appearance" "$dest/hypr/appearance.lua"
 else
@@ -82,6 +84,21 @@ cat >"$dest/manifest.conf" <<EOF
 hyprglass = $glass_on
 EOF
 
+# --- Per-app overlays: capture whatever the live files hold (see apps.conf) ---
+# Skips apply.sh's placeholders, so "this theme has no kitty settings" stays that way
+# instead of being banked as an empty look.
+apps_note=""
+while IFS=$'\t' read -r app dest reload; do
+  [ -n "$app" ] || continue
+  if [ -f "$dest" ] && ! grep -qF -e "$app_placeholder_marker" "$dest"; then
+    mkdir -p "$dest_apps"
+    cp "$dest" "$dest_apps/$app.conf"
+    apps_note="$apps_note $app"
+  else
+    rm -f "$dest_apps/$app.conf"
+  fi
+done < <(apps_list)
+
 # --- a place to describe the look, since the TOML won't say what you were going for ---
 [ -f "$dest/NOTES.md" ] || cat >"$dest/NOTES.md" <<EOF
 # theme: $name
@@ -101,5 +118,6 @@ echo "  hypr/appearance.lua $(wc -l <"$dest/hypr/appearance.lua") lines"
 echo "  hypr/layers.lua     $(wc -l <"$dest/hypr/layers.lua") lines"
 echo "  hypr/glass.lua      $glass_note"
 echo "  manifest.conf       hyprglass = $(theme_manifest_get "$dest" hyprglass)"
+echo "  apps/               ${apps_note:- none captured}"
 echo "  themes/active       $name"
 echo "Commit it: git -C \"$repo\" add themes/$name && git -C \"$repo\" commit"

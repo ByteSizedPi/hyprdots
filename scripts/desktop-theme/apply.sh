@@ -63,6 +63,23 @@ else
 fi
 
 printf '%s\n' "$name" >"$themes/active"
+
+# --- Per-app overlays (kitty font/padding/opacity, etc — see apps.conf) ---
+# Written for EVERY configured app, not just the ones this theme customises: a
+# placeholder is how switching away from a theme that had settings clears them.
+apps_note=""
+while IFS=$'\t' read -r app dest reload; do
+  [ -n "$app" ] || continue
+  if [ -f "$src/apps/$app.conf" ]; then
+    mkdir -p "$(dirname "$dest")"
+    cp "$src/apps/$app.conf" "$dest"
+    apps_note="$apps_note $app"
+  else
+    write_app_placeholder "$app" "$dest"
+  fi
+  [ -z "$reload" ] || sh -c "$reload" >/dev/null 2>&1 || true
+done < <(apps_list)
+
 reload_live
 
 echo "Applied theme '$name'"
@@ -70,3 +87,4 @@ echo "  settings.toml    theme surface replaced (previous kept at settings.toml.
 echo "  appearance.lua   $([ -f "$src/hypr/appearance.lua" ] && echo "from themes/$name" || echo "unchanged (theme ships none)")"
 echo "  layers.lua       $([ -f "$src/hypr/layers.lua" ] && echo "from themes/$name" || echo "from themes/_base")"
 echo "  glass.lua        $glass_state"
+echo "  app overlays    ${apps_note:- none (all placeholders)}"

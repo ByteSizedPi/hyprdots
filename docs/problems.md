@@ -891,6 +891,53 @@ Implemented in the `refactor(hyprland)` commit:
 
 ---
 
+## 🟥 kitty.conf is not stowed — live config drifted from the repo
+**Symptom:** found 2026-07-28 while wiring per-theme app overlays. Every other file
+in `~/.config/kitty/` is a symlink into this repo (`ssh.conf`, `jjserver.conf`,
+`dank-*.conf`, `themes/`), but **`kitty.conf` itself is a real file**. There's a
+`kitty.conf.bak` next to it from 2026-06-15, which is the fingerprint of something
+rewriting the config in place — almost certainly `kitten themes`, which replaces
+`kitty.conf` (symlink and all) and leaves a `.bak`. The `BEGIN_KITTY_THEME` markers
+that were in the repo copy are its signature.
+
+**What drifted.** Only two differences, but both matter:
+
+| | repo (`HEAD`) | live |
+| --- | --- | --- |
+| palette include | `include current-theme.conf` | `include themes/noctalia.conf` |
+| `map ctrl+shift+t no_op` | present | **missing** |
+
+- The **live** file is right about the palette: `themes/noctalia.conf` is rewritten
+  by Noctalia on every theme change (timestamped today), while
+  `current-theme.conf` has been stale since 2026-07-20 and nothing updates it.
+- The **repo** file is right about the keybind: `map ctrl+shift+t no_op` stops
+  kitty's OS-level tabs stacking on top of zellij's tabs. That fix is **not in
+  effect right now**.
+
+**Fixed in the repo (2026-07-28):** `kitty/.config/kitty/kitty.conf` now has the
+correct `themes/noctalia.conf` include, keeps the keybind, and gains
+`include theme-extra.conf` for per-theme settings (see `scripts/desktop-theme/apps.conf`).
+
+**Still open — the live file is still a real file, so none of that is active.**
+Reconciling means replacing it and re-stowing:
+
+```bash
+rm ~/.config/kitty/kitty.conf ~/.config/kitty/kitty.conf.bak
+stow -R kitty
+```
+
+Deliberately NOT done automatically: it deletes a live config, and it's worth
+eyeballing the repo version first. Also consider deleting the stale
+`~/.config/kitty/current-theme.conf` once the include is confirmed switched.
+
+**Avoid re-breaking it:** don't run `kitten themes` — it rewrites `kitty.conf` and
+will clobber the symlink again. Palette changes go through Noctalia.
+
+**Worth auditing:** other packages may have the same silent un-stowing. A quick
+check is to look for real files sitting among symlinks in each `~/.config/<app>`.
+
+---
+
 ## See also (existing deep dives)
 - 🟧/🟩 **Greeter ghost + dwindle crash + hybrid-GPU + Lua gotchas** —
   [hyprland-plasma-diagnosis.md](hyprland-plasma-diagnosis.md). Read first when

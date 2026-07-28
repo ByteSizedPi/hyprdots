@@ -34,6 +34,10 @@ hyprland/.config/hypr/hyprtoolkit.conf
 hyprland/.config/hypr/theme/appearance.lua
 hyprland/.config/hypr/theme/layers.lua
 hyprland/.config/hypr/theme/glass.lua
+# Per-app theme overlay (scripts/desktop-theme/apps.conf). Currently lands in the
+# real ~/.config/kitty (kitty.conf is not stowed — see docs/problems.md); this is a
+# safety net if that ever changes.
+kitty/.config/kitty/theme-extra.conf
 kitty/.config/kitty/themes/noctalia.conf
 zellij/.config/zellij/themes/noctalia.kdl
 nvim/.config/nvim/lua/noctalia-theme.lua
