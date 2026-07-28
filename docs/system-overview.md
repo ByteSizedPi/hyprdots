@@ -27,9 +27,17 @@ seat/DRM-master contention (see problems.md → "tty1 dead screen").
 
 ## Compositor: Hyprland
 - **Version 0.56.0**, **aquamarine** backend.
-- **Lua config** (not the classic `hyprland.conf`). Entry: `hyprland.lua` →
-  `require("monitors")`, `require("noctalia")`, plus `ui.lua`, `keybinds.lua`.
-  Stow package: `hyprland/.config/hypr/`.
+- **Lua config** (not the classic `hyprland.conf`). Stow package:
+  `hyprland/.config/hypr/`, laid out as `modules/` (hand-written, one concern per
+  file), `rules/`, `lib/` and `theme/` (everything generated), with `hyprland.lua`
+  as a bare require list. The directory has its own
+  [README](../hyprland/.config/hypr/README.md) documenting which files are written
+  by Noctalia and by the theme scripts — read it before moving anything.
+- **Plugins are loaded by hyprpm**, not by the config: `hl.plugin.load()` reports
+  success and does nothing on 0.56.0. Because hyprpm runs *after* the config is
+  parsed, `modules/plugins.lua` triggers a `hyprctl reload config-only` once it
+  finishes, or no plugin config would apply on a cold start. Enabled plugins live
+  in `/var/cache/hyprpm/$USER/`, outside this repo.
 - **Lua-config gotchas for `hyprctl`:**
   - `hyprctl dispatch …` and `hyprctl keyword …` are rejected / lua-wrapped.
   - Use `hyprctl eval 'hl.dispatch(hl.dsp.<name>(...))'`. Dispatchers live under
@@ -84,13 +92,19 @@ seat/DRM-master contention (see problems.md → "tty1 dead screen").
 
 ## Theming
 - **`themes/<name>/`** — swappable looks; `scripts/desktop-theme/{save,apply,reset}.sh`.
-  A theme is two inputs: `noctalia.toml` (merged into `settings.toml`, since that
-  outranks `config.toml`) and `hypr-theme.lua`. The **wallpaper travels with the
+  A theme's inputs: `noctalia.toml` (merged into `settings.toml`, since that
+  outranks `config.toml`), the `hypr/` fragments, and `manifest.conf`. The
+  **wallpaper travels with the
   theme** — `theme.source = "wallpaper"`, so the picture is the palette; paths only,
   images stay in `~/Pictures/Wallpapers/`. Full guide: [theming.md](theming.md).
-- **`hypr/ui.lua` = behaviour; `hypr/ui-theme.lua` = appearance** (generated,
-  gitignored, `require`d from `ui.lua`). Split so a theme swap can't revert the
+- **`hypr/modules/behaviour.lua` = behaviour; `hypr/theme/` = appearance**
+  (generated, gitignored, `require`d last). Split so a theme swap can't revert the
   dwindle-crash workaround or `misc`/`debug`.
+- **hyprglass is per-theme.** `manifest.conf` carries `hyprglass = on|off`;
+  `apply.sh` always writes `theme/glass.lua`, using an explicit disable stub when
+  off — `hyprctl reload` resets plugin options to defaults and hyprglass defaults
+  to *enabled*, so silence would mean glass everywhere. Layer rules are theme-owned
+  for the same reason: hyprglass does not deconflict with Hyprland's layer blur.
 - Everything Noctalia templates (`noctalia.lua`, `hyprtoolkit.conf`, kitty/zellij/
   nvim/gtk themes) is **regenerated output** — gitignored, never snapshotted.
 

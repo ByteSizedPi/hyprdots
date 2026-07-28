@@ -15,9 +15,9 @@ tried on it. Read order for a new session:
 
 - **[theming.md](theming.md)** — saving, switching and defining looks. Usage
   examples for `scripts/desktop-theme/{save,apply,reset}.sh`, the measured Noctalia config
-  precedence (state `settings.toml` beats stowed `config.toml`), the `ui.lua` /
-  `ui-theme.lua` behaviour-vs-appearance split, the theme key surface, safety and
-  undo, and troubleshooting.
+  precedence (state `settings.toml` beats stowed `config.toml`), the
+  behaviour-vs-appearance split, per-theme hyprglass, the theme key surface,
+  safety and undo, and troubleshooting.
 - **[../themes/README.md](../themes/README.md)** — quick reference for what's in
   `themes/`.
 

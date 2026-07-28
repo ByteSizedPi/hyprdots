@@ -42,12 +42,15 @@ setting. Themes are merged **into `settings.toml`**, with non-theme keys preserv
 `config.toml`'s remaining job is the **fresh-machine seed** (currently: enable
 idle screen-off, which is off by default upstream).
 
-### A theme is two files
+### What a theme is made of
 
 | file | holds |
 | --- | --- |
 | `themes/<name>/noctalia.toml` | bar geometry/radii/opacity/fonts, notification + OSD, panel transparency, screen corners, shadows, animation speed, palette, wallpaper paths, per-widget colors, launcher layout |
-| `themes/<name>/hypr-theme.lua` | `gaps_in/out`, `border_size`, `rounding`, `rounding_power`, window opacities, `shadow`, `blur`, animation curves |
+| `themes/<name>/hypr/appearance.lua` | `gaps_in/out`, `border_size`, `rounding`, `rounding_power`, window opacities, `shadow`, `blur`, animation curves |
+| `themes/<name>/hypr/layers.lua` | layer rules for the Noctalia shell surfaces — which ones Hyprland blurs itself. Optional; falls back to `_base`. |
+| `themes/<name>/hypr/glass.lua` | hyprglass config. Only read when the manifest opts in. |
+| `themes/<name>/manifest.conf` | non-Noctalia keys — currently just `hyprglass = on\|off` |
 
 Everything else is regenerated: `hypr/noctalia.lua`, `hypr/hyprtoolkit.conf`,
 `kitty/themes/noctalia.conf`, `zellij/themes/noctalia.kdl`,
@@ -83,10 +86,13 @@ the picture. `wallpaper.default`, `wallpaper.last` and every
 ```
 themes/
   active                     one line: the theme currently applied
-  _base/hypr-theme.lua       neutral Hyprland look, used by reset.sh
+  _base/hypr/
+    appearance.lua           neutral Hyprland look, used by reset.sh
+    layers.lua               default layer rules: Hyprland blurs the shell itself
   comicmono/
     noctalia.toml            64 keys, flat dotted-key TOML, sorted
-    hypr-theme.lua           72 lines
+    manifest.conf            hyprglass = off
+    hypr/appearance.lua      72 lines
     NOTES.md                 what the look is going for
   README.md
 
@@ -127,7 +133,9 @@ comicmono
 $ ./scripts/desktop-theme/apply.sh comicmono
 Applied theme 'comicmono'
   settings.toml  theme surface replaced (previous kept at settings.toml.bak)
-  ui-theme.lua   from themes/comicmono
+  appearance.lua   from themes/comicmono
+  layers.lua       from themes/_base
+  glass.lua        off (disable stub)
 ```
 
 With no argument it re-applies `themes/active` — which is what you want after a
@@ -146,7 +154,10 @@ in-memory state over the write.
 $ ./scripts/desktop-theme/save.sh comicmono
 Saved theme 'comicmono' -> themes/comicmono/
   noctalia.toml    64 theme keys
-  hypr-theme.lua   72 lines
+  hypr/appearance.lua 72 lines
+  hypr/layers.lua     51 lines
+  hypr/glass.lua      none — theme has no hyprglass config
+  manifest.conf       hyprglass = off
   themes/active    comicmono
 Commit it: git -C "/home/jj/dotfiles" add themes/comicmono && git -C "/home/jj/dotfiles" commit
 ```
@@ -172,7 +183,7 @@ Saved theme 'comicmono' -> themes/comicmono/
 
 $ ./scripts/desktop-theme/reset.sh                       # 2. clear
 This clears 58 theme keys from /home/jj/.local/state/noctalia/settings.toml
-and resets ~/.config/hypr/ui-theme.lua to the neutral base.
+and resets the ~/.config/hypr/theme/ fragments to the neutral base.
 Active theme is 'comicmono' — make sure it's saved (themes/comicmono/) first.
 Continue? [y/N] y
 Theme surface cleared — you're on Noctalia defaults.
@@ -189,7 +200,7 @@ theme surface. **Step 3, tweak in two places:**
   radii, thickness, fonts and weights, capsule groups, notification/OSD opacity and
   position, screen corners, shadows, animation speed, panel transparency, per-widget
   colors, launcher layout. This is most of the look.
-- **Hyprland** → edit `~/.config/hypr/ui-theme.lua` directly. Saves apply
+- **Hyprland** → edit `~/.config/hypr/theme/appearance.lua` directly. Saves apply
   immediately; Hyprland auto-reloads on config file change.
 
 **Colors** come from the palette, not from either file — Settings → Theme. Note
@@ -215,7 +226,7 @@ Faster than a blank slate when you want "the same but glassier":
 ```bash
 cp -r themes/comicmono themes/softglass
 $EDITOR themes/softglass/noctalia.toml
-$EDITOR themes/softglass/hypr-theme.lua
+$EDITOR themes/softglass/hypr/appearance.lua
 ./scripts/desktop-theme/apply.sh softglass
 ```
 
@@ -296,18 +307,18 @@ Noctalia regenerates every downstream theme file on first run.
 
 ## Hyprland: why appearance is a separate file
 
-`hypr/ui.lua` holds **behaviour** — layout, `dwindle`/`master`, `misc`, `debug`,
+`hypr/modules/behaviour.lua` holds **behaviour** — layout, `dwindle`/`master`, `misc`, `debug`,
 `resize_on_border` — and ends with:
 
 ```lua
-require("ui-theme")
+require("theme")
 ```
 
-`hypr/ui-theme.lua` holds **appearance** and is generated: installed by
-`apply.sh` from `themes/<name>/hypr-theme.lua`, and gitignored exactly like
+`hypr/theme/appearance.lua` holds **appearance** and is generated: installed by
+`apply.sh` from `themes/<name>/hypr/appearance.lua`, and gitignored exactly like
 `noctalia.lua`.
 
-Swapping whole `ui.lua` files per theme would let an old theme silently revert the
+Swapping whole behaviour files per theme would let an old theme silently revert the
 dwindle-crash workaround and the `misc`/`debug` settings. The split makes that
 structurally impossible.
 
@@ -316,6 +327,78 @@ path it parsed, so a symlinked fragment doesn't reliably trigger auto-reload.
 
 Border **colors** are not here — they come from `noctalia.lua`, which Noctalia
 regenerates per palette.
+
+---
+
+## hyprglass: glass is a per-theme thing
+
+Whether windows get the liquid-glass treatment is part of the *look*, so themes own
+it. Two files:
+
+```
+themes/<name>/manifest.conf     hyprglass = on
+themes/<name>/hypr/glass.lua    the actual hg.config / hg.layer / hg.preset calls
+```
+
+`apply.sh` **always** writes `~/.config/hypr/theme/glass.lua` — the theme's file when
+the manifest says `on`, otherwise an explicit disable stub. That stub is not
+decoration: `hyprctl reload` resets plugin options to their defaults, and hyprglass
+defaults to `enabled = true`, so a theme that said nothing about it would silently
+come up glassed. Turning `hyprglass = on` without shipping `hypr/glass.lua` is a hard
+error rather than a silent fallback.
+
+### Layer rules must move with it
+
+hyprglass only auto-manages `noblur` for **windows**. It does nothing about
+Hyprland's *layer* blur, so a Noctalia surface that is both blurred in
+`hypr/layers.lua` and glassed by `hg.layer()` gets two blur passes and looks wrong.
+A glass theme therefore ships its own `hypr/layers.lua` with the ceded namespaces
+removed. Themes that don't ship one inherit `_base` (Hyprland blurs everything
+itself), which is the right default for a non-glass look.
+
+### Namespaces are matched exactly — no regex
+
+`hl.layer_rule` takes a regex; `hg.layer()` does **not** — it is a plain string
+equality test. Patterns that work in `layers.lua` will silently match nothing.
+The measured live namespaces:
+
+| namespace | notes |
+| --- | --- |
+| `noctalia-bar-default` | suffix is the **bar name** — renaming or adding a bar breaks the match silently |
+| `noctalia-panel` | launcher, control-center, wallpaper and session — all four, indistinguishable |
+| `noctalia-notification` | |
+| `noctalia-osd` | |
+| `noctalia-screen-corner` | |
+| `noctalia-wallpaper` | never glass this |
+| `noctalia-desktop-widget-<widget>-<16 hex>` | per-instance IDs — **cannot** be whitelisted |
+
+An **empty** whitelist glasses *everything*, wallpaper included. So either list
+namespaces explicitly (and accept that desktop widgets can't be covered), or invert:
+glass all and `exclude` `noctalia-wallpaper`, which is a stable name. Full evidence
+in [problems.md](problems.md) → "hyprglass".
+
+### Saving a glass theme
+
+`save.sh` **cannot** capture glass. `hg.layer()` and `hg.preset()` are Lua-side
+registrations with no readback — only scalar options show up in
+`hyprctl getoption plugin:hyprglass:*`, which isn't enough to rebuild a look. So
+`hypr/glass.lua` and `manifest.conf` are hand-authored, and re-saving a theme leaves
+both untouched rather than clobbering them.
+
+The iteration loop is therefore manual:
+
+```bash
+$EDITOR themes/liquidglass/hypr/glass.lua
+hyprctl reload                                   # plugin stays loaded, config re-applies
+hyprctl getoption plugin:hyprglass:enabled       # sanity: `set: true` means yours took
+```
+
+`hyprctl keyword` does not work under the Lua parser. To poke a value live without a
+reload, go through the plugin's own API:
+
+```bash
+hyprctl repl 'hl.plugin.hyprglass.config({ blur_strength = 2.5 })'
+```
 
 ---
 
@@ -363,7 +446,7 @@ Or just re-apply a known-good theme:
 | Colors change on their own | `theme.source = "wallpaper"` — palette derives from the wallpaper. Re-`save.sh --force` to bank the new pairing, or pin a builtin/community palette. |
 | Wallpaper reverted after a theme switch | Expected: wallpaper paths are theme keys. `save.sh <name> --force` to bank the one you want with that theme. |
 | Wallpaper gone after `reset.sh` | Also expected — reset clears the theme surface, wallpaper included. `apply.sh <name>` to get it back. |
-| Hyprland look unchanged after apply | `hyprctl reload`; check `hyprctl configerrors`. Confirm `ui.lua` still ends with `require("ui-theme")`. |
+| Hyprland look unchanged after apply | `hyprctl reload`; check `hyprctl configerrors`. Confirm `hyprland.lua` still ends with `require("theme")`. |
 | Noctalia unresponsive after apply | Not the theme — check `~/.cache/noctalia/noctalia.log` and DNS. See problems.md → "noctalia idle stranded". |
 | `save.sh` captured too much/too little | Edit `scripts/desktop-theme/keys.conf`, re-save with `--force`. |
 | Want to inspect without applying | `python3 scripts/desktop-theme/settings-toml.py merge <settings> <keys.conf> <theme.toml>` prints the result to stdout. |
@@ -400,7 +483,7 @@ XDG_CONFIG_HOME=/tmp/dry/config NOCTALIA_STATE_HOME=/tmp/dry/state \
 
 **But `themes/active` is still written in the repo regardless** — it's repo state,
 not system state, so no env var redirects it. Verified: with both vars set, the live
-`settings.toml` and `~/.config/hypr/ui-theme.lua` are untouched, but `themes/active`
+`settings.toml` and the `~/.config/hypr/theme/` fragments are untouched, but `themes/active`
 is updated. Restore it by hand (`echo comicmono > themes/active`) or with
 `git checkout themes/active` if a dry run leaves it wrong.
 

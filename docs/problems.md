@@ -787,6 +787,110 @@ WMI hotkey) still needs a manual `rfkill unblock bluetooth` until next login.
 
 ---
 
+## 🟧 hyprglass: plugin never loads at startup, and its config never applies
+**Symptom:** `hyprpm enable hyprglass` made glass appear, but nothing loads the
+plugin at session start — it was live only because `hyprpm` had been run by hand.
+Separately, `hypr/plugins/hyprglass.lua` was never `require`d, so even while
+loaded, none of its config was in effect.
+
+**Context (2026-07-28):** investigated while designing per-theme plugin support —
+hyprglass should be ON only for a (not yet built) liquid-glass theme, OFF for
+comicmono/paper_bw. Hyprland 0.56.0, hyprglass 1.0.0.
+
+### Tried — DIDN'T work
+- **`hl.plugin.load("<abs path to .so>")` in the Lua config.** Documented on the
+  wiki as the way to register a plugin, but on 0.56.0 it **fails silently**:
+  from a cold (unloaded) state it returns success (`load_ok=true, err=nil`) while
+  `hl.plugin.<name>` stays `nil` in the same parse, the guarded config block is
+  skipped, and `hyprctl plugin list` still shows `no plugins loaded` after the
+  parse, after a second `hyprctl reload`, and minutes later. Same from
+  `hyprctl repl` at runtime. **The return value is not trustworthy — don't use
+  this call to gate anything.**
+  One non-reproducible success (plugin appeared after a reload following a
+  repl-registered load); three subsequent attempts failed. Not understood.
+  *Caveat:* only tested via `hyprctl reload`, never a real compositor start —
+  it may work on the initial parse at launch. Untested because restarting
+  Hyprland here risks the tty1 dead-panel issue (see below).
+- **`hyprctl keyword plugin:hyprglass:*`** — dead under the Lua parser, as
+  already noted in the Lua gotchas section above.
+
+### Tried — WORKED
+- **`hyprpm reload -n`** loads it reliably, every time.
+- **`hyprctl plugin unload <so>`** is clean — three unload/load cycles, no crash.
+  Safe to iterate on glass settings this way.
+- **Per-theme enable/disable via config fragment.** `hg.config({ enabled = false,
+  default_preset = "subtle" })` at parse time gave `enabled: int:0 set:true` and
+  `default_preset: str:subtle set:true`, and held across a further reload.
+
+### Two behaviours that drive the design
+1. **`hyprctl reload` keeps plugins loaded but resets all their options to
+   defaults.** Verified: set `enabled=false` → `int:0 set:true`; after reload →
+   `int:1 set:false`, same plugin handle. Because hyprglass defaults to
+   `enabled = true`, **a theme that says nothing about hyprglass gets glass with
+   default settings.** So the theme tooling must *always* emit an explicit
+   fragment (real config, or a disable stub) — this is load-bearing, not defensive.
+2. **`hyprpm reload -n` runs after config parse**, so on a cold start the
+   `if hl.plugin.hyprglass` guard is skipped and no theme glass config applies —
+   landing in exactly the default-on state above. Autostart therefore has to load
+   *then* re-parse:
+   `hyprpm reload -n && hyprctl reload config-only`
+   (`config-only` avoids re-running monitor reload — see the monitor entry above.)
+
+### hyprglass vs Hyprland layer blur — they do NOT deconflict
+`manage_window_blur` (default on) auto-sets `noblur` on glassed **windows**.
+There is **no layer equivalent**: `hkRenderLayer` (`src/main.cpp`) composites glass
+and never touches Hyprland's layer blur, so a `layer_rule{ blur = true }` on a
+glassed namespace runs both — two blur passes, wrong result. Layer rules must
+therefore be **theme-owned**: dropped for namespaces a glass theme claims.
+
+### hyprglass namespace matching is EXACT — no regex
+`shouldGlassLayer` uses `unordered_set::contains(ns)`; per-namespace presets use
+`map::find(ns)`. Hyprland's `layer_rule` takes a regex, hyprglass does not, so
+patterns that work in `windowrules.lua` will silently match nothing in `hg.layer()`.
+**An empty whitelist glasses everything** (`if (include.empty()) return true;`) —
+including the wallpaper layer.
+
+### Live noctalia layer namespaces (measured 2026-07-28)
+| namespace | source |
+|---|---|
+| `noctalia-bar-default` | the bar — suffix is the **bar name**, so renaming/adding a bar silently breaks an exact-match whitelist |
+| `noctalia-panel` | **all** panels — launcher, control-center, wallpaper and session are indistinguishable at the namespace level |
+| `noctalia-notification` | notifications |
+| `noctalia-osd` | OSDs |
+| `noctalia-screen-corner` | screen corners |
+| `noctalia-wallpaper` | wallpaper — must never be glassed |
+| `noctalia-desktop-widget-<widget>-<16 hex>` | desktop widgets — **per-instance IDs, cannot be exact-matched** |
+
+Consequence: a whitelist can cover bar/panel/notification/osd/screen-corner but
+**not** desktop widgets. To include those the only route is the inverse — empty
+whitelist (glass all) plus `exclude` on `noctalia-wallpaper`, which is stable.
+
+Also: `windowrules.lua` has a rule for `^noctalia-attached-panel$`, which never
+appeared in any capture — likely dead.
+
+### Fix in place (2026-07-28)
+Implemented in the `refactor(hyprland)` commit:
+- `modules/plugins.lua` runs `hyprpm reload -n && hyprctl reload config-only` on
+  `hyprland.start` — load, then re-parse so theme glass config actually applies.
+- `themes/<name>/manifest.conf` carries `hyprglass = on|off`;
+  `themes/<name>/hypr/glass.lua` carries the config.
+- `apply.sh` always writes `theme/glass.lua`, using an explicit disable stub when
+  off. Verified live: stub gives `enabled: int:0 set:true` and survives reloads.
+- Layer rules moved to `theme/layers.lua` so a glass theme can cede namespaces.
+
+**Still open — verify at next login (needs a real startup, not `hyprctl reload`):**
+1. Does the `hyprpm reload -n && hyprctl reload config-only` autostart actually
+   produce a glassed session on a cold boot? Check
+   `hyprctl getoption plugin:hyprglass:enabled` shows `set: true` right after login.
+2. Does `hl.plugin.load` behave differently on the initial startup parse? If it
+   works there, it's the tidier path and `modules/plugins.lua` could drop the
+   re-parse. Untested here because restarting Hyprland risks the tty1 dead-panel
+   issue above.
+3. `noctalia-attached-panel` — confirm it's genuinely dead before assuming so;
+   its layer rule was dropped in the restructure.
+
+---
+
 ## See also (existing deep dives)
 - 🟧/🟩 **Greeter ghost + dwindle crash + hybrid-GPU + Lua gotchas** —
   [hyprland-plasma-diagnosis.md](hyprland-plasma-diagnosis.md). Read first when

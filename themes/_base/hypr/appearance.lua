@@ -1,9 +1,9 @@
 -- Neutral Hyprland look — stock defaults, the blank slate for designing a new theme.
--- Copied to ~/.config/hypr/ui-theme.lua by scripts/desktop-theme/reset.sh.
+-- Copied to ~/.config/hypr/theme/appearance.lua by scripts/desktop-theme/reset.sh.
 --
 -- This file owns ONLY appearance. Behaviour (layout, dwindle/master, misc, debug,
--- resize_on_border) stays in ui.lua so swapping themes can never revert it.
--- Border COLORS come from noctalia.lua, which Noctalia regenerates per palette.
+-- resize_on_border) stays in modules/behaviour.lua so swapping themes can never
+-- revert it. Border COLORS come from noctalia.lua, regenerated per palette.
 
 hl.config({
 	general = {

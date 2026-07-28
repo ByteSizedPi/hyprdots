@@ -20,10 +20,16 @@ cat themes/active                   # what's applied
 
 ```
 active                  one line: the theme currently applied
-_base/hypr-theme.lua    neutral Hyprland look, used by reset.sh
+_base/hypr/
+  appearance.lua        neutral Hyprland look, used by reset.sh
+  layers.lua            default layer rules (Hyprland blurs the shell itself)
 <name>/
   noctalia.toml         theme keys (incl. wallpaper paths), flat dotted-key TOML, sorted
-  hypr-theme.lua        gaps, border_size, rounding, opacity, shadow, blur, anims
+  manifest.conf         non-Noctalia keys — currently `hyprglass = on|off`
+  hypr/
+    appearance.lua      gaps, border_size, rounding, opacity, shadow, blur, anims
+    layers.lua          optional; omit to inherit _base
+    glass.lua           hyprglass config; required when manifest says `hyprglass = on`
   NOTES.md              what the look is going for
 ```
 

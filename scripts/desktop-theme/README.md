@@ -1,7 +1,7 @@
 # scripts/desktop-theme — this machine's live look
 
 **Execution context: LOCAL.** These mutate the running session on *this* box —
-Noctalia's live `settings.toml` and Hyprland's generated `ui-theme.lua`. Nothing
+Noctalia's live `settings.toml` and Hyprland's generated `theme/` fragments. Nothing
 here touches a remote host (that's `../server-theme/`).
 
 **Full guide with usage examples: [../../docs/theming.md](../../docs/theming.md).**
