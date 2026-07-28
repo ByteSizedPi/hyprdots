@@ -47,9 +47,14 @@ local glass = {
 	iterations = 2, -- 1-5 gaussian passes
 	refraction = 1.8, -- edge bending; * 50 = 90px of sample offset at the edge
 	aberration = 0.9, -- spectral fringing; red x0.69 blue x1.31
-	fresnel = 0.6, -- rim glow. Adds white to the ALREADY-REFRACTED content, so unlike
-	-- Hyprland's glow this one responds to whatever is under the pane.
-	specular = 0.8, -- top highlight
+	-- Rim glow, and now the ONLY rim: Hyprland's border and glow are both off, so
+	-- these two replace them. Adds white to the ALREADY-REFRACTED sample, which is
+	-- why it reacts to what's behind the window instead of being a painted-on colour.
+	-- Additive white peaks at strength * 0.15, so 2.0 = up to 30% at the boundary.
+	fresnel = 3.0,
+	-- Top-biased highlight, peaks at strength * 0.08. Together with fresnel this is
+	-- the light-from-above cue the border gradient used to provide.
+	specular = 2.2,
 	tint = 0x8899aa22, -- RRGGBBAA; the alpha byte IS the tint strength
 }
 
@@ -101,8 +106,9 @@ local surfaces = {
 -- Band width. THIN = SHARP: this is the falloff distance, so a small value crams
 -- the distortion into a crisp strip at the boundary, while a large one smears the
 -- same effect across half the pane and reads as mush. 0.06 is the plugin default
--- and about the sharpest that still shows depth.
-local window = { edge = 0.06, dome = 0.5 }
+-- and about the sharpest that still shows depth; 0.035 is tighter still, which
+-- concentrates the fresnel rim into a hard edge line rather than a soft band.
+local window = { edge = 0.035, dome = 0.5 }
 
 -- ═══ APPLY ════════════════════════════════════════════════════════════
 -- The baseline goes in the GLOBALS rather than a window preset, for two reasons:

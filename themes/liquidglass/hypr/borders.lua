@@ -8,6 +8,12 @@
 -- ALL border settings live here, thickness included. appearance.lua deliberately
 -- does NOT set general.border_size any more — one place to look.
 --
+-- CURRENTLY BOTH ARE OFF (BORDER_SIZE 0, glow disabled). The rim is hyprglass's job
+-- now: its fresnel and specular do the same work from INSIDE the pane, on the
+-- already-refracted sample, so the highlight reacts to what's behind the window
+-- instead of being a fixed colour painted around it. See hypr/glass.lua.
+-- The values below are kept tuned so either can be switched back on in one edit.
+--
 -- THE IDEA. Real glass doesn't have a uniform edge — it has a specular hot spot
 -- where the light hits, a bright falloff either side, and a dark side where the
 -- surface curves away from the light. A multi-stop gradient border at a fixed angle
@@ -50,7 +56,7 @@ end
 
 -- Border thickness, px. The gradient needs a couple of pixels to read at all, but
 -- past ~3 the rim stops looking like an edge and starts looking like a frame.
-local BORDER_SIZE = 2
+local BORDER_SIZE = 0
 
 -- Where the light comes from, in degrees. 45 = upper-left, which is what UI shading
 -- conventions assume, so it reads as "lit" rather than merely "coloured".
@@ -88,7 +94,7 @@ local border_angle_animation = {
 
 -- Outer glow: light bleeding off the edge of the pane.
 local glow = {
-	enabled = true,
+	enabled = false,
 	range = 24, -- px
 	render_power = 3, -- falloff exponent, same meaning as on shadows
 }
