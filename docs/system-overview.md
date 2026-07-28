@@ -122,14 +122,18 @@ seat/DRM-master contention (see problems.md → "tty1 dead screen").
 ## Other moving parts
 - **keyd** — key remapping daemon; shows up as "keyd virtual keyboard/pointer"
   in libinput. Relevant when debugging input.
-- **kanshi** — stow package present but should stay **unused under Hyprland**:
-  kanshi/shikane drive outputs via wlr-output-management, and Hyprland has a
-  long-standing bug (hyprwm/Hyprland#1274) where a disabled head vanishes from
-  the protocol's output list, so those tools can never re-enable it until a
-  physical replug — docked↔mobile switching breaks. `monitors.lua` is the
-  mechanism of record: four declarative `hl.monitor()` rules registered at
-  config-parse time, which Hyprland applies natively on connect and hotplug.
-  No daemon, no state, no logging — if a monitor is wrong, the rule is wrong.
+- **kanshi** — **no longer managed here** (dropped from the repo 2026-07-28). The
+  config survives as a plain local file at `~/.config/kanshi/config`, untracked; the
+  `kanshi.service` user unit is installed by the distro and stays disabled.
+  Don't reintroduce it under Hyprland: kanshi/shikane drive outputs via
+  wlr-output-management, and Hyprland has a long-standing bug
+  (hyprwm/Hyprland#1274) where a disabled head vanishes from the protocol's output
+  list, so those tools can never re-enable it until a physical replug —
+  docked↔mobile switching breaks.
+  `modules/monitors.lua` is the mechanism of record: declarative `hl.monitor()`
+  rules registered at config-parse time, which Hyprland applies natively on connect
+  and hotplug. No daemon, no state, no logging — if a monitor is wrong, the rule is
+  wrong.
   **Always pin `scale` to a number, never `"auto"`** (see `problems.md`).
 - **Terminals/tools:** kitty (+ zellij multiplexer; zellij sessions **persist**
   across compositor restarts — reattach after), alacritty, nvim, yazi, btop,
@@ -176,7 +180,7 @@ that block at login. Nothing outside the repo; no `SYSTEM.md` entry. See
 [problems.md](problems.md) → "noctalia can't turn Bluetooth *on*".
 
 ## Stow packages
-`alacritty, btop, environment, home, hyprland, kanshi, kitty, noctalia, nvim,
+`alacritty, btop, environment, home, hyprland, kitty, noctalia, nvim,
 systemd, yazi, zellij, zen` — each `stow <pkg>` symlinks into `$HOME`.
 Not packages (never `stow` these): `docs`, `scripts`, `themes`.
 

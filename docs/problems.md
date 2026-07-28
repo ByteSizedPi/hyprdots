@@ -891,7 +891,7 @@ Implemented in the `refactor(hyprland)` commit:
 
 ---
 
-## 🟥 kitty.conf is not stowed — live config drifted from the repo
+## 🟩 kitty.conf is not stowed — live config drifted from the repo
 **Symptom:** found 2026-07-28 while wiring per-theme app overlays. Every other file
 in `~/.config/kitty/` is a symlink into this repo (`ssh.conf`, `jjserver.conf`,
 `dank-*.conf`, `themes/`), but **`kitty.conf` itself is a real file**. There's a
@@ -918,17 +918,21 @@ that were in the repo copy are its signature.
 correct `themes/noctalia.conf` include, keeps the keybind, and gains
 `include theme-extra.conf` for per-theme settings (see `scripts/desktop-theme/apps.conf`).
 
-**Still open — the live file is still a real file, so none of that is active.**
-Reconciling means replacing it and re-stowing:
+**Resolved 2026-07-28.** Checked first that the repo copy was a strict superset of
+the live one — it had the two lines above and the live file had nothing the repo
+lacked — then:
 
 ```bash
 rm ~/.config/kitty/kitty.conf ~/.config/kitty/kitty.conf.bak
 stow -R kitty
 ```
 
-Deliberately NOT done automatically: it deletes a live config, and it's worth
-eyeballing the repo version first. Also consider deleting the stale
-`~/.config/kitty/current-theme.conf` once the include is confirmed switched.
+`~/.config/kitty/kitty.conf` is a symlink into the repo again, the `ctrl+shift+t`
+fix is live, and `include theme-extra.conf` now actually loads the per-theme
+overlay. Both deleted files were backed up first.
+
+Leftover, harmless: `~/.config/kitty/current-theme.conf` is still on disk but
+nothing includes it any more. Delete it whenever.
 
 **Avoid re-breaking it:** don't run `kitten themes` — it rewrites `kitty.conf` and
 will clobber the symlink again. Palette changes go through Noctalia.
