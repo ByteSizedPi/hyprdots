@@ -100,9 +100,6 @@ seat/DRM-master contention (see problems.md → "tty1 dead screen").
 - **`hypr/modules/behaviour.lua` = behaviour; `hypr/theme/` = appearance**
   (generated, gitignored, `require`d last). Split so a theme swap can't revert the
   dwindle-crash workaround or `misc`/`debug`.
-- **hyprglass is currently DISABLED** (`hyprpm disable hyprglass`, 2026-07-28) —
-  the per-theme toggling wasn't behaving as wanted. The machinery below is intact
-  and unused; re-enable per themes/liquidglass/NOTES.md.
 - **hyprglass is per-theme.** `manifest.conf` carries `hyprglass = on|off`;
   `apply.sh` always writes `theme/glass.lua`, using an explicit disable stub when
   off — `hyprctl reload` resets plugin options to defaults and hyprglass defaults

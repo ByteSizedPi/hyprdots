@@ -787,14 +787,20 @@ WMI hotkey) still needs a manual `rfkill unblock bluetooth` until next login.
 
 ---
 
-## 🟧 hyprglass: plugin never loads at startup, and its config never applies
-> **PARKED 2026-07-28** — per-theme on/off wasn't behaving as wanted, so hyprglass
-> is disabled at the hyprpm level (`hyprpm disable hyprglass`) and liquidglass falls
-> back to Hyprland's own blur. Everything below still holds and the machinery is
-> intact; see themes/liquidglass/NOTES.md for the exact steps to switch it back on.
-> Turn it on ad-hoc any time with `hyprpm enable hyprglass && hyprpm reload -n &&
-> hyprctl reload` — with no theme shipping a glass.lua, apply.sh's disable stub will
-> simply turn it off again on the next theme apply.
+## 🟩 hyprglass: plugin never loads at startup, and its config never applies
+> **Re-enabled 2026-07-28 (second attempt) and verified toggling.** The earlier
+> parking was triggered by glass looking wrong on non-glass themes; the actual cause
+> was found on re-setup — `themes/liquidglass/hypr/layers.lua` had been overwritten
+> with the full 5-rule `_base` set, so the four namespaces glass.lua claims were
+> being blurred twice. Fixed by restoring the 1-rule version. Toggling itself was
+> never broken: verified across repeated on/off cycles and both directions of
+> `apply.sh`, plus an extra reload while off to confirm it stays off.
+>
+> **The failure mode to remember:** `save.sh` captures the LIVE `layers.lua`. Saving
+> liquidglass while a non-glass theme's rules are installed silently pulls the full
+> rule set into the glass theme, and the only symptom is that glass looks muddy. If
+> that happens, count the `layer_rule` calls in `themes/liquidglass/hypr/layers.lua`
+> — 5 means clobbered, 1 is correct.
 **Symptom:** `hyprpm enable hyprglass` made glass appear, but nothing loads the
 plugin at session start — it was live only because `hyprpm` had been run by hand.
 Separately, `hypr/plugins/hyprglass.lua` was never `require`d, so even while

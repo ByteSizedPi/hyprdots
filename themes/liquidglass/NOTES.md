@@ -1,22 +1,12 @@
 # theme: liquidglass
 
-> **hyprglass is currently OFF** (2026-07-28) — the on/off behaviour wasn't working
-> the way we wanted, so the plugin is disabled at the hyprpm level and this theme
-> falls back to Hyprland's own blur. Everything below still describes the intended
-> glass look; `hypr/glass.lua` is parked and ignored while `manifest.conf` says off.
->
-> **To turn it back on:**
-> ```bash
-> hyprpm enable hyprglass && hyprpm reload -n && hyprctl reload
-> git checkout <commit-before-this> -- themes/liquidglass/hypr/layers.lua
-> sed -i 's/^hyprglass = off$/hyprglass = on/' themes/liquidglass/manifest.conf
-> scripts/desktop-theme/apply.sh liquidglass
-> ```
-> The `layers.lua` restore matters: without it the shell surfaces get Hyprland's
-> blur *and* glass, which is the double-blur this theme was built to avoid.
-> `git log -- themes/liquidglass/hypr/layers.lua` will find the commit.
+Created 2026-07-28. The only theme that turns hyprglass on.
 
-Created 2026-07-28. Was the only theme that turned hyprglass on.
+**`hypr/layers.lua` must stay at 1 rule.** It keeps only `noctalia-screen-corner`;
+the other four namespaces are claimed by `hypr/glass.lua`. `save.sh` captures the
+live layers file, so saving this theme while a non-glass theme's rules are installed
+pulls in the full 5-rule `_base` set and glass goes muddy — the two blur passes it
+exists to avoid. Count the rules if the look degrades.
 
 - **Feel:** frosted glass — translucent windows over a blurred, refracted
   background, with the Noctalia bar/panels/notifications glassed too. Wide gaps
