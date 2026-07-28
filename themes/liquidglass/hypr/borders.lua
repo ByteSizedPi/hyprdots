@@ -28,7 +28,7 @@
 
 -- Border thickness, px. The gradient needs a couple of pixels to read at all, but
 -- past ~3 the rim stops looking like an edge and starts looking like a frame.
-local BORDER_SIZE = 2
+local BORDER_SIZE = 0
 
 -- Where the light comes from, in degrees. 45 = upper-left, which is what UI shading
 -- conventions assume, so it reads as "lit" rather than merely "coloured".
@@ -44,10 +44,30 @@ local rim = {
 	bounce = "rgba(ffffff1a)", -- faint bounce light returning on the far edge
 }
 
+-- Drop shadow. NOT optional: hyprglass force-enables decoration:shadow at plugin
+-- load because it samples the shadow pass to get the correct background — but only
+-- once, so a later `hyprctl reload` would turn it back off if the config said false.
+-- Since it has to exist anyway, it may as well do useful work: offsetting it away
+-- from the light is the cheapest way to sell a light source.
+local shadow = {
+	distance = 8, -- px the shadow is pushed away from the light
+	range = 18, -- blur radius of the shadow itself
+	render_power = 3,
+	color = "rgba(0a0c12b3)",
+}
+
+-- Rotate the gradient continuously — a specular that travels around the pane, which
+-- is the most "liquid glass" thing available. Only visible when BORDER_SIZE > 0.
+local border_angle_animation = {
+	enabled = true,
+	speed = 100, -- deciseconds for a full rotation; higher = slower
+	style = "loop",
+}
+
 -- Outer glow: light bleeding off the edge of the pane.
 local glow = {
-	enabled = true,
-	range = 14, -- px
+	enabled = false,
+	range = 24, -- px
 	render_power = 3, -- falloff exponent, same meaning as on shadows
 	color = "rgba(cfe4ff59)", -- cool white, matching the rim's colour temperature
 }
@@ -62,6 +82,13 @@ local ramp = {
 	colors = { rim.specular, rim.falloff, rim.shadow, rim.bounce },
 	angle = LIGHT_ANGLE,
 }
+
+-- Shadow falls OPPOSITE the light. Hyprland's gradient angle and its screen
+-- coordinates don't share an origin, so this is derived to look right rather than to
+-- be trigonometrically pure: at LIGHT_ANGLE 45 (upper-left) it pushes the shadow
+-- down and to the right. Flip a sign if you move the light past a quadrant.
+local rad = math.rad(LIGHT_ANGLE)
+local shadow_offset = { math.sin(rad) * shadow.distance, math.cos(rad) * shadow.distance }
 
 hl.config({
 	general = {
@@ -80,5 +107,22 @@ hl.config({
 			color = glow.color,
 			color_inactive = glow.color,
 		},
+
+		shadow = {
+			enabled = true, -- required by hyprglass; see appearance.lua
+			offset = shadow_offset,
+			range = shadow.range,
+			render_power = shadow.render_power,
+			color = shadow.color,
+			color_inactive = shadow.color,
+		},
 	},
+})
+
+hl.animation({
+	leaf = "borderangle",
+	enabled = border_angle_animation.enabled,
+	speed = border_angle_animation.speed,
+	bezier = "linear", -- a rotating highlight should not ease
+	style = border_angle_animation.style,
 })

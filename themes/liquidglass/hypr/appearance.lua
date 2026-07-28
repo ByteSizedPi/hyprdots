@@ -38,11 +38,17 @@ hl.config({
 
 		-- hyprglass force-enables shadows regardless (only their presence matters to
 		-- it, not the values). Set explicitly so the config doesn't lie about state.
+		-- hyprglass REQUIRES shadows to be enabled — it samples the shadow pass to get
+		-- the correct background, and force-enables this at plugin load
+		-- (src/main.cpp: "Shadows must be enabled for the glass effect to sample the
+		-- correct background"). But it only does that ONCE, at load: any later
+		-- `hyprctl reload` resets the value to whatever this file says. Setting it false
+		-- here therefore broke the glass on every reload after the first.
+		--
+		-- The visual values live in theme/borders.lua, which runs later and overrides
+		-- them, so that the shadow direction stays tied to LIGHT_ANGLE.
 		shadow = {
-			enabled = false,
-			range = 12,
-			render_power = 3,
-			color = 0x66000000,
+			enabled = true,
 		},
 
 		-- Applies to layers glass doesn't own (screen corners). Glassed windows get
