@@ -46,7 +46,7 @@ idle screen-off, which is off by default upstream).
 
 | file | holds |
 | --- | --- |
-| `themes/<name>/noctalia.toml` | bar geometry/radii/opacity/fonts, notification + OSD, panel transparency, screen corners, shadows, animation speed, palette, per-widget colors, launcher layout |
+| `themes/<name>/noctalia.toml` | bar geometry/radii/opacity/fonts, notification + OSD, panel transparency, screen corners, shadows, animation speed, palette, wallpaper paths, per-widget colors, launcher layout |
 | `themes/<name>/hypr-theme.lua` | `gaps_in/out`, `border_size`, `rounding`, `rounding_power`, window opacities, `shadow`, `blur`, animation curves |
 
 Everything else is regenerated: `hypr/noctalia.lua`, `hypr/hyprtoolkit.conf`,
@@ -56,10 +56,27 @@ by Noctalia on every theme change. **Never snapshot them.**
 
 ### What a theme deliberately does *not* carry
 
-Monitor names, wallpaper paths, desktop/lockscreen widget coordinates, idle,
+Monitor names, `wallpaper.directory`, desktop/lockscreen widget coordinates, idle,
 keybinds, calendar accounts, plugins, and `theme.templates.*`. These are machine
 config and must survive a theme switch. Stripping `theme.templates.*` in particular
 would stop all template generation.
+
+### …but it *does* carry the wallpaper
+
+`theme.source = "wallpaper"` means the palette is derived from the picture, so a
+theme that didn't own its wallpaper would recolour itself the moment you changed
+the picture. `wallpaper.default`, `wallpaper.last` and every
+`wallpaper.monitors.<output>.path` are therefore theme keys. Consequences:
+
+- **`apply.sh` changes your wallpaper.** That's the point, but it's the one theme
+  key with an obvious, instant visual effect beyond chrome.
+- **`reset.sh` clears it** — bare desktop until you pick one or re-apply a theme.
+- Only the **paths** are stored, not the images. A theme is portable to another
+  machine only if the same paths exist there; monitor names that don't match simply
+  don't apply, and that output falls back to `wallpaper.default`.
+- This is a deliberate exception to the `!*.monitors` rule used elsewhere in
+  `keys.conf`: for wallpaper the per-monitor table holds the actual image, not a
+  hardware assignment.
 
 ## Layout
 
@@ -68,7 +85,7 @@ themes/
   active                     one line: the theme currently applied
   _base/hypr-theme.lua       neutral Hyprland look, used by reset.sh
   comicmono/
-    noctalia.toml            58 keys, flat dotted-key TOML, sorted
+    noctalia.toml            64 keys, flat dotted-key TOML, sorted
     hypr-theme.lua           72 lines
     NOTES.md                 what the look is going for
   README.md
@@ -128,7 +145,7 @@ in-memory state over the write.
 ```console
 $ ./scripts/desktop-theme/save.sh comicmono
 Saved theme 'comicmono' -> themes/comicmono/
-  noctalia.toml    58 theme keys
+  noctalia.toml    64 theme keys
   hypr-theme.lua   72 lines
   themes/active    comicmono
 Commit it: git -C "/home/jj/dotfiles" add themes/comicmono && git -C "/home/jj/dotfiles" commit
@@ -164,8 +181,9 @@ Theme surface cleared — you're on Noctalia defaults.
 Tweak, then: scripts/desktop-theme/save.sh <newname>
 ```
 
-Now you're on stock Noctalia + neutral Hyprland, with monitors, wallpapers, widget
-positions, idle, keybinds and calendar all intact. **Step 3, tweak in two places:**
+Now you're on stock Noctalia + neutral Hyprland, with monitors, widget positions,
+idle, keybinds and calendar all intact — but no wallpaper, since that's part of the
+theme surface. **Step 3, tweak in two places:**
 
 - **Noctalia** → the Settings GUI. Bar opacity, border style and width, corner
   radii, thickness, fonts and weights, capsule groups, notification/OSD opacity and
@@ -342,7 +360,9 @@ Or just re-apply a known-good theme:
 | --- | --- |
 | A setting you changed has no effect | It may be a legacy key name. `noctalia config validate` — an `unknown setting` warning means that key is **doing nothing**. See problems.md → "Launcher settings silently inert". |
 | Theme change didn't stick | Settings GUI was open and flushed over the write. Close it, re-apply. |
-| Colors change on their own | `theme.source = "wallpaper"` — palette derives from the wallpaper. Pin a builtin/community palette. |
+| Colors change on their own | `theme.source = "wallpaper"` — palette derives from the wallpaper. Re-`save.sh --force` to bank the new pairing, or pin a builtin/community palette. |
+| Wallpaper reverted after a theme switch | Expected: wallpaper paths are theme keys. `save.sh <name> --force` to bank the one you want with that theme. |
+| Wallpaper gone after `reset.sh` | Also expected — reset clears the theme surface, wallpaper included. `apply.sh <name>` to get it back. |
 | Hyprland look unchanged after apply | `hyprctl reload`; check `hyprctl configerrors`. Confirm `ui.lua` still ends with `require("ui-theme")`. |
 | Noctalia unresponsive after apply | Not the theme — check `~/.cache/noctalia/noctalia.log` and DNS. See problems.md → "noctalia idle stranded". |
 | `save.sh` captured too much/too little | Edit `scripts/desktop-theme/keys.conf`, re-save with `--force`. |

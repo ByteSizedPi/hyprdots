@@ -26,7 +26,8 @@ Run them from anywhere — paths resolve relative to the script, not your cwd.
 Noctalia's `~/.local/state/noctalia/settings.toml` **outranks** the stowed
 `~/.config/noctalia/config.toml` per key — `config.toml` only fills keys the state
 file omits. So a theme has to be merged into `settings.toml`, preserving the
-non-theme keys (monitors, wallpapers, widget coordinates, idle, keybinds, calendar).
+non-theme keys (monitors, widget coordinates, idle, keybinds, calendar). Wallpaper
+paths are theme keys — the palette is derived from the picture.
 That split is what `keys.conf` defines.
 
 See docs/problems.md → "noctalia config.toml precedence" for the measurements.

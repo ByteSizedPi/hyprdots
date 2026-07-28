@@ -85,7 +85,9 @@ seat/DRM-master contention (see problems.md → "tty1 dead screen").
 ## Theming
 - **`themes/<name>/`** — swappable looks; `scripts/desktop-theme/{save,apply,reset}.sh`.
   A theme is two inputs: `noctalia.toml` (merged into `settings.toml`, since that
-  outranks `config.toml`) and `hypr-theme.lua`. Full guide: [theming.md](theming.md).
+  outranks `config.toml`) and `hypr-theme.lua`. The **wallpaper travels with the
+  theme** — `theme.source = "wallpaper"`, so the picture is the palette; paths only,
+  images stay in `~/Pictures/Wallpapers/`. Full guide: [theming.md](theming.md).
 - **`hypr/ui.lua` = behaviour; `hypr/ui-theme.lua` = appearance** (generated,
   gitignored, `require`d from `ui.lua`). Split so a theme swap can't revert the
   dwindle-crash workaround or `misc`/`debug`.

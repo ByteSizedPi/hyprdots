@@ -5,8 +5,12 @@
 # through to noctalia/.config/noctalia/config.toml and then to Noctalia's built-in
 # defaults. Hyprland gets the neutral themes/_base/hypr-theme.lua.
 #
-# NOTHING else is touched: monitors, wallpapers, widget positions, idle, keybinds and
-# calendar all survive. The previous settings.toml is kept at settings.toml.bak.
+# NOTHING else is touched: monitors, widget positions, idle, keybinds and calendar all
+# survive. The previous settings.toml is kept at settings.toml.bak.
+#
+# Wallpaper paths are theme keys, so a reset DOES clear the wallpaper — expect a bare
+# desktop until you set one or re-apply a theme. wallpaper.directory (the picker's
+# browse root) survives, so the images are still one click away.
 #
 # Intended loop:
 #   scripts/desktop-theme/save.sh oldlook     # bank what you have

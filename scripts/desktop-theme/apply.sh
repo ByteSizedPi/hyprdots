@@ -2,8 +2,9 @@
 # Apply a saved theme: merge its keys into Noctalia's live settings.toml, drop its
 # Hyprland fragment into place, and reload both.
 #
-# Non-theme settings in settings.toml (monitors, wallpaper paths, widget positions,
-# idle, keybinds, calendar) are preserved — only the theme surface is replaced.
+# Non-theme settings in settings.toml (monitors, widget positions, idle, keybinds,
+# calendar) are preserved — only the theme surface is replaced. Wallpaper paths ARE
+# part of that surface, so applying a theme changes the wallpaper too.
 # The previous settings.toml is kept at settings.toml.bak.
 #
 # Close Noctalia's Settings window first: the running shell may flush its in-memory

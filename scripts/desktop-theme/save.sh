@@ -2,7 +2,9 @@
 # Snapshot the CURRENT live look into themes/<name>/ so it can be restored later.
 #
 # Captures exactly two inputs:
-#   - the theme-relevant keys of Noctalia's live settings.toml (see keys.conf)
+#   - the theme-relevant keys of Noctalia's live settings.toml (see keys.conf),
+#     wallpaper paths included — theme.source = "wallpaper" means the picture IS
+#     the palette, so the look isn't reproducible without it
 #   - the current generated Hyprland theme fragment (~/.config/hypr/theme.lua)
 # Everything else — noctalia.lua, kitty/zellij/nvim/gtk themes, hyprtoolkit.conf —
 # is regenerated output and deliberately NOT captured.
