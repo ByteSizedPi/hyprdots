@@ -52,7 +52,10 @@ hl.curve("easy", { type = "spring", mass = 1, stiffness = 71.2633, dampening = 1
 
 hl.animation({ leaf = "global", enabled = true, speed = 10, bezier = "default" })
 hl.animation({ leaf = "border", enabled = true, speed = 5.39, bezier = "easeOutQuint" })
-hl.animation({ leaf = "windows", enabled = true, speed = 3, bezier = "quick" })
+-- MUST match windowsIn/windowsOut below. `windows` is the reflow of existing
+-- windows; if it is slower than the pop-in, a newly launched window finishes
+-- appearing while its neighbours are still sliding, and they visibly overlap.
+hl.animation({ leaf = "windows", enabled = true, speed = 2, bezier = "quick" })
 hl.animation({ leaf = "windowsIn", enabled = true, speed = 2, bezier = "quick", style = "popin 80%" })
 hl.animation({ leaf = "windowsOut", enabled = true, speed = 2, bezier = "quick", style = "popin 80%" })
 hl.animation({ leaf = "fadeIn", enabled = true, speed = 2, bezier = "quick" })
