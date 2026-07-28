@@ -15,9 +15,8 @@ hl.config({
 		-- windows hide them.
 		gaps_in = 2,
 		gaps_out = 4,
-		-- Thick enough for the gradient rim in theme/borders.lua to actually read as
-		-- a specular highlight; at 1-2px a four-stop gradient is invisible.
-		border_size = 3,
+		-- border_size is NOT here: all border settings live in theme/borders.lua,
+		-- which runs after the palette and would override this anyway.
 	},
 
 	decoration = {

@@ -55,14 +55,19 @@ local mask_threshold = 0.3
 -- Per-surface deviation. Geometry canNOT be shared: edge_thickness and
 -- lens_distortion are fractions of the surface's SMALLEST dimension, so the 0.10
 -- bezel that flatters a window swallows a 30px bar.
---   soften  multiplies the four optics dials (big surfaces need less)
+--   soften  multiplies refraction and aberration (big surfaces need less)
+--   rim     multiplies fresnel and specular SEPARATELY, because the rim is the only
+--           edge a layer can have: Hyprland cannot draw borders or glow on layer
+--           surfaces (HL.LayerRuleSpec has no such fields), so theme/borders.lua
+--           reaches windows only. Keeping rim high here is what stops the bar and
+--           panels looking flat next to windows.
 --   blur    multiplies glass.blur (big surfaces want more, to separate from content)
 local surfaces = {
 	-- bar, notifications, OSD: thin, so nearly flat geometry
-	chrome = { soften = 0.85, blur = 1.08, opacity = 0.88, edge = 0.04, dome = 0.20 },
+	chrome = { soften = 0.85, rim = 1.00, blur = 1.08, opacity = 0.88, edge = 0.04, dome = 0.20 },
 	-- launcher, control-center, session: cover half the screen, so restrained
 	-- optics — full-strength refraction over that area reads as noise, not glass
-	panel = { soften = 0.60, blur = 1.23, opacity = 0.90, edge = 0.05, dome = 0.15 },
+	panel = { soften = 0.60, rim = 0.95, blur = 1.23, opacity = 0.90, edge = 0.05, dome = 0.15 },
 }
 
 -- Windows use the globals directly, so their geometry lives here rather than in
@@ -108,8 +113,9 @@ local function preset_for(s)
 
 		refraction_strength = glass.refraction * s.soften,
 		chromatic_aberration = glass.aberration * s.soften,
-		fresnel_strength = glass.fresnel * s.soften,
-		specular_strength = glass.specular * s.soften,
+		-- clamped: the plugin's ceiling for these is 1.0
+		fresnel_strength = math.min(1.0, glass.fresnel * s.rim),
+		specular_strength = math.min(1.0, glass.specular * s.rim),
 
 		edge_thickness = s.edge,
 		lens_distortion = s.dome,
