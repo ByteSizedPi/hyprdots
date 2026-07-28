@@ -62,6 +62,17 @@ else
   glass_state="off (disable stub)"
 fi
 
+# Borders/glow: REMOVED when the theme ships none, not stubbed — absent means
+# Noctalia's plain palette borders stand. A leftover file would keep applying the
+# previous theme's gradient.
+if [ -f "$src/hypr/borders.lua" ]; then
+  cp "$src/hypr/borders.lua" "$hypr_borders"
+  borders_state="from themes/$name"
+else
+  rm -f "$hypr_borders"
+  borders_state="none (plain palette borders)"
+fi
+
 printf '%s\n' "$name" >"$themes/active"
 
 # --- Per-app overlays (kitty font/padding/opacity, etc — see apps.conf) ---
@@ -96,4 +107,5 @@ echo "  settings.toml    theme surface replaced (previous kept at settings.toml.
 echo "  appearance.lua   $([ -f "$src/hypr/appearance.lua" ] && echo "from themes/$name" || echo "unchanged (theme ships none)")"
 echo "  layers.lua       $([ -f "$src/hypr/layers.lua" ] && echo "from themes/$name" || echo "from themes/_base")"
 echo "  glass.lua        $glass_state"
+echo "  borders.lua      $borders_state"
 echo "  app overlays    ${apps_note:- none configured}"

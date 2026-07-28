@@ -28,7 +28,7 @@ local glass = {
 	blur = 2.6, -- radius = value * 12px
 	iterations = 4, -- 1-5 gaussian passes; 5 costs a lot for little gain
 	refraction = 0.9, -- edge bending
-	aberration = 0.8, -- rainbow fringing at edges — the most obviously "glassy" one
+	aberration = 0.95, -- rainbow fringing at edges — the most obviously "glassy" one
 	fresnel = 0.95, -- bright rim
 	specular = 1.0, -- highlight
 	tint = 0x8899aa55, -- RRGGBBAA; the alpha byte IS the tint strength
@@ -67,7 +67,10 @@ local surfaces = {
 
 -- Windows use the globals directly, so their geometry lives here rather than in
 -- `surfaces` above.
-local window = { edge = 0.10, dome = 0.70 }
+-- edge is capped at 0.15 by the plugin; 0.14 is as thick as the bezel goes.
+-- Paired with rounding_power 4.0 in appearance.lua, the aberration gets a long
+-- flat corner arc to spread along instead of a tight circular one.
+local window = { edge = 0.14, dome = 0.75 }
 
 -- ═══ APPLY ════════════════════════════════════════════════════════════
 -- The baseline goes in the GLOBALS rather than a window preset, for two reasons:

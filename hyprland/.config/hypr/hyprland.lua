@@ -32,3 +32,9 @@ require("theme")
 --
 -- So: don't move it, don't reword it, and don't let the string drift.
 require("noctalia").apply_theme()
+
+-- Anything that must OVERRIDE the palette goes after it. apply_theme() sets
+-- col.active_border and col.inactive_border, so a theme's gradient borders and glow
+-- have to be applied here or they'd be silently overwritten. pcall: most themes
+-- ship none, and then Noctalia's plain borders are exactly what we want.
+pcall(require, "theme.borders")

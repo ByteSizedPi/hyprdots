@@ -92,6 +92,15 @@ cat >"$staging/manifest.conf" <<EOF
 hyprglass = $glass_on
 EOF
 
+# --- Border/glow overrides, if the live session has any ---
+if [ -f "$hypr_borders" ]; then
+  cp "$hypr_borders" "$staging/hypr/borders.lua"
+  borders_note="captured from live"
+else
+  rm -f "$staging/hypr/borders.lua"
+  borders_note="none"
+fi
+
 # --- Per-app overlays: capture whatever the live files hold (see apps.conf) ---
 # Skips apply.sh's placeholders, so "this theme has no kitty settings" stays that way
 # instead of being banked as an empty look.
@@ -138,6 +147,7 @@ echo "  noctalia.toml       $n theme keys"
 echo "  hypr/appearance.lua $(wc -l <"$dest/hypr/appearance.lua") lines"
 echo "  hypr/layers.lua     $(wc -l <"$dest/hypr/layers.lua") lines"
 echo "  hypr/glass.lua      $glass_note"
+echo "  hypr/borders.lua    $borders_note"
 echo "  manifest.conf       hyprglass = $(theme_manifest_get "$dest" hyprglass)"
 echo "  apps/               ${apps_note:- none captured}"
 echo "  themes/active       $name"

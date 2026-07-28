@@ -15,18 +15,25 @@ hl.config({
 		-- windows hide them.
 		gaps_in = 2,
 		gaps_out = 4,
-		border_size = 2,
+		-- Thick enough for the gradient rim in theme/borders.lua to actually read as
+		-- a specular highlight; at 1-2px a four-stop gradient is invisible.
+		border_size = 3,
 	},
 
 	decoration = {
-		-- Generous radius — refraction reads best on a curve.
-		rounding = 14,
-		rounding_power = 2,
+		-- Generous radius, and rounding_power 4.0 = a SQUIRCLE rather than a plain
+		-- circular corner (1.0 triangular, 2.0 circular, up to 10.0). The flatter
+		-- corner run gives hyprglass's edge refraction and chromatic aberration a
+		-- longer arc to play along, which is where the effect is most visible.
+		rounding = 20,
+		rounding_power = 4.0,
 
-		-- REQUIRED for glass to be visible at all. Raise toward 1.0 and the effect
-		-- disappears; drop too far and text gets hard to read.
-		active_opacity = 0.88,
-		inactive_opacity = 0.80,
+		-- REQUIRED for glass to be visible at all: the glass slab is drawn BEHIND
+		-- the window surface, so at 1.0 the window hides it completely.
+		-- Both values are deliberately IDENTICAL — focus must not change opacity.
+		-- The focus cue lives in the border instead (theme/borders.lua).
+		active_opacity = 0.85,
+		inactive_opacity = 0.85,
 		dim_special = 0,
 		dim_inactive = false,
 

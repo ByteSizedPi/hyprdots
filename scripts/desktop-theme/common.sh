@@ -5,6 +5,7 @@
 #   themes/<name>/hypr/appearance.lua copied to ~/.config/hypr/theme/appearance.lua
 #   themes/<name>/hypr/layers.lua     copied to ~/.config/hypr/theme/layers.lua
 #   themes/<name>/hypr/glass.lua      copied to ~/.config/hypr/theme/glass.lua
+#   themes/<name>/hypr/borders.lua    copied to ~/.config/hypr/theme/borders.lua
 #   themes/<name>/manifest.conf       non-Noctalia theme keys (e.g. hyprglass = on)
 #   themes/active                     one line: the name currently applied
 # Noctalia's state settings.toml OUTRANKS config/config.toml, so a theme has to be
@@ -30,6 +31,10 @@ hypr_theme_dir="${XDG_CONFIG_HOME:-$HOME/.config}/hypr/theme"
 hypr_appearance="$hypr_theme_dir/appearance.lua"
 hypr_layers="$hypr_theme_dir/layers.lua"
 hypr_glass="$hypr_theme_dir/glass.lua"
+# Border/glow overrides. Separate from appearance.lua because Noctalia's palette
+# (noctalia.lua) sets col.active_border/inactive_border and runs LAST — anything
+# here has to be required after it, so it gets its own fragment.
+hypr_borders="$hypr_theme_dir/borders.lua"
 
 apps_conf="$here/apps.conf" # sibling: which app configs travel with a theme
 

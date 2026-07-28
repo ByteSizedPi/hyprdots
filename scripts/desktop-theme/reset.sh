@@ -49,6 +49,7 @@ mkdir -p "$hypr_theme_dir"
 cp "$themes/_base/hypr/appearance.lua" "$hypr_appearance"
 cp "$themes/_base/hypr/layers.lua" "$hypr_layers"
 write_glass_disabled
+rm -f "$hypr_borders"
 
 # --- Per-app overlays: back to placeholders ---
 while IFS=$'\t' read -r app app_dest app_reload; do
