@@ -13,8 +13,8 @@ hl.config({
 	general = {
 		-- Wider gaps than the flat themes: glass edges are the effect, and touching
 		-- windows hide them.
-		gaps_in = 5,
-		gaps_out = 10,
+		gaps_in = 2,
+		gaps_out = 4,
 		border_size = 2,
 	},
 
@@ -25,15 +25,15 @@ hl.config({
 
 		-- REQUIRED for glass to be visible at all. Raise toward 1.0 and the effect
 		-- disappears; drop too far and text gets hard to read.
-		active_opacity = 0.92,
-		inactive_opacity = 0.84,
+		active_opacity = 0.88,
+		inactive_opacity = 0.80,
 		dim_special = 0,
 		dim_inactive = false,
 
 		-- hyprglass force-enables shadows regardless (only their presence matters to
 		-- it, not the values). Set explicitly so the config doesn't lie about state.
 		shadow = {
-			enabled = true,
+			enabled = false,
 			range = 12,
 			render_power = 3,
 			color = 0x66000000,
@@ -42,10 +42,10 @@ hl.config({
 		-- Applies to layers glass doesn't own (screen corners). Glassed windows get
 		-- `noblur` set automatically, so these values don't reach them.
 		blur = {
-			enabled = true,
+			enabled = false,
 			size = 8,
 			passes = 3,
-			special = true,
+			special = false,
 			xray = true,
 			vibrancy = 0.17,
 		},
