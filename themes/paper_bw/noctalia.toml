@@ -17,6 +17,7 @@ osd.offset_y = 16
 osd.position = "bottom_center"
 shell.animation.speed = 2.0000000298023224
 shell.app_icon_color = "tertiary"
+shell.app_icon_colorize = true
 shell.font_family = "CaskaydiaCove NF"
 shell.launcher.app_grid = true
 shell.launcher.categories = false
