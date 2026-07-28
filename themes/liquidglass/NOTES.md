@@ -31,14 +31,12 @@ shadow alpha to 0.2 and `mask_threshold` to 0.3. Change one, re-check the other.
 
 ## Tuning
 
-`glass.lua` is hand-authored — `save.sh` can't capture it (no readback for
-`hg.layer`/`hg.preset`), so re-saving this theme leaves it alone.
+Edit the installed copy, reload to see it, bank it when you like it:
 
 ```bash
-$EDITOR themes/liquidglass/hypr/glass.lua
-scripts/desktop-theme/apply.sh liquidglass
-# or, faster while iterating, edit the installed copy and just reload:
-$EDITOR ~/.config/hypr/theme/glass.lua && hyprctl reload
+$EDITOR ~/.config/hypr/theme/glass.lua
+hyprctl reload
+scripts/desktop-theme/save.sh liquidglass --force
 ```
 
 Live poke without a reload (`hyprctl keyword` doesn't work under the Lua parser):

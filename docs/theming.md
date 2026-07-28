@@ -379,19 +379,25 @@ in [problems.md](problems.md) → "hyprglass".
 
 ### Saving a glass theme
 
-`save.sh` **cannot** capture glass. `hg.layer()` and `hg.preset()` are Lua-side
-registrations with no readback — only scalar options show up in
-`hyprctl getoption plugin:hyprglass:*`, which isn't enough to rebuild a look. So
-`hypr/glass.lua` and `manifest.conf` are hand-authored, and re-saving a theme leaves
-both untouched rather than clobbering them.
-
-The iteration loop is therefore manual:
+Glass is captured like everything else — edit the installed file, reload, and
+`save.sh` banks it:
 
 ```bash
-$EDITOR themes/liquidglass/hypr/glass.lua
-hyprctl reload                                   # plugin stays loaded, config re-applies
-hyprctl getoption plugin:hyprglass:enabled       # sanity: `set: true` means yours took
+$EDITOR ~/.config/hypr/theme/glass.lua
+hyprctl reload                              # plugin stays loaded, config re-applies
+scripts/desktop-theme/save.sh liquidglass --force
 ```
+
+`save.sh` also sets `manifest.conf` to match what's live, so the manifest always
+describes the session you just banked. It tells a real config apart from apply.sh's
+disable stub by a marker comment in the stub — banking the stub as a "look" would be
+meaningless.
+
+**One thing is not captured:** values poked in live with
+`hyprctl repl 'hl.plugin.hyprglass.config{...}'`. `hg.layer()` and `hg.preset()` are
+Lua-side registrations with no readback, so a live poke exists only inside the running
+plugin — nothing on disk changed, and there's nothing for `save.sh` to copy. Use the
+repl to *find* a value, then write it into the file.
 
 `hyprctl keyword` does not work under the Lua parser. To poke a value live without a
 reload, go through the plugin's own API:

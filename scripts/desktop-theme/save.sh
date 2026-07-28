@@ -9,8 +9,9 @@
 # Everything else — noctalia.lua, kitty/zellij/nvim/gtk themes, hyprtoolkit.conf —
 # is regenerated output and deliberately NOT captured.
 #
-# hyprglass is the exception: it CANNOT be captured (no readback for hg.layer /
-# hg.preset), so hypr/glass.lua and manifest.conf are hand-authored and left alone.
+# hypr/glass.lua and manifest.conf come along too, when the live session has glass
+# on. The one thing that can't be captured is a value poked in via `hyprctl repl` —
+# that lives only in the running plugin, not on disk.
 #
 # Usage: scripts/desktop-theme/save.sh <name> [--force]
 set -euo pipefail
@@ -52,23 +53,33 @@ else
   cp "$themes/_base/hypr/layers.lua" "$dest/hypr/layers.lua"
 fi
 
-# --- hyprglass: NOT captured from the live session ---
-# hg.layer()/hg.preset() are Lua-side registrations with no readback — only scalar
-# options are visible via `hyprctl getoption plugin:hyprglass:*`, which isn't enough
-# to reconstruct a look. So glass is hand-authored: an existing glass.lua and the
-# manifest are left exactly as they are, and re-saving a glass theme never clobbers
-# them. See docs/theming.md → "Saving a glass theme".
-if [ -f "$dest/hypr/glass.lua" ]; then
-  glass_note="preserved (hand-authored, not captured)"
+# --- hyprglass: captured like everything else, when the live theme uses it ---
+# The live glass.lua is either a real config or apply.sh's disable stub, so key off
+# the stub marker rather than mere existence — banking the stub as a theme's "look"
+# would be meaningless.
+#
+# NOTE what this does and doesn't see. Editing the FILE and reloading is captured
+# fine. Poking values with `hyprctl repl 'hl.plugin.hyprglass.config{...}'` is NOT:
+# hg.layer()/hg.preset() are Lua-side registrations with no readback, so a live poke
+# exists only in the running plugin. Edit the file if you want to keep it.
+if [ -f "$hypr_glass" ] && ! grep -qF -e "$glass_stub_marker" "$hypr_glass"; then
+  cp "$hypr_glass" "$dest/hypr/glass.lua"
+  glass_on="on"
+  glass_note="captured from live"
 else
-  glass_note="none — theme has no hyprglass config"
+  glass_on="off"
+  glass_note="none — glass is off in the live session"
 fi
-[ -f "$dest/manifest.conf" ] || cat >"$dest/manifest.conf" <<EOF
+
+# Manifest tracks the live state: saving means "bank what I'm looking at". An
+# existing glass.lua is left on disk when flipping to off — apply.sh ignores it
+# while the manifest says off, so switching back on later costs one word.
+cat >"$dest/manifest.conf" <<EOF
 # Non-Noctalia theme keys. Read by scripts/desktop-theme/apply.sh.
 #
 # hyprglass = on   requires hypr/glass.lua alongside this file
 # hyprglass = off  apply.sh installs an explicit disable stub
-hyprglass = off
+hyprglass = $glass_on
 EOF
 
 # --- a place to describe the look, since the TOML won't say what you were going for ---
