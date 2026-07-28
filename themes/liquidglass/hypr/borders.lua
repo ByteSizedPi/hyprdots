@@ -31,7 +31,7 @@
 
 -- Border thickness, px. The gradient needs a couple of pixels to read at all, but
 -- past ~3 the rim stops looking like an edge and starts looking like a frame.
-local BORDER_SIZE = 0
+local BORDER_SIZE = 2
 
 -- Where the light comes from, in degrees. 45 = upper-left, which is what UI shading
 -- conventions assume, so it reads as "lit" rather than merely "coloured".
@@ -41,10 +41,10 @@ local LIGHT_ANGLE = 45
 -- restrained: at high alpha a white stop stops reading as reflection and starts
 -- reading as a painted outline. Raise `specular` first if you want more.
 local rim = {
-	specular = "rgba(ffffff99)", -- the hot spot
+	specular = "rgba(ffffff66)", -- hot spot; eased so the glow blends into it
 	falloff = "rgba(ffffff40)", -- rolling away from the light
 	shadow = "rgba(12141a66)", -- the far side, curved away from the light
-	bounce = "rgba(ffffff1a)", -- faint bounce light returning on the far edge
+	bounce = "rgba(ffffff0d)", -- faint bounce light returning on the far edge
 }
 
 -- Drop shadow. NOT optional: hyprglass force-enables decoration:shadow at plugin
@@ -69,16 +69,20 @@ local border_angle_animation = {
 
 -- Outer glow: light bleeding off the edge of the pane.
 local glow = {
-	enabled = false,
+	enabled = true,
 	range = 24, -- px
 	render_power = 3, -- falloff exponent, same meaning as on shadows
-	color = "rgba(cfe4ff59)", -- cool white, matching the rim's colour temperature
+	-- Same 45 deg light as the rim, but the far side fades to nearly transparent
+	-- instead of going dark: glow is emitted light, so "shadowed" means absent.
+	colors = { "rgba(cfe4ff8c)", "rgba(cfe4ff40)", "rgba(cfe4ff08)", "rgba(cfe4ff1a)" },
 }
 
 -- ═══ APPLY ════════════════════════════════════════════════════════════
 -- CURRENTLY: all border decoration is OFF — no border, no glow, no visible shadow —
 -- so every window looks identical and the only edge is hyprglass's own rim.
 -- Everything below is left in place, commented, ready to switch back on.
+
+local glow_ramp = { colors = glow.colors, angle = LIGHT_ANGLE }
 
 local ramp = {
 	-- Stops run in listed order around the angle: hot spot -> falloff -> dark far
@@ -99,22 +103,22 @@ hl.config({
 		-- Kept as an ACTIVE setting rather than commented out: Hyprland's own default
 		-- is 1px, so commenting this would give every window a 1px border in the
 		-- palette colour — the opposite of the intent.
-		border_size = 0,
+		border_size = BORDER_SIZE,
 
-		-- col = {
-		-- 	active_border = ramp,
-		-- 	inactive_border = ramp,
-		-- },
+		col = {
+			active_border = ramp,
+			inactive_border = ramp,
+		},
 	},
 
 	decoration = {
-		-- glow = {
-		-- 	enabled = glow.enabled,
-		-- 	range = glow.range,
-		-- 	render_power = glow.render_power,
-		-- 	color = glow.color,
-		-- 	color_inactive = glow.color,
-		-- },
+		glow = {
+			enabled = glow.enabled,
+			range = glow.range,
+			render_power = glow.render_power,
+			color = glow_ramp,
+			color_inactive = glow_ramp,
+		},
 
 		-- `enabled` MUST stay true. hyprglass samples the shadow pass to get the
 		-- correct background and force-enables this at load; with it off the glass
