@@ -110,6 +110,18 @@ die() {
   exit 1
 }
 
+# One rule for what a theme may be called, shared by save/clone/rename. Names end up
+# as directory names and get interpolated into shell commands by the Noctalia panel,
+# so keep them boring: lowercase alnum, dash, underscore, starting alphanumeric.
+validate_theme_name() {
+  local n="${1:-}"
+  [ -n "$n" ] || die "theme name required"
+  [[ "$n" =~ ^[a-z0-9][a-z0-9_-]*$ ]] ||
+    die "theme name must be lowercase letters, digits, - or _, starting with a letter or digit: '$n'"
+  [ "$n" != "active" ] || die "'active' is the pointer file, not a theme name"
+  [ "${n#_}" = "$n" ] || die "names starting with _ are reserved (themes/_base)"
+}
+
 # Read themes/active, or empty if unset.
 active_theme() { [ -f "$themes/active" ] && tr -d '[:space:]' <"$themes/active" || true; }
 

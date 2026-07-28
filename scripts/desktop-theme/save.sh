@@ -20,8 +20,7 @@ source "$(dirname "${BASH_SOURCE[0]}")/common.sh"
 
 name="${1:-}"
 [ -n "$name" ] || die "usage: save.sh <name> [--force]"
-[[ "$name" =~ ^[a-z0-9][a-z0-9_-]*$ ]] || die "theme name must be lowercase alnum/dash/underscore: '$name'"
-[ "$name" != "active" ] || die "'active' is the pointer file, not a theme name"
+validate_theme_name "$name"
 force="${2:-}"
 
 dest="$themes/$name"

@@ -59,5 +59,23 @@ updates immediately rather than waiting out the poll.
   in a notification) rather than replaced with a generic message. The scripts already
   fail with useful text; inventing our own would lose it.
 - The plugin system is still marked beta in v5. If a Noctalia update breaks this,
-  `noctalia plugins lint noctalia/.config/noctalia/plugins/theme-switcher` is the
-  first thing to run.
+  run `scripts/noctalia-plugin-check.sh` first.
+- **`noctalia plugins lint` does not check syntax.** Measured: appending literal
+  garbage to an entry still gives "0 errors, 0 warnings" — lint only cross-checks
+  declared settings against `getConfig()` calls. And a plugin whose entry fails to
+  parse still reports `enabled`, with `panel-toggle` still answering `ok`; you just
+  get an empty panel. `scripts/noctalia-plugin-check.sh` adds the missing syntax
+  check (via Lua 5.4 after rewriting Luau's backtick interpolation).
+
+## UI notes
+
+Actions are icon buttons at a single `controlSize`, which is what keeps the button
+column aligned across rows — there is no width prop on `ui.button`. Glyph names are
+Tabler icons; validate one against `/usr/share/noctalia/assets/fonts/tabler.json`
+before using it, since an unknown name fails silently. `fontWeight` accepts `bold`
+and `medium` — don't invent a third value.
+
+Clone and rename turn the row into an inline input with confirm/cancel rather than
+opening another surface. Apply asks for confirmation first (it replaces the
+wallpaper); Update, Clone and Rename don't, since none of them touch the live
+desktop except the one you're already on.
