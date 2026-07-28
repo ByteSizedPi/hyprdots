@@ -2,7 +2,6 @@
 // Noctalia "zen-browser" community template (@import'd into chrome/userChrome.css
 // and chrome/userContent.css) is actually applied. Without this, Zen ignores
 // those files entirely.
-user_pref("toolkit.legacyUserProfileCustomizations.stylesheets", true);
 
 // Make the browser window itself transparent on Linux/Wayland so the 0.8 chrome
 // backgrounds in chrome/noctalia-transparency.css reveal the Hyprland blur behind
@@ -18,3 +17,5 @@ user_pref("browser.tabs.allow_transparent_browser", true);
 user_pref("mod.sameerasw.zen_bg_color_enabled", true);
 user_pref("mod.sameerasw.zen_transparency_color", "#00000000");
 user_pref("mod.sameerasw.zen_transparent_sidebar_enabled", true);
+user_pref("devtools.chrome.enabled", true);
+user_pref("toolkit.legacyUserProfileCustomizations.stylesheets", true);

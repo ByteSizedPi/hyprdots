@@ -21,6 +21,12 @@ tried on it. Read order for a new session:
 - **[../themes/README.md](../themes/README.md)** — quick reference for what's in
   `themes/`.
 
+## Maintenance
+
+- **`../scripts/stow-audit.sh`** — verifies every stow package file is really a
+  symlink into this repo. Catches configs that got silently un-managed by a tool
+  rewriting them in place. Exit 1 on drift, so it's usable from a hook.
+
 ## Power
 
 - **[power-profiles.md](power-profiles.md)** — `power-profile-auto.service`:

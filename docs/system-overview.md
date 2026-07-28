@@ -181,8 +181,18 @@ that block at login. Nothing outside the repo; no `SYSTEM.md` entry. See
 
 ## Stow packages
 `alacritty, btop, environment, home, hyprland, kitty, noctalia, nvim,
-systemd, yazi, zellij, zen` — each `stow <pkg>` symlinks into `$HOME`.
+systemd, zellij, zen` — each `stow <pkg>` symlinks into `$HOME`.
 Not packages (never `stow` these): `docs`, `scripts`, `themes`.
+
+**`scripts/stow-audit.sh` checks they're all actually linked.** A file that stops
+being a symlink stops being managed *silently* — the repo copy still looks
+authoritative and git stays clean while the live file drifts. Any tool that writes
+atomically (temp file + rename) to a stowed path causes this; it has bitten
+`kitty.conf`, `yazi/theme.toml` and `zen/user.js` here. Run it after adding a
+package, or when a config change "doesn't take".
+
+`yazi` was dropped as a package (2026-07-28): its only file, `theme.toml`, is
+written by Noctalia's community template and holds nothing hand-written.
 
 ## Out-of-tree changes
 Tracked in [../SYSTEM.md](../SYSTEM.md): `/etc/systemd/logind.conf.d/…`

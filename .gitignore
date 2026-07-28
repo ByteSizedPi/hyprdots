@@ -47,6 +47,10 @@ noctalia/.config/noctalia/colors.json
 # not in dotfiles). These patterns are a safety net for fresh-machine stows.
 alacritty/.config/alacritty/themes/
 btop/.config/btop/themes/
+# yazi: theme.toml is written by Noctalia's community template (it only ever holds
+# [flavor] dark/light = "noctalia"), so there's nothing hand-written to track. The
+# yazi package was dropped 2026-07-28 for that reason; this is a safety net.
+yazi/.config/yazi/theme.toml
 yazi/.config/yazi/flavors/
 
 # General patterns to avoid
