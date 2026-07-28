@@ -29,8 +29,8 @@ local glass = {
 	iterations = 4, -- 1-5 gaussian passes; 5 costs a lot for little gain
 	refraction = 0.9, -- edge bending
 	aberration = 0.95, -- rainbow fringing at edges — the most obviously "glassy" one
-	fresnel = 0.95, -- bright rim
-	specular = 1.0, -- highlight
+	fresnel = 0.0, -- bright rim — 0 skips the shader block entirely (Shaders.hpp:238)
+	specular = 0.0, -- top highlight — 0 skips the shader block entirely (Shaders.hpp:246)
 	tint = 0x8899aa55, -- RRGGBBAA; the alpha byte IS the tint strength
 }
 
@@ -64,18 +64,22 @@ local mask_threshold = 0.3
 --   blur    multiplies glass.blur (big surfaces want more, to separate from content)
 local surfaces = {
 	-- bar, notifications, OSD: thin, so nearly flat geometry
-	chrome = { soften = 0.85, rim = 1.00, blur = 1.08, opacity = 0.88, edge = 0.04, dome = 0.20 },
+	chrome = { soften = 0.85, rim = 1.00, blur = 1.08, opacity = 0.88, edge = 0.015, dome = 0.20 },
 	-- launcher, control-center, session: cover half the screen, so restrained
 	-- optics — full-strength refraction over that area reads as noise, not glass
-	panel = { soften = 0.60, rim = 0.95, blur = 1.23, opacity = 0.90, edge = 0.05, dome = 0.15 },
+	panel = { soften = 0.60, rim = 0.95, blur = 1.23, opacity = 0.90, edge = 0.02, dome = 0.15 },
 }
 
 -- Windows use the globals directly, so their geometry lives here rather than in
 -- `surfaces` above.
--- edge is capped at 0.15 by the plugin; 0.14 is as thick as the bezel goes.
--- Paired with rounding_power 4.0 in appearance.lua, the aberration gets a long
--- flat corner arc to spread along instead of a tight circular one.
-local window = { edge = 0.14, dome = 0.75 }
+-- `edge` sets bezelWidthPx = edge * min(window dimension), and EVERY edge term
+-- scales with exp(cornerSdf / bezelWidthPx) — refraction, aberration, and the
+-- hardcoded inner shadow at Shaders.hpp:257 that has no strength uniform and cannot
+-- be switched off. Shrinking this is therefore the only way to reduce that shadow.
+-- At 0.14 the band was ~140px on a 1000px window, which is why the rim was obvious;
+-- 0.02 keeps refraction as a thin edge and makes the shadow essentially invisible.
+-- Do NOT set it to 0: bezelWidthPx would be 0 and cornerSdf/0 is NaN at the boundary.
+local window = { edge = 0.02, dome = 0.75 }
 
 -- ═══ APPLY ════════════════════════════════════════════════════════════
 -- The baseline goes in the GLOBALS rather than a window preset, for two reasons:
