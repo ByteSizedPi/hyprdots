@@ -19,3 +19,16 @@ require("modules.plugins")
 
 require("rules")
 require("theme")
+
+-- Noctalia's palette. Two reasons this call is HERE and not in theme/init.lua,
+-- where it would otherwise belong:
+--
+-- 1. Noctalia's template post_hook (/usr/share/noctalia/assets/templates/hyprland/
+--    apply.sh) greps THIS FILE for the literal string `require("noctalia")` and
+--    appends its own copy if it doesn't find one. The restructure moved the call
+--    into theme/init.lua, so on the next login Noctalia duly appended a duplicate.
+--    Keeping the literal here is what stops that.
+-- 2. It has to run last anyway: it overrides border colours set by everything above.
+--
+-- So: don't move it, don't reword it, and don't let the string drift.
+require("noctalia").apply_theme()

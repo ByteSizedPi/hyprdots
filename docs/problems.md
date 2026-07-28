@@ -942,6 +942,35 @@ check is to look for real files sitting among symlinks in each `~/.config/<app>`
 
 ---
 
+## 🟩 Noctalia appends `require("noctalia")` to hyprland.lua if it isn't there
+**Symptom:** after the 2026-07-28 re-login, `hyprland.lua` had grown a stray
+`-- For Noctalia Color templates` / `require("noctalia").apply_theme()` at the end —
+a duplicate, since `theme/init.lua` already called it. File mtime matched the login
+to the second.
+
+**Cause:** `/usr/share/noctalia/assets/templates/hyprland/apply.sh` (a builtin
+template post_hook) does exactly this:
+
+```bash
+if ! grep -qF 'require("noctalia")' "$lua_config_file"; then
+  printf '\n%s\n' "$include_line" >>"$lua_config_file"
+fi
+```
+
+It greps **`hyprland.lua` only** — not the rest of the config tree. The modular
+restructure had moved that call into `theme/init.lua`, so the string vanished from
+the file Noctalia checks and it helpfully put one back.
+
+**Fix:** the call lives in `hyprland.lua` again, as the last line (where it has to
+be anyway — the palette must override earlier border colours), with a comment saying
+why it can't move. `theme/init.lua` documents the exception rather than making the
+call. Verified: running the post_hook by hand no longer appends.
+
+**Rule of thumb:** the literal string `require("noctalia")` must stay in
+`hyprland.lua`. Splitting the config further is fine; moving *that line* is not.
+
+---
+
 ## See also (existing deep dives)
 - 🟧/🟩 **Greeter ghost + dwindle crash + hybrid-GPU + Lua gotchas** —
   [hyprland-plasma-diagnosis.md](hyprland-plasma-diagnosis.md). Read first when

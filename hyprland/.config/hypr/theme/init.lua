@@ -22,5 +22,7 @@ optional("theme.appearance") -- gaps, rounding, opacity, shadow, blur, animation
 optional("theme.layers") -- layer rules: native blur, or ceded to hyprglass
 optional("theme.glass") -- hyprglass config, or an explicit disable stub
 
--- Noctalia's palette. Must come after the above: it overrides border colours.
-require("noctalia").apply_theme()
+-- The palette (../noctalia.lua) is applied by hyprland.lua, immediately after it
+-- requires this module — NOT here, even though this is where it belongs by topic.
+-- Noctalia's template hook rewrites hyprland.lua when that call isn't in it; the
+-- comment there has the detail. Ordering is unchanged either way: palette last.
