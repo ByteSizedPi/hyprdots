@@ -41,14 +41,16 @@ local hg = hl.plugin.hyprglass
 -- Keep aberration <= 1.5; refraction is the safe dial, since it scales all three
 -- channels equally and only decides how far the sample travels.
 local glass = {
-	opacity = 0.85, -- 0-1, overall glass opacity
-	blur = 4.2, -- radius = value * 12px, so ~50px
-	iterations = 5, -- 1-5 gaussian passes; 5 is the plugin's max
-	refraction = 1.3, -- edge bending; * 50 = 65px of sample offset at the edge
-	aberration = 1.4, -- spectral fringing; red x0.51 blue x1.49 — strong, still same direction
-	fresnel = 0.0, -- bright rim — 0 skips the shader block entirely (Shaders.hpp:238)
-	specular = 0.0, -- top highlight — 0 skips the shader block entirely (Shaders.hpp:246)
-	tint = 0x8899aa55, -- RRGGBBAA; the alpha byte IS the tint strength
+	opacity = 1.0, -- 0-1, overall glass opacity
+	blur = 0.4, -- radius = value * 12px, so ~5px. Heavy blur AVERAGES AWAY the
+	-- displaced samples refraction creates — the two fight, so keep this low.
+	iterations = 2, -- 1-5 gaussian passes
+	refraction = 1.8, -- edge bending; * 50 = 90px of sample offset at the edge
+	aberration = 0.9, -- spectral fringing; red x0.69 blue x1.31
+	fresnel = 0.6, -- rim glow. Adds white to the ALREADY-REFRACTED content, so unlike
+	-- Hyprland's glow this one responds to whatever is under the pane.
+	specular = 0.8, -- top highlight
+	tint = 0x8899aa22, -- RRGGBBAA; the alpha byte IS the tint strength
 }
 
 -- Tone, shared by every surface so the whole desktop reads as one material.
@@ -96,7 +98,11 @@ local surfaces = {
 -- At 0.14 the band was ~140px on a 1000px window, which is why the rim was obvious;
 -- 0.02 keeps refraction as a thin edge and makes the shadow essentially invisible.
 -- Do NOT set it to 0: bezelWidthPx would be 0 and cornerSdf/0 is NaN at the boundary.
-local window = { edge = 0.15, dome = 0.85 }
+-- Band width. THIN = SHARP: this is the falloff distance, so a small value crams
+-- the distortion into a crisp strip at the boundary, while a large one smears the
+-- same effect across half the pane and reads as mush. 0.06 is the plugin default
+-- and about the sharpest that still shows depth.
+local window = { edge = 0.06, dome = 0.5 }
 
 -- ═══ APPLY ════════════════════════════════════════════════════════════
 -- The baseline goes in the GLOBALS rather than a window preset, for two reasons:

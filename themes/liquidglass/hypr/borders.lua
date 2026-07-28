@@ -24,6 +24,25 @@
 -- Neither supports a multi-stop gradient, so layers can match this in weight and
 -- colour temperature but not in the specular ramp itself.
 
+-- ═══ PALETTE ══════════════════════════════════════════════════════════
+-- Hyprland's glow draws in the GAP outside the window, where there is no window
+-- content to sample — so unlike hyprglass's fresnel (which adds light to the
+-- already-refracted content and therefore reacts to whatever is underneath), this
+-- one has to be given a colour. A fixed colour fights the glass, so take it from
+-- Noctalia's palette instead: that palette is derived from the wallpaper, so the
+-- glow tracks the desktop rather than cutting across it.
+--
+-- Safe if noctalia.lua is missing (fresh machine, before the first theme apply) —
+-- falls back to the neutral cool white.
+local ok_palette, noctalia = pcall(require, "noctalia")
+local palette = (ok_palette and type(noctalia) == "table" and noctalia.colors) or {}
+
+-- Noctalia writes "rgb(rrggbb)"; Hyprland gradients need an alpha byte.
+local function palette_rgba(role, alpha, fallback)
+	local hex = tostring(palette[role] or ""):match("rgb%((%x+)%)")
+	return "rgba(" .. (hex or fallback) .. alpha .. ")"
+end
+
 -- ═══ TUNING ═══════════════════════════════════════════════════════════
 -- These are all still here and still tuned, but the APPLY block below currently has
 -- the border, glow and visible shadow commented out. Uncomment there to bring any of
@@ -72,9 +91,16 @@ local glow = {
 	enabled = true,
 	range = 24, -- px
 	render_power = 3, -- falloff exponent, same meaning as on shadows
-	-- Same 45 deg light as the rim, but the far side fades to nearly transparent
-	-- instead of going dark: glow is emitted light, so "shadowed" means absent.
-	colors = { "rgba(cfe4ff8c)", "rgba(cfe4ff40)", "rgba(cfe4ff08)", "rgba(cfe4ff1a)" },
+}
+
+-- Primary at the hot spot, secondary through the mid — a slight hue shift across the
+-- ramp reads as dispersion rather than a flat wash. Far side fades to almost nothing:
+-- glow is emitted light, so "shadowed" means absent, not dark.
+local glow_colors = {
+	palette_rgba("primary", "8c", "cfe4ff"),
+	palette_rgba("secondary", "40", "cfe4ff"),
+	palette_rgba("primary", "08", "cfe4ff"),
+	palette_rgba("secondary", "1a", "cfe4ff"),
 }
 
 -- ═══ APPLY ════════════════════════════════════════════════════════════
@@ -82,7 +108,7 @@ local glow = {
 -- so every window looks identical and the only edge is hyprglass's own rim.
 -- Everything below is left in place, commented, ready to switch back on.
 
-local glow_ramp = { colors = glow.colors, angle = LIGHT_ANGLE }
+local glow_ramp = { colors = glow_colors, angle = LIGHT_ANGLE }
 
 local ramp = {
 	-- Stops run in listed order around the angle: hot spot -> falloff -> dark far
