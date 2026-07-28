@@ -33,6 +33,7 @@ theme.builtin = "Noctalia"
 theme.community_palette = "Monochrome"
 theme.custom_palette = "cobalt"
 theme.mode = "dark"
+theme.pure_black_dark = true
 theme.source = "community"
 theme.wallpaper_scheme = "faithful"
 wallpaper.default.path = "/home/jj/Pictures/Wallpapers/B&W/kettle.jpg"

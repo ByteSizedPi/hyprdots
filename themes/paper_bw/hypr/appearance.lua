@@ -29,13 +29,13 @@ hl.config({
 			color = 0xee1a1a1a,
 		},
 
-		blur = {
-			size = 10,
-			passes = 3,
-			special = true,
-			xray = true,
-			vibrancy = 9,
-		},
+		-- blur = {
+		-- 	size = 10,
+		-- 	passes = 3,
+		-- 	special = true,
+		-- 	xray = true,
+		-- 	vibrancy = 9,
+		-- },
 	},
 
 	animations = {

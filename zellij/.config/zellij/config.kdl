@@ -282,7 +282,7 @@ simplified_ui true
 // ── ACTIVE THEME ── managed by noctalia (noctalia msg templates-apply) ──
 // Available: noctalia (dynamic), tokyonight-storm, dracula, catppuccin-macchiato-custom
 theme "noctalia"
-// noctalia-theme-applied: 1785241184
+// noctalia-theme-applied: 1785243369
 
 ui {
 	pane_frames {

@@ -788,6 +788,13 @@ WMI hotkey) still needs a manual `rfkill unblock bluetooth` until next login.
 ---
 
 ## 🟧 hyprglass: plugin never loads at startup, and its config never applies
+> **PARKED 2026-07-28** — per-theme on/off wasn't behaving as wanted, so hyprglass
+> is disabled at the hyprpm level (`hyprpm disable hyprglass`) and liquidglass falls
+> back to Hyprland's own blur. Everything below still holds and the machinery is
+> intact; see themes/liquidglass/NOTES.md for the exact steps to switch it back on.
+> Turn it on ad-hoc any time with `hyprpm enable hyprglass && hyprpm reload -n &&
+> hyprctl reload` — with no theme shipping a glass.lua, apply.sh's disable stub will
+> simply turn it off again on the next theme apply.
 **Symptom:** `hyprpm enable hyprglass` made glass appear, but nothing loads the
 plugin at session start — it was live only because `hyprpm` had been run by hand.
 Separately, `hypr/plugins/hyprglass.lua` was never `require`d, so even while
