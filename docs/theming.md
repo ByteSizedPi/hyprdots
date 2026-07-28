@@ -65,6 +65,18 @@ keybinds, calendar accounts, plugins, and `theme.templates.*`. These are machine
 config and must survive a theme switch. Stripping `theme.templates.*` in particular
 would stop all template generation.
 
+**Nor which widgets are on the bar** — `bar.*.start`, `.center`, `.end` and
+`.capsule_group`. Widget *appearance* is themed (the `widget.*` block in
+`keys.conf`); which widgets exist and where they sit is personal setup. Adding a
+widget shouldn't make it vanish the moment you switch themes — which is exactly what
+happened to the theme-switcher widget itself on 2026-07-28, before this exclusion
+existed.
+
+`capsule_group` is the awkward one: a single TOML value holding both capsule
+styling (`fill`, `opacity`, `padding`) and `members` (widget ids). A glob can't
+split one value, and the layout half is the half that breaks when it travels, so the
+whole key is excluded and capsule styling is machine config as a consequence.
+
 ### …but it *does* carry the wallpaper
 
 `theme.source = "wallpaper"` means the palette is derived from the picture, so a
