@@ -98,12 +98,15 @@ EOF
 apps_note=""
 while IFS=$'\t' read -r app app_dest app_reload; do
   [ -n "$app" ] || continue
-  if [ -f "$app_dest" ] && ! grep -qF -e "$app_placeholder_marker" "$app_dest"; then
-    mkdir -p "$dest_apps"
-    cp "$app_dest" "$dest_apps/$app.conf"
-    apps_note="$apps_note $app"
+  app_file="$(app_source_name "$app" "$app_dest")"
+  if app_overlay_is_default "$app_dest" "$(app_base_file "$app_file")"; then
+    # Untouched placeholder or an unmodified _base default — banking it would turn
+    # "inherits the default" into "pins a copy of today's default" for every theme.
+    rm -f "$dest_apps/$app_file"
   else
-    rm -f "$dest_apps/$app.conf"
+    mkdir -p "$dest_apps"
+    cp "$app_dest" "$dest_apps/$app_file"
+    apps_note="$apps_note $app"
   fi
 done < <(apps_list)
 

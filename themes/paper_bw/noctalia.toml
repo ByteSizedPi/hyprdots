@@ -1,4 +1,4 @@
-bar.default.background_opacity = 0.8
+bar.default.background_opacity = 1
 bar.default.border = "primary"
 bar.default.border_width = 2.0
 bar.default.capsule_thickness = 0.5999999903142452

@@ -70,12 +70,21 @@ printf '%s\n' "$name" >"$themes/active"
 apps_note=""
 while IFS=$'\t' read -r app app_dest app_reload; do
   [ -n "$app" ] || continue
-  if [ -f "$src/apps/$app.conf" ]; then
-    mkdir -p "$(dirname "$app_dest")"
-    cp "$src/apps/$app.conf" "$app_dest"
-    apps_note="$apps_note $app"
+  app_file="$(app_source_name "$app" "$app_dest")"
+  mkdir -p "$(dirname "$app_dest")"
+  if [ -f "$src/apps/$app_file" ]; then
+    cp "$src/apps/$app_file" "$app_dest"
+    apps_note="$apps_note $app(theme)"
+  elif [ -f "$(app_base_file "$app_file")" ]; then
+    # No overlay of its own: fall back to the neutral default, exactly as
+    # hypr/layers.lua falls back to _base. This matters for apps whose real config
+    # can't hold the default itself — alacritty's imports lose to its own file, so
+    # the value has to live here or nowhere.
+    cp "$(app_base_file "$app_file")" "$app_dest"
+    apps_note="$apps_note $app(_base)"
   else
     write_app_placeholder "$app" "$app_dest"
+    apps_note="$apps_note $app(none)"
   fi
   [ -z "$app_reload" ] || sh -c "$app_reload" >/dev/null 2>&1 || true
 done < <(apps_list)
@@ -87,4 +96,4 @@ echo "  settings.toml    theme surface replaced (previous kept at settings.toml.
 echo "  appearance.lua   $([ -f "$src/hypr/appearance.lua" ] && echo "from themes/$name" || echo "unchanged (theme ships none)")"
 echo "  layers.lua       $([ -f "$src/hypr/layers.lua" ] && echo "from themes/$name" || echo "from themes/_base")"
 echo "  glass.lua        $glass_state"
-echo "  app overlays    ${apps_note:- none (all placeholders)}"
+echo "  app overlays    ${apps_note:- none configured}"

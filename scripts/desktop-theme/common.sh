@@ -59,6 +59,21 @@ apps_list() {
     done
 }
 
+# The tracked input filename for an app overlay: <app>.<extension of destination>,
+# e.g. kitty -> kitty.conf, alacritty -> alacritty.toml. Deriving it from the
+# destination keeps the source readable as the format it actually is, instead of
+# calling a TOML file .conf.
+app_source_name() {
+  local app="$1" dest="$2"
+  printf '%s.%s' "$app" "${dest##*.}"
+}
+
+# The neutral default for an app, used when the active theme ships no overlay of its
+# own. Optional: without one, apply.sh writes the comment placeholder instead.
+app_base_file() {
+  printf '%s/_base/apps/%s' "$themes" "$1"
+}
+
 # Write the "this theme ships no overlay for <app>" placeholder. Written rather than
 # deleted so the app's `include` never dangles, and so switching from a theme that
 # HAD settings back to one that doesn't actually clears them.
@@ -75,6 +90,19 @@ $app_placeholder_marker
 # to give a theme its own, or edit this file and run:
 #   scripts/desktop-theme/save.sh <name> --force
 EOF
+}
+
+# True when a live overlay is untouched generated output rather than something the
+# user actually wrote — either apply.sh's comment placeholder, or a byte-identical
+# copy of the _base default. save.sh uses this to avoid banking defaults into every
+# theme, which would quietly destroy the "inherit from _base" behaviour after one
+# save. An EDITED copy of a _base default differs, so it is captured normally.
+app_overlay_is_default() {
+  local live="$1" base="$2"
+  [ -f "$live" ] || return 0
+  grep -qF -e "$app_placeholder_marker" "$live" && return 0
+  [ -f "$base" ] && cmp -s "$live" "$base" && return 0
+  return 1
 }
 
 # Read a key from a theme's manifest.conf. Format: `key = value`, # comments.

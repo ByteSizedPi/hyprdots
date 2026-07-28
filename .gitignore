@@ -38,6 +38,9 @@ hyprland/.config/hypr/theme/glass.lua
 # real ~/.config/kitty (kitty.conf is not stowed — see docs/problems.md); this is a
 # safety net if that ever changes.
 kitty/.config/kitty/theme-extra.conf
+# alacritty: ~/.config/alacritty IS a directory symlink into the repo, so the
+# generated overlay really does land in-tree.
+alacritty/.config/alacritty/theme-extra.toml
 kitty/.config/kitty/themes/noctalia.conf
 zellij/.config/zellij/themes/noctalia.kdl
 nvim/.config/nvim/lua/noctalia-theme.lua

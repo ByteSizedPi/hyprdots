@@ -53,7 +53,13 @@ write_glass_disabled
 # --- Per-app overlays: back to placeholders ---
 while IFS=$'\t' read -r app app_dest app_reload; do
   [ -n "$app" ] || continue
-  write_app_placeholder "$app" "$app_dest"
+  app_file="$(app_source_name "$app" "$app_dest")"
+  mkdir -p "$(dirname "$app_dest")"
+  if [ -f "$(app_base_file "$app_file")" ]; then
+    cp "$(app_base_file "$app_file")" "$app_dest"
+  else
+    write_app_placeholder "$app" "$app_dest"
+  fi
   [ -z "$app_reload" ] || sh -c "$app_reload" >/dev/null 2>&1 || true
 done < <(apps_list)
 

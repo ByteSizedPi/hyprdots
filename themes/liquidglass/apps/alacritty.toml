@@ -1,0 +1,8 @@
+# liquidglass — alacritty settings. Matches themes/liquidglass/apps/kitty.conf so
+# both terminals sit at the same transparency.
+#
+# Installed to ~/.config/alacritty/theme-extra.toml, imported LAST by alacritty.toml
+# so it beats the palette import above it.
+
+[window]
+opacity = 0.62

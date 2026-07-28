@@ -1,0 +1,13 @@
+# Neutral alacritty settings — the fallback when the active theme ships none.
+#
+# This file is NOT optional the way themes/_base/apps/kitty.conf would be. Alacritty
+# loads the importing file last, so alacritty.toml can't hold a default that an
+# import overrides; the default has to live here or the value is simply unset
+# (opacity would fall back to alacritty's built-in 1.0 = fully opaque).
+#
+# Copied to ~/.config/alacritty/theme-extra.toml by scripts/desktop-theme/apply.sh.
+# Edit that file live and `save.sh <name> --force` to bank it into a theme; an
+# UNCHANGED copy is deliberately not captured, so themes keep inheriting this.
+
+[window]
+opacity = 0.8

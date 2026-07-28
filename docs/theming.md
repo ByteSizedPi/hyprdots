@@ -439,6 +439,24 @@ It round-trips like everything else — edit `~/.config/kitty/theme-extra.conf`,
 then `save.sh <name> --force` banks it. `save.sh` skips placeholders, so "this theme
 has no kitty settings" stays that way.
 
+### Defaults, and inheriting them
+
+When a theme ships no overlay, `apply.sh` falls back to
+`themes/_base/apps/<app>.<ext>` — the same inheritance `hypr/layers.lua` already has
+— and only writes a bare placeholder if there's no `_base` file either.
+
+`save.sh` deliberately does **not** capture an unmodified fallback. Banking it would
+turn "inherits the default" into "pins a copy of today's default" in every theme you
+ever save. Edit the live file and it's captured normally; leave it alone and the
+theme keeps inheriting.
+
+Whether an app needs a `_base` default depends on which side wins:
+
+| app | overlay wins because | `_base` default needed? |
+| --- | --- | --- |
+| kitty | `include theme-extra.conf` is **last**, and kitty takes the last value | No — `kitty.conf` holds the default itself |
+| alacritty | it's the **last import**, and imports lose only to the importing file | **Yes** — see below |
+
 ### Adding another app
 
 One line in `apps.conf`, plus an include on the app's side:
@@ -452,9 +470,19 @@ it without asking. Point it at a dedicated overlay the app includes, never at a 
 config file. For kitty that's `include theme-extra.conf` at the end of `kitty.conf`,
 so its settings win over everything above.
 
-The limit is what the app supports. Kitty has `include`. Zellij's KDL doesn't, so a
-per-theme zellij setting would mean the theme owning the whole config file — not
-worth it for a font size. Check for an include mechanism before adding an app.
+Two things to check before adding an app:
+
+**Does it support an include/override file at all?** Kitty and alacritty do. Zellij's
+KDL doesn't, so a per-theme zellij setting would mean the theme owning the whole
+config file — not worth it for a font size.
+
+**Which side wins?** This is the trap. Kitty takes the *last* value, so including the
+overlay last is enough. **Alacritty is the reverse:** `man 5 alacritty` — *"Imports
+are loaded in order… with the importing file being loaded last."* So `alacritty.toml`
+beats everything it imports, and a key can only be themed if that file does **not**
+set it. `[window] opacity` had to be *removed* from `alacritty.toml` and moved into
+`themes/_base/apps/alacritty.toml`; putting it back would silently pin it globally
+and the overlay would look broken for no visible reason.
 
 ---
 
