@@ -25,6 +25,9 @@
 -- colour temperature but not in the specular ramp itself.
 
 -- ═══ TUNING ═══════════════════════════════════════════════════════════
+-- These are all still here and still tuned, but the APPLY block below currently has
+-- the border, glow and visible shadow commented out. Uncomment there to bring any of
+-- them back; the values don't need re-deriving.
 
 -- Border thickness, px. The gradient needs a couple of pixels to read at all, but
 -- past ~3 the rim stops looking like an edge and starts looking like a frame.
@@ -73,8 +76,9 @@ local glow = {
 }
 
 -- ═══ APPLY ════════════════════════════════════════════════════════════
--- Active and inactive are intentionally identical — this theme does not signal focus
--- visually, in opacity or in border. Don't reintroduce a split.
+-- CURRENTLY: all border decoration is OFF — no border, no glow, no visible shadow —
+-- so every window looks identical and the only edge is hyprglass's own rim.
+-- Everything below is left in place, commented, ready to switch back on.
 
 local ramp = {
 	-- Stops run in listed order around the angle: hot spot -> falloff -> dark far
@@ -92,37 +96,54 @@ local shadow_offset = { math.sin(rad) * shadow.distance, math.cos(rad) * shadow.
 
 hl.config({
 	general = {
-		border_size = BORDER_SIZE,
-		col = {
-			active_border = ramp,
-			inactive_border = ramp,
-		},
+		-- Kept as an ACTIVE setting rather than commented out: Hyprland's own default
+		-- is 1px, so commenting this would give every window a 1px border in the
+		-- palette colour — the opposite of the intent.
+		border_size = 0,
+
+		-- col = {
+		-- 	active_border = ramp,
+		-- 	inactive_border = ramp,
+		-- },
 	},
 
 	decoration = {
-		glow = {
-			enabled = glow.enabled,
-			range = glow.range,
-			render_power = glow.render_power,
-			color = glow.color,
-			color_inactive = glow.color,
-		},
+		-- glow = {
+		-- 	enabled = glow.enabled,
+		-- 	range = glow.range,
+		-- 	render_power = glow.render_power,
+		-- 	color = glow.color,
+		-- 	color_inactive = glow.color,
+		-- },
 
+		-- `enabled` MUST stay true. hyprglass samples the shadow pass to get the
+		-- correct background and force-enables this at load; with it off the glass
+		-- samples wrongly. Its README is explicit that the VISUAL values may be zero
+		-- ("only the decoration's presence matters"), so the shadow is present in the
+		-- pipeline but draws nothing: zero range, zero offset, fully transparent.
 		shadow = {
-			enabled = true, -- required by hyprglass; see appearance.lua
-			offset = shadow_offset,
-			range = shadow.range,
-			render_power = shadow.render_power,
-			color = shadow.color,
-			color_inactive = shadow.color,
+			enabled = true,
+			range = 0,
+			offset = { 0, 0 },
+			color = "rgba(00000000)",
+			color_inactive = "rgba(00000000)",
+
+			-- The visible, light-following version:
+			-- offset = shadow_offset,
+			-- range = shadow.range,
+			-- render_power = shadow.render_power,
+			-- color = shadow.color,
+			-- color_inactive = shadow.color,
 		},
 	},
 })
 
-hl.animation({
-	leaf = "borderangle",
-	enabled = border_angle_animation.enabled,
-	speed = border_angle_animation.speed,
-	bezier = "linear", -- a rotating highlight should not ease
-	style = border_angle_animation.style,
-})
+-- Rotates the border gradient. Pointless while border_size is 0 — there is nothing
+-- to rotate — so it's off too.
+-- hl.animation({
+-- 	leaf = "borderangle",
+-- 	enabled = border_angle_animation.enabled,
+-- 	speed = border_angle_animation.speed,
+-- 	bezier = "linear",
+-- 	style = border_angle_animation.style,
+-- })
