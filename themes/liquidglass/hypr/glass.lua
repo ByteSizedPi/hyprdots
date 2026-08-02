@@ -7,9 +7,15 @@
 -- `scripts/desktop-theme/save.sh liquidglass --force`. See docs/theming.md.
 --
 -- PREREQUISITE, and the usual reason "glass isn't working": windows must be
--- translucent. The glass slab is drawn BEHIND the window surface, so at
--- active_opacity = 1 the window hides it completely and none of the settings below
--- do anything visible. appearance.lua keeps them at 0.88 / 0.80 for this reason.
+-- translucent. The glass slab is drawn BEHIND the window surface, so a fully opaque
+-- window hides it completely and none of the settings below do anything visible.
+--
+-- That translucency comes from the APPS, not from Hyprland: appearance.lua keeps
+-- active/inactive_opacity at 1.0 on purpose, because Hyprland's opacity is
+-- surface-wide and would dim video and images along with the chrome. kitty and
+-- alacritty set background_opacity; Zen makes only its chrome panes transparent. So
+-- "no glass on this window" usually means that app is simply opaque — see the
+-- `translucent` opt-in list at the bottom of appearance.lua.
 
 if not hl.plugin.hyprglass then
 	return -- not loaded yet; modules/plugins.lua re-parses once hyprpm finishes

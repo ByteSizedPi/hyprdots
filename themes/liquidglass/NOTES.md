@@ -18,16 +18,22 @@ exists to avoid. Count the rules if the look degrades.
 | | other themes | liquidglass |
 | --- | --- | --- |
 | `manifest.conf` | `hyprglass = off` | `hyprglass = on` |
-| window opacity | `1.0` | `0.92 / 0.84` — **required**, glass draws *behind* the window |
+| Hyprland window opacity | `1.0` | `1.0` — same, and deliberately; see below |
+| app-level alpha | app defaults | kitty/alacritty `0.53`, Zen chrome `68%` |
 | `hypr/layers.lua` | not shipped (inherits `_base`) | shipped, and shorter |
 | `shell.shadow.alpha` | `0.8` | `0.2` — see below |
 
-## Two things that will bite if you change them
+## Three things that will bite if you change them
 
-**Window opacity must stay below 1.** hyprglass draws the glass slab behind the
-window surface. At opacity 1.0 the window covers it and you see nothing at all —
-this is the usual "glass isn't working" cause, and it looks identical to the plugin
-being broken.
+**Translucency is the APPS' job, never Hyprland's.** hyprglass draws its slab behind
+the window surface, so a window must be translucent for glass to show — but
+`decoration:active_opacity` applies that to the **whole surface**, video and photos
+included, and that is exactly how this theme spent its first week dimming YouTube.
+It's pinned at `1.0` now. The alpha lives in kitty/alacritty `background_opacity` and
+in Zen's userChrome, which paint only their chrome. An opaque app getting no glass is
+the *correct* outcome; if you want to make an exception, use the `translucent` table
+at the bottom of `hypr/appearance.lua`, and never list an app that displays content.
+Full writeup: `docs/problems.md` → "liquidglass dimmed video and images".
 
 **Shadow alpha and `mask_threshold` are coupled.** Glass masks on layer alpha, and
 layer shadows count as visible content. With Noctalia's default `shell.shadow.alpha

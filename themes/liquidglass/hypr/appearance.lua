@@ -1,9 +1,10 @@
 -- liquidglass — Hyprland appearance.
 --
 -- Tuned for hyprglass. The important bit: WINDOWS MUST BE TRANSLUCENT. hyprglass
--- draws the glass slab *behind* the window surface, so at opacity 1.0 the window
--- covers it completely and you see nothing — the single most common "glass isn't
--- working" cause. That's why active/inactive_opacity are below 1 here.
+-- draws the glass slab *behind* the window surface, so a fully opaque window covers
+-- it completely and you see nothing — the single most common "glass isn't working"
+-- cause. But that translucency is the APPS' job, not Hyprland's; see the opacity
+-- block below for why.
 --
 -- Owns ONLY appearance. Behaviour (layout, dwindle/master, misc, debug,
 -- resize_on_border) lives in modules/behaviour.lua so swapping themes can't revert it.
@@ -27,12 +28,29 @@ hl.config({
 		rounding = 20,
 		rounding_power = 4.0,
 
-		-- REQUIRED for glass to be visible at all: the glass slab is drawn BEHIND
-		-- the window surface, so at 1.0 the window hides it completely.
-		-- Both values are deliberately IDENTICAL — focus must not change opacity.
-		-- The focus cue lives in the border instead (theme/borders.lua).
-		active_opacity = 0.85,
-		inactive_opacity = 0.85,
+		-- FULLY OPAQUE, deliberately — and this is NOT the same as "no glass".
+		--
+		-- Hyprland's opacity applies to the ENTIRE window surface, and Hyprland has
+		-- no idea which pixels are chrome. So a global 0.85 buys glass behind the
+		-- terminal background at the price of dimming CONTENT too: video, photos,
+		-- PDFs, maps all read as washed out. That was the 0.85 here until now.
+		--
+		-- The alpha therefore belongs one level down, in the apps, which DO know the
+		-- difference. Everything glassy on this desktop already does it that way:
+		--   kitty / alacritty  background_opacity  (themes/liquidglass/apps/)
+		--   Zen                chrome panes only, content untouched
+		--                      (dotfiles/zen/…/chrome/noctalia-transparency.css)
+		-- Glass then shows through exactly those surfaces and nothing else — glassy
+		-- browser chrome around a YouTube video that stays at full contrast.
+		--
+		-- Their values were re-derived so the look is UNCHANGED from the 0.85 era:
+		-- each app now carries what it used to have multiplied by 0.85
+		-- (0.62 -> 0.53 for the terminals, 80% -> 68% for Zen's tint).
+		--
+		-- Apps that can't do this themselves opt in via `translucent` at the bottom
+		-- of this file.
+		active_opacity = 1.0,
+		inactive_opacity = 1.0,
 		dim_special = 0,
 		dim_inactive = false,
 
@@ -98,3 +116,29 @@ hl.animation({ leaf = "specialWorkspace", enabled = true, speed = 4, bezier = "e
 hl.animation({ leaf = "specialWorkspaceIn", enabled = true, speed = 4, bezier = "easeOutQuint", style = "slidevert" })
 hl.animation({ leaf = "specialWorkspaceOut", enabled = true, speed = 3, bezier = "easeOutQuint", style = "slidevert" })
 hl.animation({ leaf = "zoomFactor", enabled = true, speed = 7, bezier = "quick" })
+
+-- ═══ OPT-IN TRANSLUCENCY ══════════════════════════════════════════════
+-- The escape hatch for apps that cannot make themselves translucent, and so would
+-- otherwise get no glass at all now that the global opacity is 1.0.
+--
+-- ONLY list apps whose window is ALL CHROME. Hyprland's opacity is surface-wide, so
+-- listing anything that displays video, photos, documents or maps re-creates exactly
+-- the dimmed-content problem this file just got rid of — for that app instead of for
+-- everything. A browser is never a candidate; make its chrome transparent from
+-- inside the browser, the way dotfiles/zen/ does.
+--
+-- Keys are Hyprland REGEXes (`hyprctl clients` prints the class), values are alpha:
+--
+--   ["^org\\.gnome\\.Nautilus$"] = 0.88,
+--
+-- `override` on both entries stops the app's own alpha multiplying in on top, and
+-- keeps focus from changing opacity — the focus cue here is the glass rim, not alpha.
+local translucent = {}
+
+for class, opacity in pairs(translucent) do
+	hl.window_rule({
+		name = "translucent-" .. class,
+		match = { class = class },
+		opacity = opacity .. " override " .. opacity .. " override",
+	})
+end

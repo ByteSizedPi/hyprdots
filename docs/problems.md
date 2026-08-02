@@ -1025,6 +1025,56 @@ trip over — see `keys.conf`.
 
 ---
 
+## 🟩 liquidglass dimmed video and images, not just chrome
+
+**Symptom:** on `liquidglass`, YouTube video (and any photo, PDF or map) rendered
+washed out, as if a haze sat over it. Terminals looked right; it was specifically
+content that should have been opaque.
+
+**Cause:** `decoration:active_opacity` / `inactive_opacity` were `0.85` in
+`themes/liquidglass/hypr/appearance.lua`. Hyprland's opacity applies to the **entire
+window surface** and it has no concept of "chrome" vs "content" — so buying glass
+behind a terminal background that way necessarily dims video at the same rate.
+
+The confusing part is that it looked like a hyprglass problem and wasn't. hyprglass
+draws its slab *behind* the window, so glass genuinely does require a translucent
+window — which is why the 0.85 was there and why the comments in both
+`appearance.lua` and `glass.lua` presented it as mandatory. It isn't: the requirement
+is that the window be translucent **where you want glass**, and Hyprland is the wrong
+layer to express that.
+
+**Fix (2026-08-02):** push the alpha down into the apps, which know which pixels are
+chrome, and pin Hyprland at `1.0`.
+
+| layer | before | after |
+| --- | --- | --- |
+| `decoration:active_opacity` / `inactive_opacity` | 0.85 | **1.0** |
+| kitty `background_opacity` | 0.62 | 0.53 |
+| alacritty `[window] opacity` | 0.62 | 0.53 |
+| Zen `noctalia-transparency.css` `:root` tint | 80% | 68% |
+
+The app values are the old ones **multiplied by 0.85**, so the look is unchanged —
+only content stopped being dimmed. Zen needed nothing structural: `dotfiles/zen/`
+already made *only* the chrome panes transparent and left web content alone, so the
+browser now shows glass around a full-contrast video.
+
+`appearance.lua` gained a `translucent = {}` table at the bottom — a per-class
+`opacity … override` opt-in for apps that can't do their own alpha and would
+otherwise get no glass at all. Empty by default. Anything that displays content does
+**not** belong in it; that just re-creates this bug per-app.
+
+**Worth knowing:**
+- "This window has no glass" is now the expected result for an opaque app, not a
+  fault. Check whether the app is translucent before touching any glass setting.
+- The stale comment in `glass.lua` claimed appearance.lua kept opacity at
+  `0.88 / 0.80`; it had been 0.85/0.85 for some time. Both files' comments were
+  rewritten to describe where translucency actually comes from.
+- Zen's tint sits **behind** web content, so raising it can never fix washed-out
+  video — if video ever looks hazy again, look for a surface-wide alpha
+  (Hyprland opacity, or a `windowrule opacity`), not at the CSS.
+
+---
+
 ## See also (existing deep dives)
 - 🟧/🟩 **Greeter ghost + dwindle crash + hybrid-GPU + Lua gotchas** —
   [hyprland-plasma-diagnosis.md](hyprland-plasma-diagnosis.md). Read first when

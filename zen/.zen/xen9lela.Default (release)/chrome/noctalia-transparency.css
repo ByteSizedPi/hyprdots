@@ -7,9 +7,19 @@
    Paint the whole-window root container once. Every pane above it is transparent,
    so this one color shows through uniformly across the entire window — toolbar,
    tabs, viewport, all of it, at the same opacity. Dial just this one value:
-   12% = barely there, 40% = obvious, 80% = nearly solid. */
+   12% = barely there, 40% = obvious, 80% = nearly solid.
+
+   THIS TINT SITS BEHIND WEB CONTENT, so a page that paints its own background
+   (YouTube, and almost every real site) stays fully opaque over it — which is the
+   whole point: glassy chrome, undimmed video. Do not "fix" translucent video by
+   raising this; if video ever looks washed out again, something is applying a
+   SURFACE-WIDE alpha instead, and it will be Hyprland's decoration:active_opacity.
+   That is pinned at 1.0 in themes/liquidglass/hypr/appearance.lua for this reason.
+
+   Was 80% while Hyprland forced an extra 0.85 over the whole window; 68% is the
+   same result (0.8 x 0.85) now that it doesn't. */
 :root:root {
-  background-color: color-mix(in srgb, var(--base) 80%, transparent) !important;
+  background-color: color-mix(in srgb, var(--base) 68%, transparent) !important;
 
   --zen-main-browser-background:  transparent !important;
   --zen-themed-toolbar-bg:        transparent !important;
