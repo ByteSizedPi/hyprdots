@@ -239,3 +239,70 @@ hyprlang ABI versions, which is why a Hyprland update requires
   hyprpm enable hyprglass
   hyprpm disable hyprglass    # if things get unstable
   ```
+
+---
+
+## Tailscale — `--accept-routes` must stay OFF on this laptop
+
+```
+sudo tailscale set --accept-routes=false
+```
+
+Verify with `tailscale debug prefs | grep RouteAll` — must be `false`.
+
+**Why:** This laptop is the ethernet gateway for the Proxmox box: it *is*
+`10.42.0.1` and NATs `10.42.0.0/24` out over WiFi. Another tailnet node
+advertises that same subnet as a route. With `--accept-routes` on, Tailscale
+installs `10.42.0.0/24 dev tailscale0` into **routing table 52**, which policy
+rule 5270 consults *before* the `main` table (rule 32766). Return traffic for
+the NAT therefore leaves via `tailscale0` instead of `enp0s31f6`, and the
+Proxmox box loses all internet access while still being pingable on the LAN —
+a confusing split failure that also made AdGuard answer local rewrites while
+timing out on every upstream query.
+
+This cost a long debugging session on 2026-07-31. **Do not turn it back on**
+while this machine is acting as the gateway. If a tailnet route is genuinely
+needed, use `--accept-routes` with an exclusion for `10.42.0.0/24`, or move the
+gateway role off the laptop.
+
+---
+
+## `/etc/systemd/resolved.conf` — REVERTED, kept as a record
+
+Stock Fedora file; the `[Resolve]` section has no uncommented keys. A backup of
+the modified version is at `/etc/systemd/resolved.conf.bak-<date>`.
+
+**What was changed and undone (2026-08-01):** a global `DNS=10.42.0.192` line
+was added to point the laptop at the LAN AdGuard instance.
+
+**Why it was reverted:**
+1. It was inert. `resolvectl status` showed the default-route link
+   (`wlp0s20f3`) using its DHCP-provided `1.1.1.1`; link-level DNS wins over
+   the global setting, so no query ever reached AdGuard.
+2. It points at a host that is powered down overnight, so had it taken effect
+   it would have broken name resolution every night.
+3. Policy: this laptop is a workstation. Homelab services get configured on the
+   server, not by editing `/etc` here.
+
+**To reapply** (only if AdGuard should genuinely be the laptop's resolver — set
+it per-link, not globally, and ensure a fallback):
+```
+sudo resolvectl dns wlp0s20f3 10.42.0.192 1.1.1.1
+```
+
+---
+
+## Komodo — nothing installed at system level on this laptop
+
+Recorded so the absence is deliberate rather than assumed. The Komodo sandbox
+that ran here during development (Core, Mongo, Periphery, plus a test Prowlarr)
+was **containers only** — no systemd units, no `/etc/komodo`, no host packages.
+All of it was removed on 2026-08-01: containers, the `komodo_keys` /
+`komodo_mongo-data` / `komodo_mongo-config` volumes, the images, and the
+root-owned `/mnt/docker-data` tree.
+
+**Policy going forward:** Komodo runs on `app-prod`, not here. Container
+testing on this laptop is fine, but nothing homelab-related should write to
+`/etc`, install systemd units, or create root-owned directories outside
+`/home`. The `~/server` git repo is just source — it changes nothing on this
+machine.
