@@ -84,6 +84,43 @@ ps_names() {
     ' | sort -u
 }
 
+# settings.toml comes in TWO shapes and either may be current:
+#
+#   nested  the Noctalia GUI writes `[bar.default]` + `font_family = "..."`
+#   flat    scripts/desktop-theme/apply.sh writes `bar.default.font_family = "..."`
+#
+# Whichever wrote the file last decides, so a theme switch silently flips the
+# shape under you. Both readers below resolve a line to its full dotted key and
+# match on that, so neither cares which shape it is looking at.
+noctalia_key_script='
+import sys
+
+def dotted(lines):
+    """Yield (index, full_dotted_key, raw_left_hand_side) for every key line."""
+    section = ""
+    for i, line in enumerate(lines):
+        s = line.strip()
+        if s.startswith("[") and s.endswith("]"):
+            section = s[1:-1]
+            continue
+        if not s or s.startswith("#") or "=" not in line:
+            continue
+        lhs = line.split("=", 1)[0].strip()
+        yield i, (section + "." + lhs if section else lhs), lhs
+'
+
+noctalia_get() {
+  python3 - "$settings" "$1" <<PY
+$noctalia_key_script
+src, want = sys.argv[1], sys.argv[2]
+lines = open(src, encoding="utf-8").readlines()
+for i, key, _ in dotted(lines):
+    if key == want:
+        print(lines[i].split("=", 1)[1].strip().strip('"'))
+        break
+PY
+}
+
 backup_once() {
   local f="$1"
   [ -f "$f" ] || return 0
@@ -108,10 +145,8 @@ do_list() {
 
 do_show() {
   printf '  %-14s %s\n' kitty "$(sed -n 's/^font_family family="\(.*\)"/\1/p' "$kitty_conf")"
-  printf '  %-14s %s\n' "noctalia bar" \
-    "$(awk '/^\[/{s=$0} s=="[bar.default]" && /^font_family/{gsub(/.*= *"|"$/,""); print; exit}' "$settings")"
-  printf '  %-14s %s\n' "noctalia shell" \
-    "$(awk '/^\[/{s=$0} s=="[shell]" && /^font_family/{gsub(/.*= *"|"$/,""); print; exit}' "$settings")"
+  printf '  %-14s %s\n' "noctalia bar" "$(noctalia_get bar.default.font_family)"
+  printf '  %-14s %s\n' "noctalia shell" "$(noctalia_get shell.font_family)"
   printf '  %-14s %s\n' gtk3 "$(sed -n 's/^gtk-font-name=//p' "$gtk3")"
   printf '  %-14s %s\n' gtk4 "$(sed -n 's/^gtk-font-name=//p' "$gtk4")"
   printf '  %-14s %s\n' qt/kde "$(sed -n 's/^font=//p' "$kde")"
@@ -174,29 +209,25 @@ set_noctalia() {
   local propo="$1" nf="$2" candidate
   candidate="$(mktemp)"
 
-  python3 - "$settings" "$candidate" "$propo" "$nf" <<'PY'
-import sys
-
+  python3 - "$settings" "$candidate" "$propo" "$nf" <<PY
+$noctalia_key_script
 src, dst, propo, nf = sys.argv[1:5]
-want = {("[bar.default]", "font_family"): propo, ("[shell]", "font_family"): nf}
-seen, section, out = set(), None, []
+want = {"bar.default.font_family": propo, "shell.font_family": nf}
 
-for line in open(src, encoding="utf-8"):
-    if line.startswith("["):
-        section = line.strip()
-    stripped = line.split("=", 1)[0].strip()
-    key = (section, stripped)
+lines = open(src, encoding="utf-8").readlines()
+seen = set()
+for i, key, lhs in dotted(lines):
     if key in want and key not in seen:
-        out.append('%s = "%s"\n' % (stripped, want[key]))
+        # Rewrite with the left-hand side exactly as found, so a nested file
+        # stays nested and a flat one stays flat.
+        lines[i] = '%s = "%s"\n' % (lhs, want[key])
         seen.add(key)
-    else:
-        out.append(line)
 
-missing = set(want) - seen
+missing = sorted(set(want) - seen)
 if missing:
-    sys.exit("settings.toml has no %s" % ", ".join("%s %s" % m for m in sorted(missing)))
+    sys.exit("settings.toml has no " + ", ".join(missing))
 
-open(dst, "w", encoding="utf-8").writelines(out)
+open(dst, "w", encoding="utf-8").writelines(lines)
 PY
 
   # Never go live with a file the shell cannot parse.
