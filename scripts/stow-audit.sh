@@ -40,8 +40,15 @@ for pkg_dir in "$repo"/*/; do
     # actually show up here.)
     case "$rel" in
       README* | LICENSE* | COPYING) continue ;;
-      .git | .gitignore | .gitmodules | *'~' | .claude/* | */.claude/*) continue ;;
+      .git | .gitignore | .gitmodules | *'~') continue ;;
     esac
+
+    # Per-project `.claude/` settings dirs are gitignored scratch, never stowed —
+    # skip them. The `claude` package is the exception: it IS a `.claude/` tree
+    # (skills, output-styles, statusline), so it must be audited like any other.
+    if [ "$pkg" != claude ]; then
+      case "$rel" in .claude/* | */.claude/*) continue ;; esac
+    fi
 
     target="$HOME/$rel"
     want="$(readlink -f "$file")"

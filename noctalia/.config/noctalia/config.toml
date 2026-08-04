@@ -44,3 +44,12 @@ name = "dotfiles"
 kind = "path"
 location = "~/.config/noctalia/plugins"
 enabled = true
+
+# --- Official catalog: settings.toml already lists noctalia/wallhaven and
+# noctalia/mpvpaper as enabled, but with no source for them they never resolve.
+# Found via `strings /usr/bin/noctalia`; not documented in the settings UI.
+[[plugins.source]]
+name = "official"
+kind = "git"
+location = "https://github.com/noctalia-dev/official-plugins"
+enabled = true
