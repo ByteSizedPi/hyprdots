@@ -27,6 +27,13 @@ tried on it. Read order for a new session:
   symlink into this repo. Catches configs that got silently un-managed by a tool
   rewriting them in place. Exit 1 on drift, so it's usable from a hook.
 
+## Tooling
+
+- **[claude-modes.md](claude-modes.md)** — the `claude` stow package: two output
+  styles ("Technical (STE)" for work, "Open" for concepts/philosophy), the
+  `ste-writing` skill, how to switch per directory, and why the bundled linter
+  is optional.
+
 ## Power
 
 - **[power-profiles.md](power-profiles.md)** — `power-profile-auto.service`:
