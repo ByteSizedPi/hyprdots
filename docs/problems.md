@@ -1075,6 +1075,60 @@ otherwise get no glass at all. Empty by default. Anything that displays content 
 
 ---
 
+## 🟩 Four layers set a font, and they disagreed
+
+**Found 2026-08-04.** The terminal, the noctalia bar, and every GTK/Qt window
+were on three different families: kitty and noctalia on CaskaydiaCove, GTK and
+Qt on Hurmit, and fontconfig's generic `monospace` still falling through to Noto
+Sans Mono, untouched. Nothing had ever set all of them together.
+
+Settled on **ZedMono Nerd Font** everywhere, chosen by cycling three candidates
+live rather than from a specimen sheet. `scripts/desktop-font.sh <id>` writes all
+four layers in one command; `--show` reports what each is on, `--list` what is
+installed.
+
+**Two traps found while building it, both silent:**
+
+- **`fc-match` never fails.** Asked for style `BoldItalic` it answers with
+  Regular, because fontconfig spells the style `Bold Italic`. kitty's
+  `font_features` is keyed by PostScript name, so all four lines ended up naming
+  the regular face and ligatures quietly stopped applying to bold and italic.
+  The script reads names from `fc-list` per family instead, and the suffixes are
+  genuinely not predictable: `CommitMonoNFM` has no suffix at all, `FiraCode`
+  abbreviates Regular to `FiraCodeNFM-Reg`, `VictorMonoNFM-Regular` spells it
+  out.
+- **`sed -i` breaks a stow symlink.** It writes a temp file and renames it over
+  the target. The moment `gtk/.config/gtk-{3,4}.0/settings.ini` became a stow
+  package, the script's own GTK writer would have un-managed it on the next run.
+  Fixed with `sed -i --follow-symlinks`. Same failure mode as the yazi/zen
+  templates and `kitty.conf` above — third occurrence, so treat any
+  temp-file-plus-rename writer aimed at a stowed path as a bug.
+
+**Not solved, deliberately:** `~/.config/kdeglobals` stays out of the stow tree,
+because KConfig also saves by rename and would detach it the first time a Plasma
+setting changed. Its font keys are recorded in `SYSTEM.md` instead. The GTK
+files were stowed despite carrying kde-gtk-config's `gtk-modules` line, on the
+evidence that Plasma had not rewritten them in six weeks — `stow-audit.sh` is
+the tripwire if that turns out to be wrong.
+
+**The font is a theme key, so it had to be banked three times.** `bar.*` and
+`shell.font_family` match `scripts/desktop-theme/keys.conf`, which means the font
+travels with the theme — but kitty's font lives in `kitty.conf` and does not.
+Banking into `paper_bw` alone left a trap: switching to `comicmono` or
+`liquidglass` would put the bar back on CaskaydiaCove while the terminal stayed
+on ZedMono. All three themes now carry `ZedMono Nerd Font Propo` / `ZedMono Nerd
+Font`, each verified by merging it against the live `settings.toml` and running
+`noctalia config validate` in a sandbox.
+
+**So a new theme starts with the wrong font.** `save.sh` snapshots whatever is
+live, so a theme banked while ZedMono is applied inherits it — but a theme copied
+from an older one, or hand-written, will not. If the font stops being something
+you want per-theme, the fix is to drop `bar.*.font_family` and
+`shell.font_family` from `keys.conf` so they stay machine config, and let
+`desktop-font.sh` be the only writer.
+
+---
+
 ## See also (existing deep dives)
 - 🟧/🟩 **Greeter ghost + dwindle crash + hybrid-GPU + Lua gotchas** —
   [hyprland-plasma-diagnosis.md](hyprland-plasma-diagnosis.md). Read first when

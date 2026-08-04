@@ -306,3 +306,54 @@ testing on this laptop is fine, but nothing homelab-related should write to
 `/etc`, install systemd units, or create root-owned directories outside
 `/home`. The `~/server` git repo is just source — it changes nothing on this
 machine.
+
+---
+
+## Desktop font — `~/.config/kdeglobals` (Qt/KDE) + three font packages
+
+The monospace font is set on four layers. Three are in the repo; the Qt one is
+not, and neither are the font packages.
+
+**In the repo (no action needed on a fresh machine):**
+
+| layer | file |
+|---|---|
+| kitty | `kitty/.config/kitty/kitty.conf` |
+| noctalia bar + shell | `themes/paper_bw/noctalia.toml` (applied into state `settings.toml`) |
+| GTK 3 / GTK 4 | `gtk/.config/gtk-{3,4}.0/settings.ini` — **the `gtk` stow package**, added 2026-08-04 |
+
+**Out of tree — reapply by hand:**
+
+```
+sudo dnf install zedmono-nerd-fonts commitmono-nerd-fonts victormono-nerd-fonts
+```
+
+`commitmono` and `victormono` were the two rejected candidates; keep them or
+drop them, nothing references them. `zedmono-nerd-fonts` is the one in use.
+
+Then the Qt/KDE half, in `~/.config/kdeglobals` under `[General]` and
+`[WM]`:
+
+```ini
+fixed=ZedMono Nerd Font Mono,10,-1,5,400,0,0,0,0,0,0,0,0,0,0,1,,0,0
+font=ZedMono Nerd Font Propo,10,-1,5,400,0,0,0,0,0,0,0,0,0,0,1,,0,0
+menuFont=ZedMono Nerd Font Propo,10,-1,5,400,0,0,0,0,0,0,0,0,0,0,1,,0,0
+smallestReadableFont=ZedMono Nerd Font Propo,8,-1,5,400,0,0,0,0,0,0,0,0,0,0,1,,0,0
+toolBarFont=ZedMono Nerd Font Propo,9,-1,5,400,0,0,0,0,0,0,0,0,0,0,1,,0,0
+activeFont=ZedMono Nerd Font Propo,10,-1,5,400,0,0,0,0,0,0,0,0,0,0,1,,0,0
+```
+
+Or just run `scripts/desktop-font.sh zedmono`, which writes all four layers.
+
+**Why `kdeglobals` is not a stow package.** KConfig saves by writing a temp file
+and renaming it over the target. A rename replaces a symlink with a regular
+file, so the first time anything in Plasma's settings is touched, a stowed
+`kdeglobals` would silently stop being managed — the exact failure
+`scripts/stow-audit.sh` exists to catch.
+
+**Watch the GTK files for the same thing.** `~/.config/gtk-{3,4}.0/settings.ini`
+carry `gtk-modules=colorreload-gtk-module:window-decorations-gtk-module`, which
+means kde-gtk-config wrote them. They were stable from 2026-06-26 to
+2026-08-04 despite Plasma running daily, so stowing them is a reasonable bet —
+but if a Plasma appearance change ever detaches them, `stow-audit.sh` will say
+so, and the answer is to move them here alongside `kdeglobals`.
