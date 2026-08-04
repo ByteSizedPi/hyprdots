@@ -56,11 +56,33 @@ local glass = {
 	-- Rim glow, and now the ONLY rim: Hyprland's border and glow are both off, so
 	-- these two replace them. Adds white to the ALREADY-REFRACTED sample, which is
 	-- why it reacts to what's behind the window instead of being a painted-on colour.
-	-- Additive white peaks at strength * 0.15, so 2.0 = up to 30% at the boundary.
-	fresnel = 3.0,
-	-- Top-biased highlight, peaks at strength * 0.08. Together with fresnel this is
-	-- the light-from-above cue the border gradient used to provide.
-	specular = 2.2,
+	--
+	-- THE FOG PROBLEM, and why these two numbers now look inverted. The shader has
+	-- three edge terms, and only ONE of them is non-directional:
+	--     fresnel  color += vec3(1.0)            * ep^2 * fresnel  * 0.15
+	--     specular color += vec3(1.0,0.99,0.97)  * ep^2 * specular * 0.08 * topBias
+	--     shadow   color *= 1.0 - ep^2 * 0.06 * bottomBias      (HARDCODED, no dial)
+	-- where topBias = (1-uv.y)^2 and bottomBias = uv.y^2.
+	--
+	-- fresnel adds PURE WHITE to all four edges equally. An even white gradient with
+	-- no light direction is, literally, what fog is. At the old fresnel 3.0 the wash
+	-- peaked at 45% white while specular (the only directional, warm term) peaked at
+	-- 17.6% and the 6% bottom shadow was invisible underneath. The window read as a
+	-- pane sitting in haze rather than a slab with a light above it.
+	--
+	-- So the ratio is flipped. Real glass gets its edge from ONE light: a hot top
+	-- rim, sides that fall away, and a dark bottom where the surface curves out of
+	-- the light. That is exactly specular + the hardcoded inner shadow, and fresnel's
+	-- job is now only to keep the side edges from vanishing.
+	--   fresnel  1.1 -> 16.5% white all round (was 45%)
+	--   specular 5.5 -> 44%   warm at the top edge (was 17.6%)
+	-- Additive white also DESATURATES what it lands on, so cutting it lets the
+	-- refracted background keep its colour at the edge — another fog cue removed.
+	--
+	-- Raise fresnel and it goes back to fog. Raise specular past ~7 and the top edge
+	-- clips to flat white, which loses the refraction underneath it.
+	fresnel = 1.1,
+	specular = 5.5,
 	tint = 0x8899aa22, -- RRGGBBAA; the alpha byte IS the tint strength
 }
 
@@ -120,7 +142,15 @@ local surfaces = {
 --   edge_thickness sets how DEEP the effect fades inward
 -- 0.022 keeps the rim as bright as before while cutting the fresnel tail from ~54px
 -- to ~34px into the window; at 0.035 it read as too thick at the corners.
-local window = { edge = 0.022, dome = 0.5 }
+--
+-- 0.016 is the anti-fog pass. All three edge terms carry ep^2 = exp(2*sdf/bezel), so
+-- brightness halves at sdf = -bezel * ln(2) / 2. On a 1000px window that moves the
+-- half-brightness point from 7.6px inward to 5.5px: the rim becomes a line on the
+-- boundary instead of a band bleeding into the pane. Refraction is NOT weakened by
+-- this — its peak offset (refraction * 50px) sits at the boundary where ep = 1 and
+-- does not depend on bezel width; only its depth shrinks. So the optical part of the
+-- edge survives while the glowing part gets confined.
+local window = { edge = 0.016, dome = 0.5 }
 
 -- ═══ APPLY ════════════════════════════════════════════════════════════
 -- The baseline goes in the GLOBALS rather than a window preset, for two reasons:
@@ -158,7 +188,14 @@ local function preset_for(s)
 
 		refraction_strength = glass.refraction * s.soften,
 		chromatic_aberration = glass.aberration * s.soften,
-		-- clamped: the plugin's ceiling for these is 1.0
+		-- CAP, and it is OURS, not the plugin's. Checked in the 1.0.0 binary on
+		-- 2026-08-03: readPresetValuesFromTable, setPresetField and resolvePresetFloat
+		-- contain no minss/maxss, and the shader multiplies the uniform straight
+		-- through. Values above 1.0 do reach the GPU. The cap is kept because these
+		-- surfaces are THIN: specular's topBias is (1-uv.y)^2, so on a 40px bar the
+		-- "top edge" is most of the bar and a window-strength specular would just
+		-- brighten the whole strip instead of drawing an edge on it.
+		-- Raise it here if the bar starts looking flat next to the windows.
 		fresnel_strength = math.min(1.0, glass.fresnel * s.rim),
 		specular_strength = math.min(1.0, glass.specular * s.rim),
 

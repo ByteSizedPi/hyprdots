@@ -14,7 +14,7 @@ hl.config({
 	},
 
 	decoration = {
-		rounding = 8,
+		rounding = 0,
 		rounding_power = 2,
 
 		active_opacity = 1,
@@ -52,15 +52,19 @@ hl.curve("easy", { type = "spring", mass = 1, stiffness = 71.2633, dampening = 1
 
 hl.animation({ leaf = "global", enabled = true, speed = 10, bezier = "default" })
 hl.animation({ leaf = "border", enabled = true, speed = 5.39, bezier = "easeOutQuint" })
--- MUST match windowsIn/windowsOut below. `windows` is the reflow of existing
--- windows; if it is slower than the pop-in, a newly launched window finishes
--- appearing while its neighbours are still sliding, and they visibly overlap.
-hl.animation({ leaf = "windows", enabled = true, speed = 2, bezier = "quick" })
-hl.animation({ leaf = "windowsIn", enabled = true, speed = 2, bezier = "quick", style = "popin 80%" })
-hl.animation({ leaf = "windowsOut", enabled = true, speed = 2, bezier = "quick", style = "popin 80%" })
-hl.animation({ leaf = "fadeIn", enabled = true, speed = 2, bezier = "quick" })
-hl.animation({ leaf = "fadeOut", enabled = true, speed = 2, bezier = "quick" })
-hl.animation({ leaf = "fade", enabled = true, speed = 2, bezier = "quick" })
+-- Windows appear, close, and reflow with no animation. `windows` is the parent
+-- of windowsIn/windowsOut/windowsMove, but each child is set explicitly as well:
+-- `hyprctl animations` reports a non-overridden child as enabled, so relying on
+-- inheritance alone makes the state hard to read back.
+-- `fade` is off for the same goal: a window that pops in but still fades is not
+-- instant. Its layer children (fadeLayersIn/Out) are re-enabled below.
+hl.animation({ leaf = "windows", enabled = false })
+hl.animation({ leaf = "windowsIn", enabled = false })
+hl.animation({ leaf = "windowsOut", enabled = false })
+hl.animation({ leaf = "windowsMove", enabled = false })
+hl.animation({ leaf = "fadeIn", enabled = false })
+hl.animation({ leaf = "fadeOut", enabled = false })
+hl.animation({ leaf = "fade", enabled = false })
 hl.animation({ leaf = "layers", enabled = true, speed = 3.81, bezier = "easeOutQuint" })
 hl.animation({ leaf = "layersIn", enabled = true, speed = 4, bezier = "easeOutQuint", style = "fade" })
 hl.animation({ leaf = "layersOut", enabled = true, speed = 1.5, bezier = "linear", style = "fade" })
