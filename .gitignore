@@ -26,6 +26,7 @@ home/.themes/
 # re-authoring them as user templates.
 hyprland/.config/hypr/noctalia.lua
 hyprland/.config/hypr/hyprtoolkit.conf
+niri/.config/niri/noctalia.kdl
 # Hyprland theme fragments — installed by scripts/desktop-theme/apply.sh from
 # themes/<name>/hypr/. The themes/ copies are the tracked inputs.
 # (theme/jjserver.lua is deliberately NOT here: it's written by the far rarer
