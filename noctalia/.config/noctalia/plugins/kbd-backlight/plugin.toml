@@ -1,0 +1,64 @@
+id           = "jj/kbd-backlight"
+name         = "Keyboard Backlight"
+version      = "0.1.0"
+plugin_api   = 24
+author       = "jj"
+license      = "MIT"
+icon         = "keyboard"
+description  = "Toggle and step the keyboard backlight LED from the bar or the control center"
+tags         = ["hardware", "keyboard"]
+dependencies = ["brightnessctl"]
+
+# plugin_api 24 is the floor for two reasons:
+#   22 — relative require(), so the widget and the shortcut share lib/control.luau
+#   23 — noctalia.readFileAsync(), used for the sysfs poll
+#   24 — argv form of noctalia.runAsync(), so the device setting never goes
+#        through /bin/sh and needs no quoting
+# Noctalia v5.0.0 supports levels 3-27.
+
+[[setting]]
+key             = "device"
+type            = "string"
+label_key       = "settings.device.label"
+description_key = "settings.device.description"
+default         = "dell::kbd_backlight"
+
+[[setting]]
+key             = "default_level"
+type            = "int"
+label_key       = "settings.default_level.label"
+description_key = "settings.default_level.description"
+min             = 1
+max             = 10
+default         = 1
+
+[[setting]]
+key             = "poll_seconds"
+type            = "int"
+label_key       = "settings.poll_seconds.label"
+description_key = "settings.poll_seconds.description"
+min             = 1
+max             = 60
+default         = 2
+advanced        = true
+
+# The service is the only entry that reads sysfs. The widget and the shortcut
+# read its published state, so two surfaces never disagree about the level.
+[[service]]
+id    = "state"
+entry = "service.luau"
+
+[[widget]]
+id    = "widget"
+entry = "widget.luau"
+
+  [[widget.setting]]
+  key             = "show_level"
+  type            = "bool"
+  label_key       = "settings.show_level.label"
+  description_key = "settings.show_level.description"
+  default         = true
+
+[[shortcut]]
+id    = "shortcut"
+entry = "shortcut.luau"

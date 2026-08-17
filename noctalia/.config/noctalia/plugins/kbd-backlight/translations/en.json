@@ -1,0 +1,20 @@
+{
+  "settings": {
+    "device": {
+      "label": "LED device",
+      "description": "Name under /sys/class/leds. On this Dell Precision 3590 it is dell::kbd_backlight."
+    },
+    "default_level": {
+      "label": "Default level",
+      "description": "Level a toggle turns the light on to on a first run, before any level has been remembered."
+    },
+    "poll_seconds": {
+      "label": "Poll seconds",
+      "description": "How often the service re-reads the level from sysfs, so the Fn key stays in step with the widget."
+    },
+    "show_level": {
+      "label": "Show the level",
+      "description": "Draw level/max next to the glyph on the bar. Turn it off for a glyph-only widget."
+    }
+  }
+}

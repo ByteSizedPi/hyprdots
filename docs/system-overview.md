@@ -112,6 +112,12 @@ seat/DRM-master contention (see problems.md → "tty1 dead screen").
   for switching/saving themes. Discovered via a `[[plugins.source]]` of kind `path`
   declared in `config.toml`; enable once with `noctalia msg plugins enable`. It
   shells out to `apply.sh`/`save.sh` rather than reimplementing them.
+- **`jj/kbd-backlight`** — a second Noctalia plugin in this repo
+  (`noctalia/.config/noctalia/plugins/kbd-backlight/`) giving a bar widget, a
+  control-center tile and an IPC target for the `dell::kbd_backlight` LED (levels
+  0/1/2). Same `path` source, same one-time enable. A service polls sysfs because
+  the Fn key writes the level in firmware and raises no event; writes go through
+  `brightnessctl`, so they only work from the session on the **active VT**.
 
 ## Plasma / KDE
 - `plasmashell` + `startplasma-wayland` present; Plasma Wayland is the "other"
