@@ -357,3 +357,199 @@ means kde-gtk-config wrote them. They were stable from 2026-06-26 to
 2026-08-04 despite Plasma running daily, so stowing them is a reasonable bet —
 but if a Plasma appearance change ever detaches them, `stow-audit.sh` will say
 so, and the answer is to move them here alongside `kdeglobals`.
+
+---
+
+## NetworkManager profiles for `enp0s31f6` — `pe-share` disabled, `room-lan` added
+
+**Changed 2026-08-16.** Both files live in
+`/etc/NetworkManager/system-connections/` and are root-owned `0600`, so they are
+outside the stow tree.
+
+### `pe-share` — `autoconnect` turned OFF
+
+```ini
+[connection]
+id=pe-share
+uuid=1f943cb0-0b58-4517-8d24-fe8f7c295022
+type=ethernet
+autoconnect=false
+interface-name=enp0s31f6
+timestamp=1786913050
+
+[ethernet]
+
+[ipv4]
+method=shared
+
+[ipv6]
+addr-gen-mode=default
+method=auto
+
+[proxy]
+```
+
+**Why.** `ipv4.method=shared` makes this laptop **`10.42.0.1`** and starts a
+dnsmasq serving DHCP on `10.42.0.10–10.42.0.254`. That is the same address as
+the TP-Link AX1500 room router, and the same subnet it serves. With the cable
+plugged in, the laptop became a second gateway **and** a second DHCP server on
+a live LAN carrying pve, pve-prod and two LXCs.
+
+It auto-activated on carrier at 22:43 on 2026-08-16 and ran for about two
+minutes before being stopped. It had also fired earlier the same day, 20:42:52
+to 20:44:08, while the laptop simultaneously held a `10.42.0.145` lease from
+jjlink — two interfaces on one subnet.
+
+`pe-share` dates from the laptop-relay era in `docs/homelab.md` §7, when this
+laptop really was `10.42.0.1`. The R720xd now sits behind the room router
+instead, so the profile is obsolete and actively harmful. Kept rather than
+deleted because the relay is still a useful fallback for bootstrapping a box
+with no network.
+
+**To reapply the fix:**
+```
+nmcli con modify pe-share connection.autoconnect no
+```
+
+**Before ever bringing it up again**, confirm nothing else owns `10.42.0.0/24`.
+Today the room router does.
+
+### `room-lan` — added, deliberately has no default route
+
+```ini
+[connection]
+id=room-lan
+uuid=cacafd5a-ee9b-48d2-8c20-3d81223cd08a
+type=ethernet
+interface-name=enp0s31f6
+timestamp=1786913340
+
+[ethernet]
+
+[ipv4]
+ignore-auto-dns=true
+method=auto
+never-default=true
+route-metric=2000
+
+[ipv6]
+addr-gen-mode=default
+ignore-auto-dns=true
+method=auto
+never-default=true
+
+[proxy]
+```
+
+**Why.** The laptop normally reaches the room LAN over **jjlink Wi-Fi**; the
+cable is for diagnosis only. Without a profile, NetworkManager auto-creates a
+`Wired connection 1` with DHCP and a default route at metric 100. That beats
+Wi-Fi (metric 600) and silently moves all internet traffic onto the cable.
+
+`never-default=true` plus `ignore-auto-dns=true` means the port takes a
+`10.42.0.x` address and nothing else. Wi-Fi keeps the default route and DNS.
+Plugging in can no longer change how the laptop reaches the internet.
+
+**To reapply:**
+```
+nmcli con add type ethernet ifname enp0s31f6 con-name room-lan \
+  ipv4.method auto ipv6.method auto
+nmcli con modify room-lan ipv4.never-default yes ipv6.never-default yes \
+  ipv4.ignore-auto-dns yes ipv6.ignore-auto-dns yes ipv4.route-metric 2000
+```
+
+**To use the cable as the primary link instead** (only if the laptop-to-router
+cable is replaced — the current one is faulty, see `docs/problems.md`):
+```
+nmcli con modify room-lan ipv4.never-default no ipv4.ignore-auto-dns no \
+  ipv4.route-metric 100
+nmcli con up room-lan
+```
+
+**To route only specific traffic over the cable while Wi-Fi stays default** —
+the technique used to diagnose the router without losing the session:
+```
+sudo ip route add <target-ip>/32 via 10.42.0.1 dev enp0s31f6
+# ... test ...
+sudo ip route del <target-ip>/32
+```
+
+---
+
+## Fingerprint reader — `libfprint` swapped for a third-party COPR build
+
+**Added 2026-08-17.** The power-button reader is a **Broadcom ControlVault 3+**,
+USB `0a5c:5865`, Citadel B0 CID7 chip. Stock Fedora `libfprint` covers Broadcom
+IDs 5842–5845 only, so `fprintd-list` returned `No devices available` and
+`/usr/lib64/libfprint-2/` did not exist. The chip needs signed firmware and a
+proprietary protocol, so no open driver is possible — a vendor blob is the only
+route.
+
+### Packages
+
+```
+sudo dnf copr enable grahamwhiteuk/libfprint-tod
+sudo dnf swap libfprint libfprint-tod
+sudo dnf install libfprint-2-tod1-broadcom-cv3plus
+```
+
+| package | version |
+|---|---|
+| `libfprint-tod` | 1.94.10+tod1-1.fc44 |
+| `libfprint-tod-selinux` | 1.94.10+tod1-1.fc44 (pulled in as a dependency) |
+| `libfprint-2-tod1-broadcom-cv3plus` | 6.0.055.0-1.fc44 |
+
+**`dnf swap` removes Fedora's `libfprint`.** A COPR now owns a core
+authentication library. That is the real cost of this change; the COPR is not
+held to Fedora quality or security rules. GPG key
+`996AC07341FB669A0F38B273BACAB8B53DE8000C`.
+
+### Files it lays down (all outside the stow tree)
+
+```
+/usr/lib64/libfprint-2/tod-1/libfprint-2-tod-1-broadcom-cv3plus.so
+/usr/lib/udev/rules.d/60-libfprint-2-device-broadcom-cv3plus.rules   # matches 5864–5867
+/var/lib/fprint/.broadcomCv3plusFW/                                  # Citadel firmware + key.pem
+```
+
+### Bring it up without a reboot
+
+```
+sudo udevadm control --reload-rules
+sudo udevadm trigger --subsystem-match=usb --action=add
+sudo systemctl restart fprintd.service
+fprintd-list "$USER"
+fprintd-enroll -f right-index-finger
+```
+
+### PAM — nothing was changed
+
+`authselect current` already listed **`with-fingerprint`** on the `local`
+profile before any of this. `/etc/pam.d/system-auth` line 8 is
+`auth sufficient pam_fprintd.so`, line 9 is `auth sufficient pam_unix.so nullok`,
+so the password path is intact and takes over whenever the finger fails. Do not
+run `authselect enable-feature with-fingerprint` again.
+
+That pre-existing feature also explains the stray `fprintd.service` starts in
+the journal from before the driver existed: PAM kept calling a daemon that had
+no device.
+
+### Notes worth keeping
+
+- Device firmware (AAI `6.0.55.0`, SBI `48`) matched the driver package exactly,
+  so no firmware flash ran. A mismatch here is the known enrolment-failure mode
+  upstream.
+- The template is stored **on the Citadel chip**. `/var/lib/fprint/jj/broadcom-cv3plus/`
+  stays an empty marker directory even after a successful enrol, despite
+  `/etc/fprintd.conf` saying `type=file`. Do not read the empty directory as failure.
+- Zero SELinux denials (`ausearch -m AVC`), thanks to `libfprint-tod-selinux`.
+- **`sudo` cannot test this.** `/etc/sudoers.d/` carries
+  `jj ALL=(ALL) NOPASSWD: ALL`, so sudo never authenticates. Use `su - jj`,
+  which runs `system-auth` as a substack.
+
+### To undo
+
+```
+sudo dnf swap libfprint-tod libfprint
+sudo dnf copr disable grahamwhiteuk/libfprint-tod
+```

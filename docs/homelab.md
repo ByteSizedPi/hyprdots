@@ -225,10 +225,24 @@ then deploys everything else from the repo.
       (§5). Highest-value step; do not let it slip.
 - [ ] 9. Later (no rework): GPU → Jellyfin LXC + NFS; jjserver → NAS.
 
-> All guest IPs are still **relay-temporary `10.42.0.x`** (laptop Wi-Fi share) —
-> AdGuard `…192`, app-prod `…205`, Komodo UI `…205:9120`. These change when the
-> R720xd moves to the main LAN; nothing durable should hardcode them (internal
-> wiring is name-based, so it survives the move). Cutover checklist TBD.
+> **Addressing — corrected 2026-08-16.** The `10.42.0.x` subnet is still in use,
+> but it is **no longer the laptop Wi-Fi share**. A TP-Link AX1500 in the room
+> is now `10.42.0.1` and serves it, uplinked by the roof cable to the Nokia on
+> `10.0.0.0/24`. Verified live:
+>
+> | address | host |
+> | --- | --- |
+> | `10.42.0.1` | TP-Link AX1500 room router (SSID `jjlink`) |
+> | `10.42.0.10` | pve host — Proxmox UI on `:8006` |
+> | `10.42.0.11` | pve-prod |
+> | `10.42.0.12` | DNS LXC (the address the router hands out as DNS) |
+> | `10.42.0.13`, `10.42.0.100` | further guests, roles not re-verified |
+>
+> The earlier note here said AdGuard `…192`, app-prod `…205`, Komodo `…205:9120`
+> and Proxmox `…50`. **All of those are stale** — the guests were renumbered.
+> Nothing durable should hardcode any of them; internal wiring is name-based.
+> Full topology and the fault history: `docs/problems.md` → "jjlink internet
+> crawled".
 
 ---
 
@@ -261,9 +275,16 @@ then deploys everything else from the repo.
 
 ## 7. Network bootstrap — share laptop Wi-Fi to the R720xd
 
-The R720xd's only uplink is an ethernet cable to the **Fedora laptop** (Wi-Fi
-internet, one ethernet port). Use NetworkManager **shared** mode = instant
-NAT + DHCP + DNS, no manual `iptables`/`dnsmasq`.
+> **⚠️ SUPERSEDED 2026-08-16 — this is no longer how the R720xd is connected,
+> and running it now BREAKS the LAN.** The R720xd sits behind a TP-Link AX1500
+> at `10.42.0.1`. NetworkManager's `shared` mode also uses `10.42.0.1` and
+> serves DHCP on `10.42.0.10–254`, so bringing `pe-share` up puts a **second
+> gateway and a second DHCP server** on a live subnet. `pe-share` is therefore
+> set `connection.autoconnect no` — see `SYSTEM.md` → NetworkManager profiles.
+>
+> Kept below because the recipe is still the right way to bootstrap a box that
+> has **no other network at all**. Before using it, confirm nothing else owns
+> `10.42.0.0/24`.
 
 ```bash
 # On the laptop — find the wired interface name:
@@ -286,6 +307,14 @@ nmcli connection up pe-share
 
 **Long-term:** replace the laptop relay by plugging the R720xd straight into the
 main `10.0.0.0/24` switch/router and give it a static `10.0.0.x`.
+
+**Status 2026-08-16 — half done.** The laptop relay is gone; the AX1500 replaced
+it. But the R720xd is still on `10.42.0.x` behind that router's NAT, not on the
+main LAN. Consequence worth knowing: hosts on `10.0.0.0/24` (jjserver) cannot
+open connections *into* the homelab — only Tailscale crosses that boundary.
+Finishing the move means either renumbering the guests onto `10.0.0.x`, or
+switching the AX1500 to Access Point mode. The Nokia is ISP-managed with no
+DHCP/DNS control, which is the reason the private subnet was kept.
 
 ---
 

@@ -9,253 +9,92 @@ Status key: 🟥 OPEN · 🟧 MITIGATED (worked around, root cause unsolved) · 
 ---
 
 ## 🟩 Monitor profiles never applied / eDP-1 stuck at scale 1.5
-**Symptom:** plugged in the home AOC monitor and the layout was wrong — it came
-up at 60Hz despite being a 144Hz panel. Log showed exactly two lines, ever:
-`[monitors] config.reloaded` → `[monitors] no profile matched the connected
-monitors`. **The monitor profiles had never actually been applied — Hyprland's
-built-in defaults were doing all the work the whole time.**
 
-**Root cause — startup ordering.** Hyprland parses the Lua config *before*
-aquamarine/DRM exists. From the log:
-```
-line  8: [cfg] Using lua config found at .../hyprland.lua
-line 14: [Lua] [monitors] config.reloaded      <- our handler runs
-line 15: [Lua] [monitors] no profile matched
-line 19: Creating an Aquamarine backend!       <- backend starts HERE
-line 23: drm: Enumerated device ... Found 1 GPUs
-```
-So at `config.reloaded` **`hl.get_monitors()` returns an empty list** and nothing
-can match. The engine then never got another chance: `hyprland.start` never
-fired, and `monitor.added` does **not** fire for monitors already present at
-enumeration. Old engine also *disabled* any monitor no profile mentioned, so an
-unknown monitor would have gone dark.
+**Symptom:** the AOC came up at 60Hz on a 144Hz panel, and eDP-1 sat at scale
+1.50. The log only ever said `[monitors] no profile matched the connected
+monitors`. The profiles had never applied at all — Hyprland's built-in defaults
+were doing all the work.
 
-**Fix (2026-07-16):** in `monitors.lua`, retry the initial apply on a timer until
-the backend reports monitors — `hl.timer(fn, { timeout = 250, type = "oneshot" })`,
-re-armed up to 40× (10s ceiling). Plus `monitor-profiles.lua` gained a top-level
-`default = "preferred, auto"` applied to any monitor the winning profile doesn't
-name (instead of disabling it), with explicit `= "disable"` to opt out.
+**Root cause.** `hl.monitor()` called at **config-parse time registers a
+persistent rule**, and Hyprland applies rules at output connect and on hotplug,
+natively ([wiki](https://wiki.hypr.land/Configuring/Basics/Monitors/),
+[Lua API](https://alejandrominaya.github.io/hyprland-lua-docs/)). The old
+361-line engine only ever called `hl.monitor()` from **deferred timers**, i.e.
+always after enumeration — permanently missing the one moment when `scale` is
+honoured. Auto-scale then won the initial connect and picked 1.5.
 
-**Verified** by loading the engine with a stubbed `hl` against real monitors:
-matches `home` → AOC `1920x1080@144 @1920x0` + eDP-1 `1920x1080@60 @0x0`; and an
-unknown monitor correctly gets `preferred, auto` rather than being disabled.
+**Second realisation: there were no profiles.** Every monitor's spec was
+identical in every profile that named it — no spec depended on what else was
+plugged in. "Laptop only" is not a profile, it is what happens when nothing
+else is connected. The `ws` and `exec` profile features were never used.
 
-**Regression, same day (2026-07-16 evening):** eDP-1 came up at `scale: 1.50`
-(Hyprland's own auto-scale) again on a fresh login, despite the fix above.
-`journalctl` showed **zero** `[monitors]` log lines for the new session — the
-engine never ran at all this time, not even the broken 09:53 run that at least
-logged something. `hyprctl eval` confirmed `hl.monitor({scale=1})` works fine
-called manually, and `hyprctl reload` (which fires `config.reloaded`, not a
-real reload — see gotchas below) made the engine run correctly and fix the
-scale. That proves the earlier fix's actual gap:
-
-**Real root cause:** the entire engine only ever runs from inside
-`hl.on("hyprland.start", function() apply_when_ready(...) end)`. The file's
-own header comment already said `hyprland.start` "does NOT reliably fire for
-monitors that were already present at enumeration" — but the retry-timer
-mitigation built for that is only *reachable* by that same unreliable event.
-On a genuine cold login where `hyprland.start` doesn't fire, the retry loop
-never starts and nothing ever touches eDP-1's scale. The "Verified" note above
-tested the matching logic directly (stubbed `hl`), and the working retest
-earlier that day used `hyprctl reload` — both routes bypass this gap, which is
-why the fix looked solid before.
-
-**Fix applied (2026-07-16 evening):** `monitors.lua` now also calls
-`apply_when_ready("module load")` unconditionally at the bottom of the file,
-not only from the `hyprland.start` handler. `hl.get_monitors()` is empty at
-parse time either way, so this just enters the same retry-timer path — a
-harmless duplicate on runs where `hyprland.start` does fire, the only trigger
-on runs where it doesn't.
-
-**Not yet verified across a real restart** — `hyprctl reload` doesn't
-re-execute the Lua file (see gotchas below), so this session's live scale was
-only patched via a manual `hl.monitor` call + `hyprctl reload`, which doesn't
-prove the new module-load call works. Flip to 🟩 once confirmed.
-
-**2026-07-17 morning — verification attempt failed for TWO separate reasons:**
-1. The "check hyprland.log for `[monitors]` lines" method is **unusable**:
-   Hyprland stops capturing Lua `print()` after its early "Disabling stdout
-   logs!" line, and every print that matters (the retry timers) fires after
-   that point. Today's real Hyprland session had **zero** `[monitors]` lines —
-   indistinguishable from the engine not running at all. Fixed: the engine now
-   writes its own timestamped log to **`~/.local/state/hypr-monitors.log`**
-   (and still print()s). Re-verified the whole engine with a stubbed `hl`:
-   cold start with late backend → `laptop` profile (eDP-1 @60 scale 1),
-   AOC hotplug → `home` (@144 at 1920x0), unplug → `laptop` again. All pass.
-2. The Hyprland session itself only lived ~4 minutes (07:00:36 → 07:04:35),
-   died silently (no coredump, no OOM-kill, log ends mid cursor activity), and
-   the 07:04 re-login landed in **Plasma on tty1** without the user noticing —
-   see the new entry below. So there was no session to verify against.
-
-**2026-07-17, later — engine verified live, and the REAL scale culprit found.**
-The 07:17 cold login ran the engine perfectly (log: cold start → retry →
-`applied profile: home`) and yet eDP-1 sat at 1.50. Systematic elimination:
-- `hl.monitor` runtime calls: mode/refresh/position **apply live** (HDMI
-  144→120→144 worked), but **`scale` is silently ignored** — bundled,
-  scale-only, number or string, always `ok`, never applied.
-- `wlr-randr --output eDP-1 --scale 1`: also silently ignored (so
-  kanshi/shikane could not have fixed this either).
-- Monitor userdata is read-only (`m.scale=1` → "attempt to modify read-only
-  hl object"); no scale dispatcher in `hl.dsp`.
-- **Scale IS honored at output (re)connect**: `hl.monitor{disabled=true}`
-  then `hl.monitor{disabled=false, mode=…, position=…, scale=1}` applied
-  scale 1 instantly. → **Hyprland 0.55.4 bug: monitor rule `scale` only
-  takes effect when the output (re)connects, never on a live output.**
-  At cold start the engine's scale=1 gets overwritten by Hyprland's own
-  connect-time auto-scale (1.5), and nothing after that could change it.
-- Trap found on the way: re-enabling a disabled monitor **requires an
-  explicit `disabled = false`** in the spec — a plain spec leaves it dark
-  (eDP-1 vanished until re-enabled with the flag).
-
-**Fix (2026-07-17):** `monitors.lua` now (a) always passes `disabled = false`
-for normal specs, and (b) `verify_scale()`: 1s after each apply with a numeric
-scale, compares actual vs wanted; on drift it disable/enable-cycles the output
-(the only thing that applies scale), with `suppress_events` so its own churn
-doesn't retrigger profile matching, max 3 attempts, everything logged.
-Stub-tested (drift 1.5 → cycle → converge) and live-tested (`hyprctl reload`
-with correct state → no churn, scale stays 1). **Remaining check: one cold
-login showing `scale drift 1.50 -> want 1 — cycling output` →
-`converged` in `~/.local/state/hypr-monitors.log` and eDP-1 at scale 1.**
-Then flip to 🟩. Consider reporting the scale-at-connect-only bug upstream.
-
-**2026-07-18 — that cold login happened, and it FAILED. Two bugs found in the
-fix itself.** The 09:03 cold boot logged the drift detection working exactly as
-designed, then `eDP-1 scale STUCK at 1.50 (want 1) — giving up`. Every log line
-appeared **five times**. Two distinct causes:
-
-1. **The disable/enable cycle must span two event-loop turns.** Reproduced
-   live: the two calls issued back-to-back inside one `hyprctl eval` left
-   eDP-1 at 1.50, while the *same two calls* as separate `hyprctl eval`s (2s
-   apart) snapped it to 1.00 immediately. Hyprland coalesces the same-tick
-   pair — the output never actually disconnects, so the connect-time scale
-   path never runs. `verify_scale` issued them back-to-back, so **the whole
-   recovery mechanism was a no-op on every cold boot**. This also explains the
-   long-standing "it fixes itself once you poke it" behaviour: manual pokes
-   are naturally separate ticks.
-   ⚠️ This *narrows* the 07-17 finding above — "scale IS honored at (re)connect"
-   is true, but only when the reconnect is real, which needs the split.
-2. **Five concurrent verify chains raced each other.** At cold start
-   `apply_best_profile()` runs up to 5× (module load, `hyprland.start`,
-   `config.reloaded`, one `monitor.added` per output) and each armed its own
-   chain. They interleaved: chain B re-enabled the output while chain A still
-   had it down, so nothing ever settled and all five hit "STUCK".
-
-**Fix (2026-07-18):** `verify_scale` now (a) re-enables from inside a 400ms
-`hl.timer` so the disable and enable land in different turns, and (b) is
-guarded by `verify_armed[name]` — one chain per output, with `verify_want[name]`
-always holding the newest spec so the single chain converges on the last-applied
-value.
-
-Verified in-session: split-tick cycle 1.50→1.00 (the direct proof for #1);
-5× duplicate log lines gone after the guard; `hyprctl reload` with a deliberate
-scale change (1 → 1.25 → 1) applies cleanly with no churn.
-Could not be reproduced in-session (re-plugging makes the connect-time handler
-win, and on `hyprctl reload` scale applies live), so it needed a real login.
-
-**✅ CONFIRMED FIXED — cold login 2026-07-18 09:16:**
-```
-09:16:10 [monitors] eDP-1 scale drift 1.50 -> want 1 — cycling output (attempt 1)
-09:16:12 [monitors] eDP-1 scale converged to 1 after re-enable
-```
-Once, converged, no duplicates. Both bugs above were real and both fixes hold.
-
-**Residual cost (new, open):** the recovery cycle is *visible* — the output goes
-down and back up ~1s into the session, which glitches the screen. Worse, the
-`hyprland.start` handler launches `noctalia --daemon` at 09:16:09, one second
-*before* the cycle destroys eDP-1's output at 09:16:10 — a Wayland client whose
-surfaces are on an output that disappears right after it starts is a plausible
-way to lose noctalia (it was not running after this boot; no coredump, so it
-exited rather than crashed — evidence is circumstantial, not proven).
-→ **Proper fix is to never need the cycle:** register the profile specs as
-monitor rules at *config-parse* time so Hyprland's connect-time auto-scale never
-wins the initial enumeration.
-
-**2026-07-18 — rewritten from scratch. The engine is gone (361 lines → 4 rules.)**
-Reviewing the above, the whole apparatus was compensation for one wrong
-assumption. `hl.monitor()` called at **config-parse time registers a persistent
-rule**, and Hyprland applies rules at output connect *and* on hotplug, natively
-([wiki](https://wiki.hypr.land/Configuring/Basics/Monitors/),
-[Lua API](https://alejandrominaya.github.io/hyprland-lua-docs/)). The engine only
-ever called `hl.monitor()` from *deferred timers*, i.e. always after enumeration
-— permanently missing the one moment when `scale` is honoured. Every mechanism
-above (retry loop, `verify_scale`, disable/enable cycle, `suppress_events`,
-split-tick timing, chain guard) existed to claw back a setting we forfeited by
-being late.
-
-Second realisation: **there were no profiles.** Every monitor's spec was
-identical in every profile that named it (eDP-1 `0x0` scale 1; AOC `1920x0`
-@144; Samsung `1920x0`) — no spec depended on what else was plugged in. "Laptop
-only" isn't a profile, it's just what happens when nothing else is connected.
-The `ws` and `exec` profile features were never used by any profile.
-
-`monitors.lua` is now four declarative `hl.monitor()` calls (laptop, AOC,
-Samsung, catch-all `output = ""`), `monitor-profiles.lua` is deleted, and
-`~/.local/state/hypr-monitors.log` is obsolete. **`scale = 1` explicitly, never
+**Fix (2026-07-18) — the engine was deleted, not repaired.**
+`hyprland/.config/hypr/modules/monitors.lua` is now a short list of declarative
+`hl.monitor()` calls (eDP-1, AOC, Samsung, Hisense TV, catch-all `output = ""`
+kept last). `monitor-profiles.lua` is deleted. **`scale = 1` explicitly, never
 `"auto"`** — auto-scale choosing 1.5 was the entire original bug.
-Confirmed: luajit syntax check passes; live state after the swap is eDP-1
-`scale=1.0 pos=0x0 @60` + AOC `scale=1.0 pos=1920x0 @144`.
-Old engine is in `git log` for this file if a genuinely conditional layout is
-ever needed.
 
-**✅ CONFIRMED on a cold login, 2026-07-18 (instance `..._1784360807_...`):**
-`eDP-1 scale=1.0 pos=0x0 @60` + `HDMI-A-1 scale=1.0 pos=1920x0 @144`, correct at
-first connect, **no cycling and no visible glitch**. `~/.local/state/hypr-monitors.log`
-was not recreated — nothing is running that could write it, which is the point:
-the scale is right because nothing *does* anything. Hyprland applies four rules
-at connect, which is all it ever needed.
+**✅ CONFIRMED on a cold login, 2026-07-18:** `eDP-1 scale=1.0 pos=0x0 @60` +
+`HDMI-A-1 scale=1.0 pos=1920x0 @144`, correct at first connect, no cycling and
+no visible glitch.
 
-**Settled a side question:** noctalia survived this login. It had been dying on
-boot, and the suspicion was that the recovery cycle destroyed eDP-1's output ~1s
-after `autostart.lua` launched it. No cycle → no crash, so that was the cause —
-not a noctalia bug. (The *visual glitching* on that boot was separate: a drkonqi
-crash-loop, still open below.)
+**Settled a side question:** noctalia had been dying on boot. The old engine's
+recovery cycle destroyed eDP-1's output ~1s after `autostart.lua` launched it.
+No cycle → no crash, so that was the cause, not a noctalia bug.
+
+### Superseded — do not rebuild any of this
+Roughly six iterations of machinery existed before the rewrite: a retry timer
+loop, `verify_scale`, a disable/enable cycle to force a reconnect, `suppress_events`,
+split-tick timing, and a per-output chain guard. **All of it was compensation
+for applying rules too late, and all of it is gone.** `~/.local/state/hypr-monitors.log`
+is obsolete and no longer written. Full history is in `git log` for
+`modules/monitors.lua` if a genuinely conditional layout is ever needed.
+
+Two real Hyprland behaviours were learned along the way and are still true, but
+you should never need them now: forcing a scale change on a *live* output takes
+a disable then a re-enable, and those two calls must land in **separate
+event-loop turns** or Hyprland coalesces them into a no-op.
 
 ### Hyprland Lua config gotchas (learned here — save yourself the time)
 - **`hyprctl reload` DOES re-execute the Lua config** (verified 2026-07-17:
-  engine log shows a fresh `module load` on every reload; edited code took
-  effect live). An earlier note here claimed the opposite — that observation
-  was wrong or predates 0.55.4. Handlers don't appear to duplicate across
-  reloads.
-- **Monitor rule `scale` only applies at output (re)connect** on a live
-  output every path silently no-ops (`hl.monitor`, wlr-randr, userdata is
-  read-only). To change scale at runtime: disable the output, then re-enable
-  with `disabled = false` + full spec — and the two calls **must be in separate
-  event-loop turns** (put the re-enable in an `hl.timer`), or Hyprland
-  coalesces them into a no-op. `monitors.lua` automates this (`verify_scale`).
-  Mode/refresh/position apply live just fine.
-- **Re-enabling a disabled monitor requires explicit `disabled = false`** —
+  edited code took effect live). An earlier note claimed the opposite; it was
+  wrong. Handlers do not appear to duplicate across reloads.
+- **Monitor rule `scale` only applies at output (re)connect.** On a live output
+  every path silently no-ops — `hl.monitor`, `wlr-randr`, and the monitor
+  userdata is read-only. Declare scale at parse time and the problem does not
+  arise. Mode, refresh and position apply live just fine.
+- **Re-enabling a disabled monitor requires an explicit `disabled = false`** —
   a plain `hl.monitor{output=…, mode=…}` will NOT wake it.
 - **Lua `print()` stops reaching hyprland.log almost immediately.** Only prints
-  made *before* the "Disabling stdout logs!" line (very early in startup) land
-  in the log; everything printed later — timer callbacks, event handlers — is
-  silently dropped. A session with zero `[monitors]` lines proves nothing.
-  `monitors.lua` therefore keeps its own log: `~/.local/state/hypr-monitors.log`.
+  made *before* the early "Disabling stdout logs!" line land; everything from
+  timer callbacks and event handlers is silently dropped. **A session with zero
+  `[…]` log lines proves nothing.** If you need output from Lua, `io.open()` a
+  file and write to it.
 - **`hyprctl keyword` doesn't work** with the Lua parser ("keyword can't work
-  with non-legacy parsers. Use eval."). Use `hyprctl eval '<lua>'` instead.
+  with non-legacy parsers. Use eval."). Use `hyprctl eval '<lua>'`.
 - **`hyprctl eval` discards return values** (prints only `ok`) and its `print()`
-  does not reach the log. To get output, `io.open()` a file and write to it.
+  does not reach the log.
 - **`hl.get_monitors()` returns `HL.Monitor` userdata**, not plain tables —
   `pairs(m)` errors. Read fields directly (`m.name`, `m.description`).
-- **Valid `hl.on` events** (the full list, from an error message): `hyprland.start,
+- **Valid `hl.on` events** (full list, from an error message): `hyprland.start,
   config.reloaded, workspace.active, monitor.layout_changed, hyprland.shutdown,
   workspace.move_to_monitor, monitor.removed, monitor.added, keybinds.submap,
   layer.opened, window.open, window.open_early, window.urgent, monitor.focused,
   window.close, layer.closed, window.destroy, screenshare.state, workspace.removed,
   workspace.created, window.kill, window.active, window.pin, window.title,
   window.fullscreen, window.class, window.update_rules, window.move_to_workspace`
+- **`hyprland.start` does NOT reliably fire** for monitors already present at
+  enumeration, and `monitor.added` does not fire for them either. Anything that
+  depends on either event will silently never run on a cold login.
 - **`hl.timer` signature:** `hl.timer(fn, { timeout = <ms>, type = "oneshot"|"repeat" })`.
-- **Monitor positions are LOGICAL pixels, so scale changes the math.** With no
-  profile applied, Hyprland's auto-scale picked **1.5** for eDP-1 → its logical
-  width was **1280**, not 1920. Placing the next monitor at `1920x0` then left a
-  640px gap and content overflowed off-screen ("only the top-left is visible").
-  Fix: pin `scale` explicitly (eDP-1 → `1`) and place the neighbour at `1920x0`.
+- **Monitor positions are LOGICAL pixels, so scale changes the math.** At
+  auto-scale 1.5 eDP-1's logical width is **1280**, not 1920, so placing the
+  neighbour at `1920x0` leaves a 640px gap and content overflows off-screen.
   Rule of thumb: `next_x = previous_width / previous_scale`.
-- **`hyprctl monitors` does not reflect a scale change immediately.** Reading
-  right after `hl.monitor{scale=...}` can still show the OLD scale, which makes
-  a working call look like it failed. Re-read after a second before concluding.
-- **`hl.monitor` accepts `scale` as a number or the string `"auto"`.** Prefer an
-  explicit number for the built-in panel; `"auto"` is a good default for unknown
-  external monitors so a HiDPI/4K screen comes up usable.
+- **`hyprctl monitors` does not reflect a scale change immediately.** Re-read
+  after a second before concluding a call failed.
+- **Explicit modes beat `"preferred"`.** `preferred` picks 48Hz on eDP-1 and
+  60Hz on the AOC. Pin the refresh rate.
 
 ---
 
@@ -459,9 +298,17 @@ Meanwhile: if noctalia "crashes", check DNS first, and check its own log
 before blaming Hyprland.
 
 **Still open:** whether every historical crash-loop was this (the pid:-1
-leaked-surface crash-looping may be a separate defect). Re-enable idle
-(prefer a long `lock` timeout; keep `screen_off`/`lock_and_suspend` off)
-only once noctalia is stable. → MITIGATED, not solved.
+leaked-surface crash-looping may be a separate defect). → MITIGATED, not
+solved.
+
+**Only `lock` and `lock-and-suspend` are the risky ones** — those are what
+stranded the session. `screen-off` is deliberately on and is recoverable by
+any keypress. Verified live 2026-08-16 in `~/.local/state/noctalia/settings.toml`:
+`lock.enabled = false`, `lock-and-suspend.enabled = false`,
+`screen-off.enabled = true` @660s. Do not re-enable the two lock behaviours
+until noctalia stops crash-looping. (An earlier note here said to keep
+`screen_off` off as well; that contradicted the deliberate state above and was
+wrong.)
 
 **Worked, also useful:** `noctalia msg caffeine-enable` inhibits idle live;
 killing noctalia clears its leaked lock/corner surfaces.
@@ -778,11 +625,20 @@ boot-time restore — the unit is idempotent and doesn't depend on ever identify
 every possible blocker. Remaining gap: a block asserted **mid-session** (e.g. the
 WMI hotkey) still needs a manual `rfkill unblock bluetooth` until next login.
 
+**Holding well — checked 2026-08-16 (three weeks on):**
+```
+rfkill list bluetooth   -> dell-bluetooth soft:no hard:no ; hci0 soft:no hard:no
+bluetoothctl list       -> Controller A0:D3:65:F5:10:67 jj-laptop [default]
+bluetooth-unblock.service -> enabled, active
+/var/lib/systemd/rfkill/platform-dell-laptop:bluetooth -> 0
+```
+The persisted state file reads `0`, so the shutdown race has not re-triggered
+since the unit went in. That is not proof the race cannot happen — the unit
+clears the block at login either way — only that it has not recurred.
+
 **Still open / next steps if it recurs:**
-1. Confirm the shutdown race — watch `/var/lib/systemd/rfkill/platform-dell-laptop:bluetooth`
-   across a reboot and see whether it comes back as `1`.
-2. File the noctalia gating bug (rfkill unblock unreachable when no adapter exists).
-3. If it recurs often, consider masking `systemd-rfkill` — but that also drops
+1. File the noctalia gating bug (rfkill unblock unreachable when no adapter exists).
+2. If it recurs often, consider masking `systemd-rfkill` — but that also drops
    wifi rfkill persistence, so prefer the unit.
 
 ---
@@ -891,16 +747,29 @@ Implemented in the `refactor(hyprland)` commit:
   off. Verified live: stub gives `enabled: int:0 set:true` and survives reloads.
 - Layer rules moved to `theme/layers.lua` so a glass theme can cede namespaces.
 
-**Still open — verify at next login (needs a real startup, not `hyprctl reload`):**
-1. Does the `hyprpm reload -n && hyprctl reload config-only` autostart actually
-   produce a glassed session on a cold boot? Check
-   `hyprctl getoption plugin:hyprglass:enabled` shows `set: true` right after login.
-2. Does `hl.plugin.load` behave differently on the initial startup parse? If it
-   works there, it's the tidier path and `modules/plugins.lua` could drop the
-   re-parse. Untested here because restarting Hyprland risks the tty1 dead-panel
-   issue above.
-3. `noctalia-attached-panel` — confirm it's genuinely dead before assuming so;
-   its layer rule was dropped in the restructure.
+**✅ VERIFIED on a live session, 2026-08-16.** The autostart chain works
+end-to-end:
+```
+hyprctl plugin list                       -> hyprglass 1.0.0, handle 555e6e2b4ce0
+hyprctl getoption plugin:hyprglass:enabled-> int: 0   set: true
+themes/active                             -> noctalia  (manifest: hyprglass = off)
+```
+`set: true` with the plugin loaded is the whole design working: `hyprpm reload -n
+&& hyprctl reload config-only` loaded it, and the theme's explicit **disable
+stub** then applied. Without the stub this would read `set: false` and glass
+would default on. Also confirmed `themes/liquidglass/hypr/layers.lua` still has
+**1** `layer_rule` (5 would mean clobbered — see the note at the top).
+
+**Still open — one item:** does `hl.plugin.load` behave differently on the
+initial startup parse? If it works there it is the tidier path and
+`modules/plugins.lua` could drop the re-parse. Untested because restarting
+Hyprland risks the tty1 dead-panel issue above. Low value — the current chain
+is verified working.
+
+**`noctalia-attached-panel` is very likely dead.** It has never appeared in any
+layer capture, including a live one on 2026-08-16. Not proven, since a
+namespace only shows while its surface exists — but nothing has ever produced
+it. Its layer rule was dropped in the restructure with no ill effect.
 
 ---
 
@@ -1126,6 +995,211 @@ from an older one, or hand-written, will not. If the font stops being something
 you want per-theme, the fix is to drop `bar.*.font_family` and
 `shell.font_family` from `keys.conf` so they stay machine config, and let
 `desktop-font.sh` be the only writer.
+
+---
+
+## 🟩 jjlink internet crawled — duplicate IP on the router WAN, plus wrong MTU
+
+**Symptom (2026-08-16).** Internet over `jjlink` was unusable on the laptop and
+the phone. Downloads landed anywhere between 0.65 Mbit/s and 89 Mbit/s with no
+pattern. The line is ~85 Mbit/s fibre.
+
+**Two independent faults, both introduced during a router config session
+earlier the same day.**
+
+### Root cause 1 — duplicate `10.0.0.107` on the house LAN
+
+The TP-Link AX1500's WAN port and an unidentified device both held
+`10.0.0.107`. Measured at the same moment from two hosts:
+
+```
+laptop   (Wi-Fi, 17 Mozart)  10.0.0.107 = 24:2f:d0:d1:b6:e1   <- TP-Link WAN
+jjserver (wired to Nokia)    10.0.0.107 = ba:e0:5e:bf:eb:ee   <- something else
+```
+
+Six samples each, both stable. Each host had locked onto whichever answered
+its ARP first. Return traffic for the room router's NAT therefore reached the
+wrong device roughly half the time.
+
+**Fix:** set the AX1500 WAN to a **static** address outside the Nokia's DHCP
+pool. `10.0.0.240`, mask `255.255.255.0`, gateway `10.0.0.254`, DNS `1.1.1.1`.
+The Nokia's pool hands out `.100`–`.119`; `.240` and `.250` were free.
+
+### Root cause 2 — MTU 1500 against a 1492 PPPoE path
+
+The Nokia runs PPPoE, so the path MTU is 1492. The AX1500 was passing 1500.
+Large packets died silently while small ones passed, which is why TCP connects
+completed in 19 ms and then stalled.
+
+```
+ping -M do -s 1472 1.1.1.1  ->  From 10.0.0.254: Frag needed and DF set (mtu = 1492)
+```
+
+**Fix:** set the AX1500 WAN MTU to **1492**.
+
+### Result
+
+Measured from pve-prod (wired) immediately after the fix:
+
+```
+                       before            after
+ping loss, pve-prod    48.9 – 57.8%      0%   (60 packets)
+TCP, 12x 10 MB         5 dead, 1 slow    9/9 at 9.7–10.4 MB/s
+                       6 at ~10 MB/s     (10–12 were Cloudflare HTTP 429)
+```
+
+**Confirmed from the laptop on jjlink Wi-Fi**, which is the path that was
+originally reported broken:
+
+```
+link   jjlink 5 GHz, -42 dBm, rx 1200.9 Mbit/s (chose 5 GHz unaided)
+ping   0% loss, 40 packets, 16.3 ms
+LAN    185 / 395 / 330 Mbit/s to pve-prod
+WAN    11.42  11.42  11.30  11.32  11.25  11.35 MB/s   (CacheFly, 20 MB x6)
+```
+
+Six consecutive runs at ~90 Mbit/s with 1.5% spread — full line rate. Before
+the fix the same path gave 0.34 MB/s and 75% ping loss.
+
+**Two measurement artefacts to recognise, not faults:** `speed.cloudflare.com`
+starts returning **HTTP 429** to the whole household public IP after repeated
+testing, and a single stream to a European endpoint (OVH) is distance-limited
+to ~1.5 MB/s regardless of local health. Use `http://cachefly.cachefly.net/100mb.test`
+with `-r 0-19999999` as the fallback throughput endpoint.
+
+### Dead ends — do not re-tread
+
+- **The roof cable.** Suspected first and cleared. jjserver reached the room
+  router's WAN across it with 0–1.1% loss at full line rate.
+- **The 2.4 GHz radio.** A single sample per band gave 2.4 GHz 0.65 Mbit/s and
+  5 GHz 89 Mbit/s, which looked like a band-scoped limit. It was sampling
+  noise. NetworkManager used the **same** cloned MAC (`stable-ssid`) on both
+  bands one minute apart, so nothing device-scoped could differ.
+- **A leftover guest-network bandwidth cap.** The AX1500 has no bandwidth
+  control feature at all, only QoS prioritisation. QoS was off throughout.
+- **2.4 GHz channel width and channel 6 congestion.** Disproved by a 113 Mbit/s
+  LAN transfer over the same association that gave 0.65 Mbit/s to the internet.
+- **ICMP loss figures generally.** The router deprioritises ICMP to its own
+  addresses. `ping` to a router management IP is not a valid loss test here.
+
+### Method note — the actual lesson
+
+Every wrong conclusion above came from **one sample per condition** against a
+fault that failed about half the time at random. Nothing was reliable until
+tests were run as 12 repeated samples, and until the two ends were measured
+**simultaneously** rather than in sequence. Do that first next time.
+
+### Topology (supersedes `docs/homelab.md` §7, which is stale)
+
+```
+fibre -> Nokia 10.0.0.254 (ISP-managed, SSID "17 Mozart", PPPoE, MTU 1492)
+           |- eth -> jjserver 10.0.0.101
+           `- eth [roof cable] -> TP-Link AX1500
+                                  WAN 10.0.0.240 static
+                                  LAN 10.42.0.1, SSID jjlink (2.4 + 5 GHz)
+                                    |- eth -> pve 10.42.0.10
+                                    |- eth -> pve-prod 10.42.0.11
+                                    |- LXC  10.42.0.12 (DNS/AdGuard), 10.42.0.13
+                                    `- wifi -> laptop, phone
+```
+
+`docs/homelab.md` still says AdGuard is `10.42.0.192` and that this laptop is
+`10.42.0.1`. Both are wrong. AdGuard moved to `10.42.0.12`; the laptop relay
+was replaced by the AX1500. See `SYSTEM.md` → NetworkManager profiles.
+
+### Still open
+
+- **Laptop-to-router ethernet cable is faulty.** It failed gigabit negotiation
+  four times and settled at 100 Mbit/s; `carrier_changes` reached 10.
+  ```
+  22:51:36 NIC Link is Up 1000 Mbps Full Duplex
+  22:51:37 NIC Link is Down          (x4)
+  22:51:54 NIC Link is Up 100 Mbps Full Duplex
+  ```
+  Not a cause of the above — pve-prod on a different cable showed the identical
+  50% loss. Costs nothing today since the line is ~85 Mbit/s. The laptop
+  normally uses jjlink Wi-Fi anyway; the cable was only for diagnosis.
+- **pve's own tailscale daemon** has not returned since the router reboot.
+  pve-prod runs on that host and is fine, so only the daemon is down.
+
+---
+
+## 🟩 Fingerprint reader dead — Broadcom CV3+ has no in-tree driver
+
+**Solved 2026-08-17.** The power-button reader had never worked. `fprintd` and
+`libfprint` were both installed, `authselect` already had `with-fingerprint`
+enabled, and `fprintd-list` still answered `No devices available`. The daemon
+was starting on every PAM call and finding nothing, which is what all those
+`fprintd.service` lines in the journal were.
+
+**Root cause.** The reader is `0a5c:5865`, a **Broadcom ControlVault 3+**.
+Fedora's `libfprint` ships Broadcom support for IDs 5842–5845 only. There was
+no `/usr/lib64/libfprint-2/` directory at all, because stock Fedora builds
+`libfprint` without TOD (Touch OEM Driver) support. The CV3+ Citadel chip wants
+signed firmware and speaks a proprietary encrypted protocol, so an open driver
+cannot exist for it. A vendor blob loaded through TOD is the only path.
+
+**Fix.** Swap `libfprint` for the TOD-enabled build from the
+`grahamwhiteuk/libfprint-tod` COPR and add the CV3+ blob. Exact packages,
+versions, file paths and the undo command are in `SYSTEM.md` → "Fingerprint
+reader". Enrolled `right-index-finger`; `fprintd-verify` and `su - jj` both
+pass.
+
+### Things that would have cost time
+
+- **No reboot needed**, despite what every guide says. `udevadm control
+  --reload-rules`, `udevadm trigger --subsystem-match=usb --action=add`, then
+  `systemctl restart fprintd` was enough — the device appeared immediately.
+- **An empty print directory is not a failure.** After a successful enrol,
+  `/var/lib/fprint/jj/broadcom-cv3plus/` is still empty and
+  `/etc/fprintd.conf` still says `[storage] type=file`. The template lives on
+  the Citadel chip. Trust `fprintd-list`, not `ls`.
+- **`sudo` is useless as a test here.** `/etc/sudoers.d/` has
+  `jj ALL=(ALL) NOPASSWD: ALL`, so it never authenticates and always looks like
+  a pass. `su - jj` is the real test: `/etc/pam.d/su` pulls in `system-auth` as
+  a substack.
+- **Don't touch `authselect`.** `with-fingerprint` was already enabled on the
+  `local` profile. Enabling it "again" is a no-op at best.
+- **Check the firmware versions in the journal before blaming the driver.**
+  `fprintd` prints `Current AAI Version` and `SBI Version` on startup. Ours
+  (`6.0.55.0` / `48`) matched the package exactly. Upstream's known enrolment
+  failure is a mismatch between the on-chip firmware and the blob, and the
+  driver will flash the chip to fix it.
+
+### Cost of the fix — read before updating
+
+`dnf swap libfprint libfprint-tod` hands ownership of a **core authentication
+library** to a personal COPR that is explicitly outside Fedora's quality and
+security process. CV3+ is marked *experimental* by its maintainer, and the only
+hardware he tested is not this laptop. If a Fedora update ever fights the COPR,
+the recovery is `sudo dnf swap libfprint-tod libfprint` — the password path
+keeps working throughout, because `pam_fprintd` is `sufficient` and falls
+through to `pam_unix`.
+
+### Not solved — the reader is useless for WebAuthn
+
+Wanting the reader for Authentik logins is what started this, and that part does
+not work. **Linux has no platform authenticator.** No browser exposes `fprintd`
+to WebAuthn, so the fingerprint cannot back a passkey the way Windows Hello or
+Touch ID does. Findings from the search on 2026-08-17:
+
+- **Firefox on Linux supports USB security keys only** — no phone, no QR, no
+  hybrid transport. Its "insert and touch your security key" dialog is the whole
+  feature set. This is still true in Firefox 153.
+- **Chromium on Linux does offer "Use a phone or tablet"** (QR + Bluetooth), and
+  that is what got a passkey enrolled in Authentik. Several Fedora users report
+  the phone is never found after scanning; it worked here first try.
+- In Authentik, **Authenticator attachment must be *No preference* or
+  *Cross-platform***. Setting it to *Platform* hides the phone option and puts
+  you back at the security-key-only dialog.
+- The one route that would use this reader for WebAuthn is a TPM-backed virtual
+  FIDO2 token gated on `fprintd` (`mc256/tpm-fido2-thinkpad-linux`: a daemon on
+  `/dev/uhid`, keys sealed to the TPM). **Shelved, not tried.** This machine
+  meets every requirement (TPM 2.0 STMicro at `/dev/tpmrm0`, `/dev/uhid`
+  present, `uhid` built into the kernel, `60-fido-id.rules` already shipped) but
+  the project is small, was tested on a ThinkPad with a Synaptics reader, and
+  its fingerprint gate is enforced in **userspace, not by the TPM** — which
+  means nothing on a box where `jj` is passwordless root anyway.
 
 ---
 
