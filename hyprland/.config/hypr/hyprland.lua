@@ -16,6 +16,7 @@ require("modules.keybinds")
 require("modules.autostart")
 require("modules.scratchpads")
 require("modules.plugins")
+require("modules.voxtype")
 
 require("rules")
 require("theme")

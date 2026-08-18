@@ -51,6 +51,61 @@ Drop-ins in repo (symlinked to `~/.config/systemd/user/`):
 
 > **Do NOT add `Restart=on-failure` to `wayland-wm@hyprland.desktop.service`.** It was tried and reverted. The Hyprland 0.55.4 SIGSEGVs are *shutdown* crashes (stack: `main` → `CCompositor::cleanup()` → `wl_display_destroy_clients`), triggered when special-workspace windows (zellij/jjserver) unmap during teardown. noctalia logout runs `hyprctl dispatch exit`, so logout itself hits this crash path and exits non-zero. With `Restart=on-failure`, systemd would relaunch Hyprland on logout instead of letting `OnFailure=wayland-session-shutdown.target` end the session — i.e. it breaks logout. The crash is benign for running sessions (it only fires while Hyprland is already exiting); logout still completes via the OnFailure path. Real fix is an upstream Hyprland patch (none available in the lionheartp COPR as of 0.55.4).
 
+---
+
+## `/usr/bin/voxtype` → Vulkan engine (GPU transcription)
+
+`/usr/bin/voxtype` is a **root-owned symlink** the RPM points at one of the engine
+variants in `/usr/lib/voxtype/`. Default after install is `voxtype-onnx-avx2` (CPU).
+
+```
+/usr/bin/voxtype -> /usr/lib/voxtype/voxtype-vulkan
+```
+
+**Why:** whisper ran on the CPU (`whisper_backend_init_gpu: no GPU found`,
+`use gpu = 0`). Measured on the same 17.8s clip, same model (`base.en`):
+**CPU 1.05s, GPU 0.08s.** (The clip is ambient noise, so the decode pass is
+trivial and the number mostly reflects the encoder, which is the part that
+scales with audio length.)
+
+**Why Vulkan and not CUDA:** the ONNX GPU variants (`voxtype-onnx-cuda-12/13`,
+`migraphx`) require **AVX-512**, and Meteor Lake exposes none (`grep avx512
+/proc/cpuinfo` is empty). `voxtype setup gpu --enable` refuses for that reason.
+The Whisper Vulkan variant has no such requirement. Cost of the switch: the ONNX-only
+engines (parakeet, moonshine, sensevoice, paraformer, dolphin, omnilingual) become
+unavailable. We use whisper, so that is free.
+
+**Device selection is NOT done here, and NOT with `VOXTYPE_VULKAN_DEVICE`.** That
+variable was tried first, as a `voxtype.service.d/gpu.conf` drop-in — it is what
+`voxtype setup gpu --status` tells you to use. It does not work on this machine.
+`systemctl --user show voxtype -p Environment` confirmed the daemon had
+`VOXTYPE_VULKAN_DEVICE=nvidia`, and whisper still logged `gpu_device = 0` and loaded
+onto `Vulkan0`, the Intel Arc iGPU. The binary translates the variable into
+`VK_LOADER_DRIVERS_SELECT`, and that filter did not take: ggml still enumerated both
+devices. The drop-in was deleted rather than kept as dead config.
+
+What actually works is `gpu_device = 1` in `voxtype/.config/voxtype/config.toml`
+(stow package `voxtype`). Verify after any driver change:
+
+```
+journalctl --user -u voxtype | grep -E 'ggml_vulkan|Vulkan[01] total size'
+```
+
+`Vulkan1 total size` means the RTX 500 Ada. `Vulkan0` means it fell back to the iGPU,
+and the index moved.
+
+**To reapply:**
+```
+sudo voxtype setup onnx --disable
+sudo voxtype setup gpu --enable
+voxtype info variants          # confirm: Active: Whisper (Vulkan)
+```
+
+**An RPM update resets this** — the symlink is packaged. Re-run the two commands
+after every `voxtype` upgrade, and check with `voxtype info variants`.
+
+---
+
 ### `akonadi_control.service` → `/dev/null` (mask — not in stow, stow can't handle absolute symlinks)
 
 **Why:** Disables Akonadi (KDE's PIM data broker). Not used outside of KDE apps.

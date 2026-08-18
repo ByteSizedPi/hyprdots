@@ -118,6 +118,24 @@ seat/DRM-master contention (see problems.md → "tty1 dead screen").
   0/1/2). Same `path` source, same one-time enable. A service polls sysfs because
   the Fn key writes the level in firmware and raises no event; writes go through
   `brightnessctl`, so they only work from the session on the **active VT**.
+- **`gabedunn/voxtype`** — a bar indicator for the `voxtype` dictation daemon
+  (`voxtype-0.7.5`, installed from an RPM, not from this repo). It ships in
+  `noctalia-dev/community-plugins`, **not** in `official-plugins`, so it stays
+  invisible in Settings → Plugins until a third `[[plugins.source]]` named
+  `community` is declared in `config.toml`. Fetch it with
+  `noctalia msg plugins update community`, then
+  `noctalia msg plugins enable gabedunn/voxtype`. Add the `status` widget to the
+  bar in Settings → Bar.
+- **Voxtype dictation** — `voxtype.service` (the unit is the packaged one in
+  `/usr/lib`, enabled) runs whisper locally with `base.en` on the **NVIDIA RTX 500
+  Ada via Vulkan**. `[hotkey] enabled = false`, so voxtype grabs no key itself:
+  **`SUPER + D` held** is the only trigger, bound in
+  `hyprland/.config/hypr/modules/voxtype.lua`. Output goes through `wtype`.
+  Config is the `voxtype` stow package; the GPU pin is `gpu_device = 1` there, and
+  the engine symlink `/usr/bin/voxtype` is in `SYSTEM.md` (an RPM update resets it).
+  `voxtype setup compositor hyprland` writes a `conf.d/*.conf` fragment that a
+  Lua Hyprland config can never read — see that module and the hypr README
+  before re-running it.
 
 ## Plasma / KDE
 - `plasmashell` + `startplasma-wayland` present; Plasma Wayland is the "other"

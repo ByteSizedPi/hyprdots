@@ -77,6 +77,10 @@ hl.bind("XF86AudioMicMute", hl.dsp.exec_cmd("noctalia msg mic-mute"), { locked =
 hl.bind("XF86MonBrightnessUp", hl.dsp.exec_cmd("noctalia msg brightness-up"), { locked = true, repeating = true })
 hl.bind("XF86MonBrightnessDown", hl.dsp.exec_cmd("noctalia msg brightness-down"), { locked = true, repeating = true })
 
+-- Dictation: SUPER + D push-to-talk is in modules/voxtype.lua, not here. Its
+-- release half has to be defined inside the voxtype_recording submap, so both
+-- halves live with the submap.
+
 -- Media (via Noctalia)
 hl.bind("XF86AudioNext", hl.dsp.exec_cmd("noctalia msg media next"), { locked = true })
 hl.bind("XF86AudioPause", hl.dsp.exec_cmd("noctalia msg media toggle"), { locked = true })

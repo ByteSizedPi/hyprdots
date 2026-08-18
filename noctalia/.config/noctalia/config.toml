@@ -53,3 +53,13 @@ name = "official"
 kind = "git"
 location = "https://github.com/noctalia-dev/official-plugins"
 enabled = true
+
+# --- Community catalog: gabedunn/voxtype (bar indicator for the voxtype
+# dictation daemon) lives here, not in official-plugins. Without this source the
+# plugin never appears in Settings -> Plugins.
+# Run `noctalia msg plugins update community` after adding it to fetch the repo.
+[[plugins.source]]
+name = "community"
+kind = "git"
+location = "https://github.com/noctalia-dev/community-plugins"
+enabled = true

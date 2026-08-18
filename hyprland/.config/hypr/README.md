@@ -16,10 +16,11 @@ modules/            hand-written config, one concern per file
   monitors.lua      monitor rules (read its header before touching)
   input.lua         keyboard, touchpad, gestures
   behaviour.lua     what the compositor DOES — layout, misc, debug
-  keybinds.lua      all binds
+  keybinds.lua      all binds except voxtype's (see voxtype.lua)
   autostart.lua     noctalia daemon
   scratchpads.lua   special:zellij and special:jjserver
   plugins.lua       hyprpm loading model (read before touching plugins)
+  voxtype.lua       dictation — SUPER+D push-to-talk + its submaps
 
 rules/              theme-independent rules
   windows.lua       window rules
@@ -66,3 +67,39 @@ lives outside this repo, in `/var/cache/hyprpm/$USER/`.
 
 Per-plugin **appearance** config is theme-owned (`theme/glass.lua`), because whether
 hyprglass runs is a property of the look, not the machine.
+
+## No conf.d, ever
+
+`voxtype setup compositor hyprland` (and tools like it) write a `.conf` fragment
+to `~/.config/hypr/conf.d/` and then tell you to add
+`source = ~/.config/hypr/conf.d/*.conf` to `hyprland.conf`.
+
+**Ignore that instruction.** There is no `hyprland.conf` here, and a Lua config
+has no source/include function — the `hl` table has no such field. Enumerate it
+yourself if you want to check:
+
+```
+hyprctl eval 'local t={} for k,v in pairs(hl) do t[#t+1]=k end table.sort(t) error(table.concat(t,", "))'
+```
+
+A `.conf` dropped in `conf.d/` is never read. Port it to a module under
+`modules/` instead and delete the fragment, or it will sit in the tree looking
+like live config. `modules/voxtype.lua` is the worked example.
+
+Two translation rules that bit on that port:
+
+- A no-modifier bind is `hl.bind("F12", ...)`, **not** `hl.bind(", F12", ...)`.
+  The comma form is `.conf` syntax and fails with "Unknown keysym".
+- `hl.bind` takes one dispatcher per key. Where the `.conf` binds the same key
+  twice to chain two actions, pass a Lua function that calls `hl.dispatch` twice.
+
+## Entering a submap from outside Hyprland
+
+`hyprctl dispatch submap <name>` **fails** on a Lua config. It is wrapped into
+`hl.dispatch(submap <name>)`, which is a Lua syntax error. Any external tool
+that documents that command needs its hook rewritten as:
+
+```
+hyprctl eval 'hl.dispatch(hl.dsp.submap("voxtype_suppress"))'
+hyprctl eval 'hl.dispatch(hl.dsp.submap("reset"))'
+```
