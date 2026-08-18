@@ -9,8 +9,8 @@ themes {
             emphasis_3 {{colors.tertiary_container.default.red}} {{colors.tertiary_container.default.green}} {{colors.tertiary_container.default.blue}}
         }
         text_selected {
-            base       {{colors.on_surface.default.red}} {{colors.on_surface.default.green}} {{colors.on_surface.default.blue}}
-            background {{colors.surface_container_high.default.red}} {{colors.surface_container_high.default.green}} {{colors.surface_container_high.default.blue}}
+            base       {{colors.surface.default.red}} {{colors.surface.default.green}} {{colors.surface.default.blue}}
+            background {{colors.on_surface.default.red}} {{colors.on_surface.default.green}} {{colors.on_surface.default.blue}}
             emphasis_0 {{colors.tertiary.default.red}} {{colors.tertiary.default.green}} {{colors.tertiary.default.blue}}
             emphasis_1 {{colors.secondary.default.red}} {{colors.secondary.default.green}} {{colors.secondary.default.blue}}
             emphasis_2 {{colors.error.default.red}} {{colors.error.default.green}} {{colors.error.default.blue}}

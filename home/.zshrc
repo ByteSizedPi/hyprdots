@@ -81,6 +81,19 @@ plugins=(
     fast-syntax-highlighting
 )
 
+# ── Palette for the shell plugins ─────────────────────────────────────
+# zsh-autosuggestions defaults ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE to fg=8. Noctalia
+# maps kitty colour 8 to a near-background dark blue (#21215f on #070722, 1.4:1),
+# so the suggestion is unreadable. Noctalia renders the palette colour into
+# ~/.config/zsh/noctalia-theme.zsh from
+# noctalia/.config/noctalia/templates/zsh-theme.zsh on every theme change.
+# The value below is the fallback for a host with no generated file: 244 is a
+# fixed xterm grey, not a palette slot, so it stays readable anywhere.
+# Both lines must run BEFORE oh-my-zsh sources the plugin.
+ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=244'
+[[ -r ${XDG_CONFIG_HOME:-$HOME/.config}/zsh/noctalia-theme.zsh ]] \
+  && source ${XDG_CONFIG_HOME:-$HOME/.config}/zsh/noctalia-theme.zsh
+
 source $ZSH/oh-my-zsh.sh
 
 export EDITOR="nvim"

@@ -8,6 +8,10 @@ input_path = "~/.config/noctalia/templates/nvim-theme.lua"
 output_path = "$XDG_CONFIG_HOME/nvim/lua/noctalia-theme.lua"
 post_hook = "bash ~/.config/noctalia/scripts/nvim-theme-apply.sh"
 
+[theme.templates.user.zsh]
+input_path = "~/.config/noctalia/templates/zsh-theme.zsh"
+output_path = "$XDG_CONFIG_HOME/zsh/noctalia-theme.zsh"
+
 # [theme.templates.user.hyprland-windowrules]
 # input_path = "~/.config/noctalia/templates/hyprland-windowrules.lua"
 # output_path = "~/.config/hypr/noctalia-windowrules.lua"

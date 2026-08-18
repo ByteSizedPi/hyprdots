@@ -26,6 +26,13 @@ function M.setup()
 
 	hi("WinSeparator", { fg = "{{colors.outline.default.hex}}", bg = "{{colors.surface.default.hex}}" })
 
+	-- base16 maps Visual to base02 (surface_container_high), which sits at 1.15:1
+	-- against the surface and is unreadable. Use kitty's inverted selection instead
+	-- (17.2:1). The explicit fg is required: on a light bg the syntax colors that
+	-- base16 leaves showing through are unreadable. Kept in sync with
+	-- text_selected in templates/zellij-theme.kdl and selection_* in kitty-theme.conf.
+	hi("Visual", { fg = "{{colors.surface.default.hex}}", bg = "{{colors.on_surface.default.hex}}" })
+
 	hi("TelescopeNormal", { fg = "{{colors.on_surface.default.hex}}", bg = "{{colors.surface.default.hex}}" })
 	hi("TelescopeBorder", { fg = "{{colors.outline.default.hex}}", bg = "{{colors.surface.default.hex}}" })
 	hi("TelescopePromptNormal", {
