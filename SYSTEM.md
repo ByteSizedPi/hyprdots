@@ -34,6 +34,15 @@ sudo systemctl reload systemd-logind
 
 These are version-controlled in `dotfiles/systemd/` and applied with `stow --no-folding systemd` from the dotfiles root. **Must use `--no-folding`** — standard stow creates directory symlinks which systemd does not follow for drop-in discovery.
 
+Full units in repo (no packaged equivalent exists): `bluetooth-unblock.service`, `power-profile-auto.service`, `espanso.service`.
+
+> **Never run `systemctl --user disable` (or `reenable`) on a stow-symlinked unit.** systemd treats a symlinked unit file as a *linked* unit and **deletes the stow symlink**. It ate `espanso.service` once. Restow to recover, then create the `.wants/` symlink by hand:
+> ```
+> ln -sfn ~/dotfiles/systemd/.config/systemd/user/espanso.service \
+>   ~/.config/systemd/user/default.target.wants/espanso.service
+> ```
+> Units whose fragment lives in `/usr/lib` (voxtype) are safe to `systemctl enable` normally.
+
 Drop-ins in repo (symlinked to `~/.config/systemd/user/`):
 - `drkonqi-coredump-launcher@.service.d/rate-limit.conf` — rate-limits KDE crash reporter to prevent runaway instances
 - `app-org.kde.xwaylandvideobridge@autostart.service.d/kde-only.conf` — prevents xwaylandvideobridge autostarting under Hyprland
