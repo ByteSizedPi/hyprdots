@@ -66,3 +66,8 @@ yazi/.config/yazi/flavors/
 *.swp
 *.swo
 .claude
+
+# voxtype installer RPM — 342 MB binary, downloaded from
+# github.com/peteonrails/voxtype/releases. The install is recorded in SYSTEM.md
+# (the /usr/bin/voxtype engine symlink); the package itself does not belong here.
+*.rpm
