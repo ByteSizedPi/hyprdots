@@ -10,36 +10,45 @@
 -- to be defined inside the submap callback below. See the submap comment.
 
 -- Hold this to dictate. voxtype does not grab a key itself —
--- ~/.config/voxtype/config.toml sets `[hotkey] enabled = false`, so this bind is
--- the only way to start a recording.
-local PTT = "SUPER + D"
-
--- Press: start recording, then enter the submap so F12 can cancel.
-hl.bind(PTT, function()
-	hl.dispatch(hl.dsp.exec_cmd("voxtype record start"))
-	hl.dispatch(hl.dsp.submap("voxtype_recording"))
-end, { description = "voxtype: push-to-talk (hold)" })
-
--- Recording submap: active while voxtype records.
+-- voxtype/.config/voxtype/config.toml sets `[hotkey] enabled = false`, so this
+-- bind is the only way to start a recording.
 --
--- The release bind MUST be defined in here. Entering a submap deactivates the
--- default submap's binds, so a release bind left outside would never fire and
--- the recording would run until [audio] max_duration_secs (60s).
+-- F13 is the physical Right Ctrl key. keyd remaps it in /etc/keyd/default.conf
+-- (`rightcontrol = f13`, recorded in SYSTEM.md). No keyboard has a real F13 and
+-- no application binds it, so grabbing it globally costs nothing.
 --
--- F12 cancels instead of transcribing. The generated .conf binds F12 twice
--- (exec, then submap reset); hl.bind takes one dispatcher per key, so one Lua
--- function does both.
-hl.define_submap("voxtype_recording", function()
-	hl.bind(PTT, function()
-		hl.dispatch(hl.dsp.exec_cmd("voxtype record stop"))
-		hl.dispatch(hl.dsp.submap("reset"))
-	end, { release = true, description = "voxtype: stop and transcribe" })
+-- IT MUST BE A BARE KEY. Measured on SUPER + D: the release bind fires only if D
+-- is released BEFORE super. Release super first and it never fires, the recording
+-- runs to the 60s limit, and the next press looks like a toggle. That is the
+-- "SUPER+D works like a toggle" bug. A key with no modifier has no such order.
+-- The physical Right Ctrl key. keyd rewrites it to F13 in /etc/keyd/default.conf
+-- (`rightcontrol = f13`, recorded in SYSTEM.md), and this binds F13 by KEYCODE:
+-- keyd emits Linux keycode 183, Hyprland takes xkb keycodes, which are Linux + 8.
+--
+-- IT MUST BE A BARE KEY. Measured on SUPER + D: the release bind fires only if D
+-- is released BEFORE super. Release super first and it never fires, the recording
+-- runs to the 60s limit, and the next press looks like a toggle. That was the
+-- "SUPER+D works like a toggle" bug.
+--
+-- DO NOT "FIX" THIS BY NAME. `hl.bind("F13", ...)` is not equivalent: the US xkb
+-- layout assigns no keysym above F12. And do not trust `hyprctl binds -j` here —
+-- it reports a keycode bind as `key: ""`, `keycode: 0`, which looks dead and is
+-- not. This exact misreading already caused one regression. Verify by dictating,
+-- not by reading the bind table.
+local PTT = "code:191"
 
-	hl.bind("F12", function()
-		hl.dispatch(hl.dsp.exec_cmd("voxtype record cancel"))
-		hl.dispatch(hl.dsp.submap("reset"))
-	end, { description = "voxtype: cancel recording" })
-end)
+hl.bind(PTT, hl.dsp.exec_cmd("voxtype record start"), {
+	description = "voxtype: push-to-talk (hold)",
+})
+
+hl.bind(PTT, hl.dsp.exec_cmd("voxtype record stop"), {
+	release = true,
+	description = "voxtype: stop and transcribe",
+})
+
+hl.bind("SUPER + SHIFT + D", hl.dsp.exec_cmd("voxtype record cancel"), {
+	description = "voxtype: cancel recording, discard audio",
+})
 
 -- Suppress submap: swallows the bare modifier keysyms while voxtype types the
 -- transcription, so a held modifier cannot combine with the typed letters and

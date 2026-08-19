@@ -53,6 +53,63 @@ Drop-ins in repo (symlinked to `~/.config/systemd/user/`):
 
 ---
 
+## `/etc/keyd/default.conf`
+
+```ini
+[ids]
+*
+
+[main]
+capslock = overload(meta, esc)
+
+# Right Ctrl becomes F13, a key no physical keyboard has and no application binds.
+# Hyprland uses it as the bare push-to-talk key for voxtype dictation
+# (hyprland/.config/hypr/modules/voxtype.lua). A bare key has no modifier, so
+# there is no release-order trap: SUPER + D only stopped recording if D was
+# released before SUPER.
+rightcontrol = f13
+```
+
+**Why `capslock = overload(meta, esc)`:** Caps Lock acts as Meta when held and
+Escape when tapped. Predates this entry; it was running untracked.
+
+**Why remap at all:** push-to-talk needs a key with no modifier. Measured
+on `SUPER + D`: the `release` bind fires only when `D` is released **before**
+`SUPER`. Release `SUPER` first and it never fires, the recording runs to the 60s
+`max_duration_secs`, and the next press reads as a toggle. Bare `Pause`,
+`Scroll_Lock` and `F13` all failed to reach Hyprland from this keyboard (no such
+physical keys), so keyd synthesises one.
+
+**Hyprland must bind it by KEYCODE, not by name.** keyd emits Linux keycode 183
+(confirmed by reading `/dev/input/event22`, the keyd virtual keyboard, raw).
+Hyprland takes xkb keycodes, which are Linux + 8, so the bind is `code:191` in
+`hyprland/.config/hypr/modules/voxtype.lua`. `hl.bind("F13", ...)` by name is NOT
+equivalent — the US xkb layout assigns no keysym above F12.
+
+> **Do not trust `hyprctl binds -j` for a keycode bind.** It reports `"key": ""`
+> and `"keycode": 0`, which looks like a dead bind and is not. Acting on that
+> reading already broke dictation once. Verify by dictating and checking
+> `journalctl --user -u voxtype`, never by reading the bind table.
+
+**To reapply:**
+```
+sudo tee /etc/keyd/default.conf <<'EOF'
+[ids]
+*
+
+[main]
+capslock = overload(meta, esc)
+rightcontrol = f13
+EOF
+sudo keyd reload
+keyd list-keys | tr ' ' '\n' | grep -x -E 'rightcontrol|f13'   # verify names
+```
+
+`keyd` is a system service (`systemctl is-active keyd`). It reads `/etc/keyd/`,
+which stow cannot own, so this file has to be reapplied by hand on a fresh install.
+
+---
+
 ## `/usr/bin/voxtype` → Vulkan engine (GPU transcription)
 
 `/usr/bin/voxtype` is a **root-owned symlink** the RPM points at one of the engine
