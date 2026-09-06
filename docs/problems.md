@@ -8,6 +8,70 @@ Status key: 🟥 OPEN · 🟧 MITIGATED (worked around, root cause unsolved) · 
 
 ---
 
+## 🟩 `noctalia config validate` warns on 4 keys — they are legacy names, not dead keys
+
+**Symptom (2026-09-05, after the move to noctalia 5.0.1):**
+
+```
+WARN  settings.toml:342:11: widget.cpu.display: unknown setting
+WARN  settings.toml:343:14: widget.cpu.show_label: unknown setting
+WARN  settings.toml:350:11: widget.ram.display: unknown setting
+WARN  settings.toml:372:11: widget.widget_2.capsule: unknown setting
+```
+
+The same four keys sit in `themes/noctalia/noctalia.toml` and
+`themes/catppuccin/noctalia.toml`, so every theme apply re-seeds them.
+
+**The first three are renames, and 5.0.1 migrates them at load.** The rename
+rules are compiled into `/usr/bin/noctalia`. `strings` on the binary finds
+them:
+
+```
+show_icon is now show_glyph
+show_label is now show_value
+display is now visualization and show_value
+show_glyph, show_value, and visualization cannot all be disabled
+```
+
+**Why the validator warns anyway.** It is a validator limitation, not dead
+config. `[widget.cpu]` in `settings.toml` declares no `type`, so the validator
+cannot resolve which widget schema to check against. Add the type and the same
+keys pass:
+
+```
+$ printf '[widget.cpu]\ndisplay = "text"\n' > p.toml && noctalia config validate p.toml
+WARN  p.toml: widget.cpu.display: unknown setting
+
+$ printf '[widget.cpu]\ntype = "sysmon"\nstat = "cpu_usage"\ndisplay = "text"\n' > p.toml && noctalia config validate p.toml
+✓ Config is valid
+```
+
+`noctalia config export full` shows the running shell resolving
+`widget.cpu` to `type = "sysmon"`, `stat = "cpu_usage"` from built-in defaults.
+The shell applies those defaults; the validator does not.
+
+**The fourth warning has a different cause.** `widget.widget_2` is a plugin
+widget (`type = "jj/theme-switcher:widget"`). Its `plugin.toml` declares two
+settings, `repo` and `confirm_apply`, and no `capsule`. The validator checks
+plugin-widget keys against that declared list, so a generic bar key like
+`capsule` warns. `widget.clock.capsule` is a builtin and does not warn.
+
+**Not fixed, on purpose.** Modernising the theme files would silence the
+warnings, but the old key pair is self-contradictory and the new value cannot
+be derived without deciding how the bar should look:
+
+* `display = "text"` maps to `visualization = "none"` + `show_value = true`.
+* `show_label = false` maps to `show_value = false`.
+
+Both rules target `show_value` and disagree. Which one 5.0.1 applies first was
+not measured. Decide the wanted appearance first, then write the new keys
+directly rather than converting the old ones.
+
+**Do not read the warning as "this setting does nothing."** The CPU and RAM
+widgets render correctly on 5.0.1 with the legacy keys in place.
+
+---
+
 ## 🟩 `sudo dnf upgrade` printed 238 "errors" — they are cosmetic rpm warnings
 
 **Symptom (2026-09-04):** `sudo dnf upgrade` scrolled a long wall of lines that
