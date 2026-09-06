@@ -1246,6 +1246,55 @@ Touch ID does. Findings from the search on 2026-08-17:
 
 ---
 
+## 🟩 SUPER + swipe to swap the two monitors' workspaces
+
+**Goal (2026-08-22):** a SUPER-held 3-finger horizontal swipe on the touchpad
+should exchange the workspaces on eDP-1 and HDMI-A-1. Config lives in
+`hyprland/.config/hypr/modules/input.lua`.
+
+**The dispatcher is `hl.dsp.workspace.swap_monitors`** — the Lua name for
+`swapactiveworkspaces`. It is not in the LSP stubs by that name, so grepping
+`/usr/share/hypr/stubs/hl.meta.lua` for "swapactive" finds nothing. Look under
+`HL.DspWorkspaceNamespace` instead.
+
+**Tried, didn't work:**
+
+- `hl.dsp.workspace.swap_monitors("current", "+1")` — two positional strings.
+  `hl.workspace.swap_monitors: expected a table { monitor1, monitor2 }`.
+- `hl.dsp.workspace.swap_monitors({ "current", "+1" })` — positional table.
+  `'monitor1' is required` / `'monitor2' is required`, then `Monitor not found`.
+- `action = { ["end"] = fn }` — rejected with `hl.gesture: action callback
+  table must define at least one of start, update, end, or finish`. **The error
+  message is wrong.** `end` is listed but not accepted. Measured on 0.56.2 by
+  registering one gesture per candidate key: `start`, `update` and `finish`
+  pass; `end`, `on_end`, `gesture_end`, `done` and `complete` all fail.
+
+**Worked:**
+
+```lua
+hl.dsp.workspace.swap_monitors({ monitor1 = "current", monitor2 = "+1" })
+```
+
+Named keys. `"current"` is the focused monitor, `"+1"` the next by monitor id.
+
+**Gesture shadowing — order matters.** Hyprland keeps the **first** gesture
+registered for a finger count plus direction and refuses later ones:
+`hl.gesture: Gesture will be overshadowed by a previous gesture. Previous
+HORIZONTAL shadows new HORIZONTAL`. So the modded gesture is declared **before**
+the plain `action = "workspace"` one in `input.lua`.
+
+**`mods` is part of a gesture's identity.** Registering `mods = "SUPER"` and
+plain 3-finger horizontal together produces **no** shadow error, so a differing
+`mods` makes them distinct gestures. The plain workspace swipe therefore does
+not also fire while SUPER is held.
+
+**Verifying a Lua config edit:** Hyprland auto-reloads on file change, but the
+reload is not written to `hyprland.log`. `hyprctl configerrors` is the check —
+it printed the `["end"]` failure with the exact file and line, and prints
+nothing now. `hyprctl gestures` does not exist (`unknown request`).
+
+---
+
 ## See also (existing deep dives)
 - 🟧/🟩 **Greeter ghost + dwindle crash + hybrid-GPU + Lua gotchas** —
   [hyprland-plasma-diagnosis.md](hyprland-plasma-diagnosis.md). Read first when
