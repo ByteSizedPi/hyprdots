@@ -38,3 +38,9 @@ hl.window_rule({
 --
 -- It now lives in the `translucent` table at the bottom of theme/appearance.lua,
 -- which is the mechanism built for exactly this in commit ef0bd81.
+
+-- The YouTube Music and Beeper rules USED TO LIVE HERE, and moved to
+-- modules/scratchpads.lua on 2026-09-03. Each of those apps now owns a special
+-- workspace, a launch command, a keybind and a border colour, and splitting one
+-- app across two files makes none of the four readable. The jjserver border rule
+-- set that precedent: scratchpad-related window rules live with the scratchpad.

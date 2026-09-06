@@ -55,6 +55,8 @@ end
 -- Scratchpad
 hl.bind(mainMod .. " + S", hl.dsp.workspace.toggle_special("zellij"))
 hl.bind(mainMod .. " + A", hl.dsp.workspace.toggle_special("jjserver"))
+hl.bind(mainMod .. " + Y", hl.dsp.workspace.toggle_special("youtube"))
+hl.bind(mainMod .. " + B", hl.dsp.workspace.toggle_special("beeper"))
 -- hl.bind(mainMod .. " + SHIFT + S", hl.dsp.window.move({ workspace = "special:magic" }))
 
 -- Mouse
