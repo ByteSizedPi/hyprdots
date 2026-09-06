@@ -130,6 +130,8 @@ alias ls="eza --icons"
 alias la="eza -lah --icons --git"
 alias tree="eza --tree --icons"
 alias grep="rg --color=auto"
+alias sup="sudo dnf update --refresh"
+alias wifi="nmcli radio wifi on"
 # alias cat="bat"
 
 setopt COMPLETE_ALIASES
