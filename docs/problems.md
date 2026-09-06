@@ -1302,3 +1302,85 @@ nothing now. `hyprctl gestures` does not exist (`unknown request`).
 - **Dwindle layout crash on shutdown** — [hyprland-plasma-diagnosis.md](hyprland-plasma-diagnosis.md)
   → ISSUE 2. (The standalone draft bug report was deleted 2026-07-27 as stale: written
   against 0.55.4, never filed, and no Hyprland coredump since the 0.56.0 upgrade.)
+
+---
+
+## 🟩 cliamp played nothing from YouTube Music
+
+**Symptom:** cliamp v1.63.2 would not stream YouTube Music. Time was being spent
+in the Google Cloud Console OAuth screens, which is the wrong place to look —
+Google was only one of three separate faults, and the least important one.
+
+**Three faults, found in this order.**
+
+**1. OAuth was never completed, and never needed to be.** `~/.config/cliamp/config.toml`
+had `[ytmusic]` with a `client_id` and `client_secret`, so the Google Cloud half
+was already done. But `~/.config/cliamp/ytmusic_credentials.json` did not exist,
+so the consent step had never finished. cliamp's own docs
+([docs/youtube-music.md](https://github.com/bjarneo/cliamp/blob/main/docs/youtube-music.md))
+say `cookies_from` **skips OAuth entirely**. YouTube Music already runs on this
+machine as a Chromium web app on the `Default` profile, so those cookies are
+signed in and Google Cloud is not involved at all. Added to `[ytmusic]`:
+
+```toml
+cookies_from = "chromium"
+```
+
+**2. yt-dlp could not resolve any audio format.** cliamp streams by shelling out
+to `yt-dlp` (confirmed by `strings` on the binary: `--cookies-from-browser`,
+`-f`, `bestaudio`). Run by hand, yt-dlp 2026.08.19 failed:
+
+```
+WARNING: Signature solving failed: Some formats may be missing.
+WARNING: Only images are available for download.
+ERROR: Requested format is not available.
+```
+
+YouTube signs media URLs with a JavaScript challenge, and yt-dlp must execute
+that JavaScript to see any audio stream. Two things were missing:
+
+* **A usable JS runtime.** Deno is yt-dlp's default and is not installed. Node
+  22.23.1 **is** installed, but Node is only used when `--js-runtimes node` is
+  passed.
+* **The challenge solver script.** Fedora's `yt-dlp+default` rpm is installed and
+  does **not** pull it in — `import yt_dlp_ejs` fails in the system python3.
+
+**3. cliamp passes neither flag.** cliamp only ever passes `-f bestaudio`, so the
+flags had to become yt-dlp defaults or every track would fail. That is what the
+new **`yt-dlp` stow package** is for: `yt-dlp/.config/yt-dlp/config` sets
+`--js-runtimes node` and `--remote-components ejs:github`.
+
+### Tried — DIDN'T work
+* `yt-dlp -f bestaudio --cookies-from-browser chromium <url>` with no other
+  flags. Cookie decryption succeeded (Chromium was running at the time and it
+  still worked), but only image formats resolved.
+* Adding `--js-runtimes node` alone. The message sharpened to
+  `Remote component challenge solver script (node) was skipped`, but still no
+  audio. The runtime was never the whole problem.
+
+### Tried — WORKED
+* `--js-runtimes node --remote-components ejs:github` together resolved a real
+  stream: `Aphex Twin - Xtal (HQ) | 128.476 kbps | opus`.
+* The same two flags moved into `~/.config/yt-dlp/config`, then yt-dlp run with
+  **no** runtime flags: same result. This is what makes cliamp work.
+* End to end, 2026-09-03: `cliamp --daemon --provider ytmusic --vol -30`, then
+  `cliamp queue <music.youtube.com url>` and `cliamp play`. Status went
+  `stopped` → `playing`, position advanced 5 → 21 of 294 seconds.
+
+### Still to do
+`--remote-components ejs:github` makes yt-dlp **download the solver script from
+GitHub at run time**. It works, but a signed package is better. The terra repo
+(already enabled) has it:
+
+```
+sudo dnf install python3-yt-dlp-ejs
+```
+
+Install that, then delete the `--remote-components` line from
+`yt-dlp/.config/yt-dlp/config`. The comment in that file says the same.
+
+### Note for the next YouTube breakage
+This whole failure mode is **not cliamp's**. It hits anything that shells out to
+yt-dlp, and YouTube changes the challenge often. If audio stops again, test
+`yt-dlp -f bestaudio --simulate <url>` by hand FIRST. If that fails, the fix is a
+yt-dlp update or an ejs update, not a cliamp setting.

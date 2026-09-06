@@ -1,0 +1,28 @@
+# yt-dlp defaults, applied to EVERY yt-dlp run on this machine.
+#
+# This file exists for cliamp. cliamp streams YouTube Music by shelling out to
+# yt-dlp, and it passes only `-f bestaudio` — no runtime flags. So the flags
+# YouTube now needs have to be defaults here, or every cliamp track fails with
+# "Requested format is not available".
+#
+# WHY THESE TWO FLAGS (measured 2026-09-03, yt-dlp 2026.08.19):
+#
+# YouTube signs its media URLs with a JavaScript challenge. yt-dlp must run that
+# JavaScript to get any audio format at all. Without it, `yt-dlp -f bestaudio`
+# on a music.youtube.com URL returns "Only images are available for download".
+#
+#   --js-runtimes node
+#     Picks the JavaScript engine. Deno is yt-dlp's default and is NOT installed;
+#     Node 22.23.1 is, at /usr/bin/node. Node needs this flag to be used at all,
+#     and yt-dlp requires Node >= 22. Drop this line if you ever install deno.
+#
+#   --remote-components ejs:github
+#     Downloads the challenge solver script from the yt-dlp GitHub repo at run
+#     time. This is a WORKAROUND, not the good answer. The solver ships as an
+#     rpm and the terra repo has it:
+#         sudo dnf install python3-yt-dlp-ejs
+#     Install that and DELETE this line — the solver then comes from a signed
+#     package instead of a fetch on every cold run. Fedora's `yt-dlp+default`
+#     package is already installed and does NOT pull the solver in.
+--js-runtimes node
+--remote-components ejs:github
