@@ -56,6 +56,7 @@ widget.cpu.show_label = false
 widget.cpu.visualization = "none"
 widget.ram.display = "text"
 widget.ram.visualization = "none"
+widget.status.idle_color = "tertiary"
 widget.widget_2.capsule = true
 widget.workspaces.color = "tertiary"
 widget.workspaces.empty_color = "primary"
