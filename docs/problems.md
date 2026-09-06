@@ -8,6 +8,49 @@ Status key: 🟥 OPEN · 🟧 MITIGATED (worked around, root cause unsolved) · 
 
 ---
 
+## 🟩 `sudo dnf upgrade` printed 238 "errors" — they are cosmetic rpm warnings
+
+**Symptom (2026-09-04):** `sudo dnf upgrade` scrolled a long wall of lines that
+look like failures:
+
+```
+WARNING [rpm] file /lib/modules/7.1.7-200.fc44.x86_64/kernel/drivers/... : remove failed: No such file or directory
+```
+
+**Not a problem.** Verified:
+
+1. `sudo dnf history info 111` reports `Status : Ok` (329 packages, 10:15).
+2. That transaction removed the 7.1.7 kernel: `kernel`, `kernel-core`,
+   `kernel-devel`, `kernel-modules`, `kernel-modules-core`,
+   `kernel-modules-extra`, and `kmod-nvidia-7.1.7-...`.
+3. `/lib/modules/7.1.7-200.fc44.x86_64` does not exist.
+4. `sudo grep -iE '\[(error|critical)\]|error:|WARNING|failed' /var/log/dnf5.log`
+   returns 238 lines, all of the pattern above, and **zero** lines of any other
+   kind.
+5. `sudo dnf upgrade --assumeno` afterwards reported `Nothing to do.`
+
+**Cause (inferred, not verified).** The kernel scriptlets delete the whole
+`/lib/modules/<version>` tree first. rpm then tries to unlink the 238
+subdirectories it owns and finds them already gone. The count scales with how
+many module subdirectories the kernel package owns, so it looks alarming.
+
+**How to check next time.** Do not read the scrollback. Run:
+
+```
+sudo dnf history info $(sudo dnf history list | sed -n 2p | awk '{print $1}')   # Status line
+sudo grep -iE '\[(error|critical)\]|error:|failed' /var/log/dnf5.log \
+  | grep -v 'remove failed: No such file or directory' | tail -40
+```
+
+An empty second command means the upgrade was clean.
+
+**Unrelated finding at the time.** An `akmods` build of
+`kmod-nvidia-7.1.12-200.fc44.x86_64` was still running and held the dnf lock
+("Waiting for a lock on the system repository"). Wait for it rather than using
+`--skip-file-locks`.
+
+---
+
 ## 🟩 Monitor profiles never applied / eDP-1 stuck at scale 1.5
 
 **Symptom:** the AOC came up at 60Hz on a 144Hz panel, and eDP-1 sat at scale
