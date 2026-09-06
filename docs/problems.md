@@ -1448,3 +1448,49 @@ This whole failure mode is **not cliamp's**. It hits anything that shells out to
 yt-dlp, and YouTube changes the challenge often. If audio stops again, test
 `yt-dlp -f bestaudio --simulate <url>` by hand FIRST. If that fails, the fix is a
 yt-dlp update or an ejs update, not a cliamp setting.
+
+---
+
+## 🟩 zellij tab shows extra users after the phone disconnects
+
+**Symptom (2026-09-06):** The zellij `main` session showed two extra users in
+tab 8. The phone (Termux over Tailscale) had closed its windows earlier.
+
+**Root cause:** The users were real, not stale display state. Closing the Termux
+window does not close the ssh transport. sshd kept both sessions open, so both
+`zellij attach main` clients stayed attached and the server kept counting them.
+
+`who` showed the evidence:
+
+```
+jj  pts/3  2026-09-06 17:17 (100.103.148.59)
+jj  pts/4  2026-09-06 17:11 (100.103.148.59)
+```
+
+`100.103.148.59` is the phone Tailscale address. `ps` showed one
+`zellij attach main` process per pts.
+
+Stock Fedora sshd sets `ClientAliveInterval 0`, so sshd sends no liveness
+probes. `TCPKeepAlive yes` alone does not help, because the kernel
+`tcp_keepalive_time` default is 2 hours.
+
+### Tried — WORKED
+
+1. Killed the two `sshd-session: jj@pts/N` processes. Both zellij clients
+   disappeared and `who` dropped back to `seat0` and `tty1`.
+2. Added `/etc/ssh/sshd_config.d/60-keepalive.conf` with
+   `ClientAliveInterval 30` and `ClientAliveCountMax 3`, then reloaded sshd.
+   `sshd -T` confirms `clientaliveinterval 30`. sshd now closes an
+   unresponsive session after about 90 seconds.
+
+Full file content and reapply steps are in `SYSTEM.md`.
+
+### Notes
+
+- `kill` on the root-owned `sshd-session: jj [priv]` parent returns
+  "operation not permitted" as user `jj`. Ignore the error. The parent exits by
+  itself once its child dies.
+- Do not kill PID for `kitty -- zellij attach main --create` on `tty1`. That is
+  the local client.
+- zellij has no command to detach another client. Killing the transport that
+  carries the client is the way.

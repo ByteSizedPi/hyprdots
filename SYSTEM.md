@@ -753,3 +753,63 @@ no device.
 sudo dnf swap libfprint-tod libfprint
 sudo dnf copr disable grahamwhiteuk/libfprint-tod
 ```
+
+---
+
+## `/etc/ssh/sshd_config.d/60-keepalive.conf` — drop dead ssh sessions
+
+```
+# Drop dead ssh sessions instead of leaving them attached.
+#
+# Reason: closing the Termux window on the phone (over Tailscale) does not
+# close the ssh transport. The `zellij attach main` client stays alive, so the
+# zellij server keeps counting the phone as an extra user in the tab bar.
+# sshd defaults to ClientAliveInterval 0, which sends no probes, and
+# TCPKeepAlive only reacts after the kernel tcp_keepalive_time (2 hours).
+#
+# 30 s x 3 = sshd closes an unresponsive session after about 90 seconds.
+# A network gap longer than 90 s also drops the session. That is acceptable:
+# zellij keeps the session on the server, so reattach is cheap.
+ClientAliveInterval 30
+ClientAliveCountMax 3
+```
+
+**Why:** On 6 September 2026 the zellij `main` session showed two extra users in
+tab 8. Both were real, live clients, not stale display state. `who` listed two
+sessions from the phone Tailscale address `100.103.148.59` on `pts/3` and
+`pts/4`. Each ran `zellij attach main`. Termux had closed its window hours
+earlier, but sshd never noticed, because the stock config sends no client-alive
+probes.
+
+Stock Fedora values before the change (`sshd -T`):
+
+```
+clientaliveinterval 0
+clientalivecountmax 3
+tcpkeepalive yes
+```
+
+Neither `/etc/ssh/sshd_config` nor the two shipped drop-ins
+(`40-redhat-crypto-policies.conf`, `50-redhat.conf`) set `ClientAlive*`, so the
+new file conflicts with nothing. The prefix `60-` sorts after both.
+
+**To reapply:**
+```
+sudo tee /etc/ssh/sshd_config.d/60-keepalive.conf <<'EOF'
+ClientAliveInterval 30
+ClientAliveCountMax 3
+EOF
+sudo chmod 600 /etc/ssh/sshd_config.d/60-keepalive.conf
+sudo sshd -t && sudo systemctl reload sshd
+sudo sshd -T | grep -i clientalive   # expect 30 and 3
+```
+
+**Clearing a session that is already stuck:** find it with `who`, then kill the
+`sshd-session: jj@pts/N` process. Its root-owned `[priv]` parent exits by
+itself. Do not kill the local kitty client on `tty1`.
+
+**To undo:**
+```
+sudo rm /etc/ssh/sshd_config.d/60-keepalive.conf
+sudo systemctl reload sshd
+```
