@@ -71,3 +71,9 @@ yazi/.config/yazi/flavors/
 # github.com/peteonrails/voxtype/releases. The install is recorded in SYSTEM.md
 # (the /usr/bin/voxtype engine symlink); the package itself does not belong here.
 *.rpm
+
+# Credentials. environment/secrets/ holds live API keys — Google OAuth client
+# ids and client secrets for the ytmusic provider. NEVER commit these: a secret
+# in git history stays there after the file is deleted, and has to be rotated
+# at the provider instead. Keep the directory, track nothing inside it.
+environment/secrets/
