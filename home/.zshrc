@@ -8,7 +8,7 @@ export ZSH="$HOME/.oh-my-zsh"
 # load a random theme each time Oh My Zsh is loaded, in which case,
 # to know which specific one was loaded, run: echo $RANDOM_THEME
 # See https://github.com/ohmyzsh/ohmyzsh/wiki/Themes
-ZSH_THEME="bira"
+ZSH_THEME="bira-status"
 
 # Set list of themes to pick from when loading at random
 # Setting this variable when ZSH_THEME=random will cause zsh to load
@@ -132,6 +132,8 @@ alias tree="eza --tree --icons"
 alias grep="rg --color=auto"
 alias sup="sudo dnf update --refresh"
 alias wifi="nmcli radio wifi on"
+alias open="xdg-open"
+alias dl="cd ~/Downloads/"
 # alias cat="bat"
 
 setopt COMPLETE_ALIASES
