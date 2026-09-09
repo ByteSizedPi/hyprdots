@@ -526,10 +526,19 @@ not, and neither are the font packages.
 
 ```
 sudo dnf install zedmono-nerd-fonts commitmono-nerd-fonts victormono-nerd-fonts
+sudo dnf install google-roboto-fonts
 ```
 
 `commitmono` and `victormono` were the two rejected candidates; keep them or
 drop them, nothing references them. `zedmono-nerd-fonts` is the one in use.
+
+`google-roboto-fonts` (added 2026-09-07) is proportional, not monospace, so
+`scripts/desktop-font.sh` does not touch it and no layer above names it. It is
+installed for applications that ask for Roboto by name. It gives 12 faces:
+Thin, Light, Regular, Medium, Bold, Black, each roman and italic. The related
+packages, none installed, are `google-roboto-condensed-fonts`,
+`google-roboto-slab-fonts`, `google-roboto-mono-fonts`, and
+`robotomono-nerd-fonts`.
 
 Then the Qt/KDE half, in `~/.config/kdeglobals` under `[General]` and
 `[WM]`:
@@ -813,3 +822,31 @@ itself. Do not kill the local kitty client on `tty1`.
 sudo rm /etc/ssh/sshd_config.d/60-keepalive.conf
 sudo systemctl reload sshd
 ```
+
+---
+
+## Package: `zathura-pdf-mupdf` — zathura cannot open any file without it
+
+```
+sudo dnf install zathura-pdf-mupdf
+```
+
+**Why:** The Fedora `zathura` package ships the viewer shell only. Every format
+lives in a separate plugin package, and none is a dependency. With no plugin,
+`/usr/lib64/zathura/` does not exist and zathura opens an empty window:
+
+```
+warning: Found no plugins. Please install at least one plugin.
+error: Could not determine file type.
+```
+
+`xdg-open file.pdf` therefore showed a blank window with no visible error,
+because the two messages go to stderr and xdg-open discards them.
+
+The plugin installs `/usr/lib64/zathura/libpdf-mupdf.so`. zathura loads it at
+start with no configuration.
+
+**Other plugins if a format comes up:** `zathura-djvu` (DjVu), `zathura-ps`
+(PostScript), `zathura-cb` (comic book), or `zathura-plugins-all`.
+`zathura-pdf-poppler` is the alternative PDF backend. Do not install both PDF
+backends.
