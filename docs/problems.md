@@ -1494,3 +1494,98 @@ Full file content and reapply steps are in `SYSTEM.md`.
   the local client.
 - zellij has no command to detach another client. Killing the transport that
   carries the client is the way.
+
+## 🟩 Jellyfin 12.1 showed one audiobook as many (pve-prod, 2026-09-21)
+
+**Symptom.** The Audiobooks library (`/data/media/audiobooks`) showed 32
+items for 5 books. Jellyfin 12.1.0 lists each file of a chapter-split book
+as its own AudioBook item.
+
+**Cause.** Multi-file audiobook merging is Jellyfin PR #17362, still open and
+unmerged on 2026-09-15. The press about the "Jellyfin 12 audiobook overhaul"
+does not apply to 12.1.0.
+
+### Tried — WORKED
+- Merge each split book into ONE file with embedded chapters, using
+  `jellyfin-ffmpeg` inside the jellyfin container as `-u 1000:1000`:
+  - MP3 parts: concat demuxer, `-c copy`, ffmetadata chapters,
+    `-id3v2_version 3`. No re-encode. ffmpeg prints non-monotonic DTS
+    warnings at each join. Those are harmless.
+  - AAC `.m4a` parts: the same, into `.m4b` with `-f mp4`. No re-encode.
+- Layout: `audiobooks/<Author>/<Title> (<Year>)/<Title>.<ext>` plus
+  `cover.jpg`. After a rescan: 4 items, Artemis 17 chapters, Animal Farm 10.
+
+### Notes
+- Media copies were full copies of `torrents/audiobooks` (link count 1),
+  not hardlinks. The torrents were removed from qBittorrent. The old files
+  are staged in `/mnt/data/recyclebin/audiobooks-cleanup-2026-09-21`.
+- The Martian's embedded cover is a TIFF tagged as PNG. ffmpeg cannot decode
+  or extract it. The merged file carries no cover.
+- Homepage's Jellyfin widget needs `version: 2` on Jellyfin 12 (the v1 widget
+  calls removed `/emby/` paths and gets 404). Fixed in the server repo,
+  commit 9af120a.
+
+## 🟩 Arrested Development: 15 episodes never arrive (pve-prod, 2026-09-21)
+
+**Symptom.** Sonarr series 13 had S03 2/13 and S05 12/16 episodes. History showed
+a loop of grab → `downloadFailed` "Manually marked as failed". 29 releases for the
+series were on the blocklist.
+
+**Cause, 3 parts.**
+1. The indexers overstate the seeders. The NTb 720p NF episode torrents showed 33 to 40
+   seeders in the search results. The trackers reported 0 or 1, and qBittorrent found 0 peers in 5 minutes.
+2. Decluttarr then removes the torrent (`remove_metadata_missing` / `remove_stalled`,
+   3 strikes) and marks it failed, and Sonarr blocklists the release.
+3. qBittorrent `max_active_downloads = 3` with `dont_count_slow_torrents = false`.
+   Two 1% movie torrents held two slots, so new grabs sat in `queuedDL` and could
+   not even fetch metadata.
+
+### Tried — DIDN'T work
+- Unblocklist the 4 NTb S05 episode releases and search again. Sonarr grabbed them, but they were
+  dead (0 peers). Removed them from the queue and blocklisted them again.
+
+### Tried — WORKED (S05)
+- qBittorrent: `dont_count_slow_torrents = true` (Web UI state, not in the server repo).
+- Manual grab of `Arrested.Development.S05.COMPLETE.1080p.WEB.x264-STRiFE[TGx]`
+  (330 seeders according to the indexer, real peers 8). Sonarr rejects this pack automatically because the
+  existing episodes score higher (CF 1775 vs 0). On import, Sonarr keeps the better files
+  and imports only the missing episodes.
+
+### Tried — WORKED (S03)
+- No approved release existed. The only well-seeded packs were 1080p BluRay x265
+  (CF -9995 from the TRaSH `x265 (HD)` penalty, also under the size minimum).
+  The user chose a manual grab of the 247-seeder x265 REPACK pack (Knaben). It downloaded in about 20 minutes, and
+  Sonarr imported E01-E04, E06-E08 and E10-E13. S03 is 13/13.
+- The pack then went to `importBlocked` because E05 and E09 already exist
+  ("Not an upgrade"). Decluttarr's `remove_failed_imports` patterns match that
+  message, so decluttarr will probably mark the pack failed and blocklist it, as it did the S05 pack
+  at 15:01. The episodes are already imported, so no data is lost.
+
+---
+
+## 🟥 Hyprland SIGSEGV on HDMI-A-1 disconnect, restarted in safe mode (2026-09-22)
+
+**Symptom:** at 07:37:19 Hyprland 0.56.2 (session up since 17 Sep) died.
+`start-hyprland` restarted it with `--safe-mode`, so the Lua config, noctalia and
+the keybinds did not load. Zen SIGSEGV'd at 07:37:25 when its compositor went away.
+
+**Evidence:**
+- Crash report: `~/.cache/hyprland/hyprlandCrashReport4127.txt`. Log tail shows
+  `drm: Connector HDMI-A-1 disconnected`, then `Cannot commit a disconnected
+  output`, then a CRTC recheck, then the crash.
+- `coredumpctl info 4127` stack: `CDRMOutput::scheduleFrame` lambda (libaquamarine.so.14)
+  <- `CBackend::dispatchIdle` <- `aquamarineFDWrite`. The idle callback touched a
+  destroyed `CDRMOutput` (use-after-free).
+- Aquamarine 0.15.0. Upstream tracks the same class of bug: the dispatchIdle
+  batch cannot cancel an event for an output that was just removed
+  ([aquamarine#361](https://github.com/hyprwm/aquamarine/issues/361),
+  [#383](https://github.com/hyprwm/aquamarine/issues/383),
+  [#386](https://github.com/hyprwm/aquamarine/issues/386)).
+
+**Not the cause:** the config. Safe mode is `start-hyprland`'s reaction to any crash.
+
+**Recovery:** click "Load config" in the safe-mode dialog, or exit (SUPER+M) and
+log in again. The zellij server runs outside Hyprland and survives either path.
+
+**Next steps:** watch for an aquamarine release after 0.15.0 that fixes the
+dispatchIdle UAF. Until then, expect a crash risk on every HDMI unplug.
