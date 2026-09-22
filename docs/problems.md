@@ -8,6 +8,43 @@ Status key: 🟥 OPEN · 🟧 MITIGATED (worked around, root cause unsolved) · 
 
 ---
 
+## 🟩 hyprglass: `Version mismatch` after a same-commit Hyprland rebuild
+
+**Symptom (2026-09-22):** `hyprpm reload -n` prints `✔ Loaded hyprglass`, but
+`hyprctl plugin list` shows `no plugins loaded`. A direct load shows the real
+error:
+```
+$ hyprctl plugin load /var/cache/hyprpm/jj/HyprGlass/hyprglass.so
+Plugin ... could not be loaded: plugin crashed/threw in main: Version mismatch
+```
+**Do not trust the `hyprpm reload` output.** It reports success when
+`PLUGIN_INIT` throws.
+
+**Root cause:** Fedora shipped `hyprland-0.56.2-2` on 2026-08-30. The package
+has the same git commit (`efb5099`) but links against `aquamarine` 0.15 and
+`hyprutils` 0.14.1. The hyprpm headers in
+`/var/cache/hyprpm/jj/headersRoot/.../src/version.h` dated from 2026-08-09 and
+still said `AQUAMARINE_VERSION "0.14.0"`. hyprglass compares the `_aq_…` ABI
+suffix of `__hyprland_api_get_hash()` (running) against
+`__hyprland_api_get_client_hash()` (compiled from those headers), so the
+`_aq_0.14` vs `_aq_0.15` difference made it throw. `state.toml` already
+said `_aq_0.15`, so a plain `hyprpm update` saw "up to date" and did not
+rebuild the headers.
+
+### Tried — WORKED
+- `hyprpm update -f`. It re-cloned Hyprland at the running commit, rebuilt the
+  headers (`version.h` now says aq 0.15.0, hu 0.14.1) and rebuilt hyprglass.
+  After `hyprctl reload config-only`: `hyprglass 1.0.0` is loaded and
+  `plugin:hyprglass:enabled` reads `int: 0, set: true` (catppuccin theme,
+  `hyprglass = off`), which is correct.
+
+**Next time a plugin does not load:** run `hyprctl plugin load <path to .so>`
+first to see the real error. If it is `Version mismatch`, compare
+`hyprctl version -j | grep abiHash` against `headersRoot/.../version.h` and run
+`hyprpm update -f`.
+
+---
+
 ## 🟩 `noctalia config validate` warns on 4 keys — they are legacy names, not dead keys
 
 **Symptom (2026-09-05, after the move to noctalia 5.0.1):**

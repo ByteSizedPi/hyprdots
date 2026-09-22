@@ -426,6 +426,13 @@ pins the Hyprland commit plus aquamarine/hyprutils/hyprgraphics/hyprcursor/
 hyprlang ABI versions, which is why a Hyprland update requires
 `hyprpm update` before plugins will load again.
 
+**A package rebuild of the same Hyprland commit also breaks plugins.** On
+2026-08-30 Fedora shipped `hyprland-0.56.2-2` against a newer aquamarine. The
+commit hash did not change, so plain `hyprpm update` kept stale headers and
+hyprglass failed with `Version mismatch`. Fix (2026-09-22): `hyprpm update -f`
+(forces a header and plugin rebuild). See `docs/problems.md` → "hyprglass:
+`Version mismatch`".
+
 ### Plugins added
 
 - **HyprGlass** (`https://github.com/hyprnux/hyprglass`) — "liquid glass" visual
