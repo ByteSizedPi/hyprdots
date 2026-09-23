@@ -8,6 +8,39 @@ Status key: 🟥 OPEN · 🟧 MITIGATED (worked around, root cause unsolved) · 
 
 ---
 
+## 🟧 tuigreet: fingerprint login, then a second password prompt
+
+**2026-09-23.** After the fingerprint login at tuigreet, a password prompt came
+up inside the session.
+
+**Root cause (from the journal, 22 Sep 19:16 login).** The audit line shows
+`op=PAM:authentication grantors=pam_fprintd`, so the fingerprint alone logged
+in. `pam_kwallet5` logged `Couldn't get password (it is empty)`. `ksecretd`
+started with the wallet locked and asked for the password when an app wanted a
+secret. The second prompt is the KWallet unlock, not a second login.
+Inference: I did not see the prompt on screen.
+
+### Tried — WORKED (not yet verified at a real login)
+- `/etc/pam.d/greetd` auth now uses `password-auth` (no `pam_fprintd`). The
+  greeter takes the password one time and the wallet unlocks. `su`, polkit and
+  the noctalia lock screen still use `system-auth`, so they still take the
+  fingerprint. Details in `SYSTEM.md`.
+
+### Rejected
+- Empty wallet password: no prompt, but secrets sit unencrypted on disk.
+- Any PAM trick that keeps fingerprint at the greeter: the wallet key is the
+  password, so a fingerprint cannot unlock the wallet.
+
+**To verify:** log out, log in at tuigreet with the password, confirm no
+KWallet prompt, and confirm the journal no longer shows `Couldn't get password`.
+
+Also on 2026-09-23: tuigreet now takes noctalia colors (template
+`greetd-palette` + wrapper `/usr/local/bin/tuigreet-themed`). See `SYSTEM.md`.
+If the greeter shows stock colors, check `ausearch -m avc -ts boot | grep greetd`
+(SELinux `xdm_t` reading `var_lib_t`) before anything else.
+
+---
+
 ## 🟩 hyprglass: `Version mismatch` after a same-commit Hyprland rebuild
 
 **Symptom (2026-09-22):** `hyprpm reload -n` prints `✔ Loaded hyprglass`, but
@@ -640,6 +673,18 @@ so it reaches the zellij server (and anything else long-lived spawned in the
 session) instead of only interactive shells. **Requires a fresh
 login/reboot** to take effect — already-running zellij servers keep their old
 env until restarted.
+
+**Regression (2026-09-22):** the bug came back. The session was the plain
+"Hyprland" greetd entry (`/usr/bin/start-hyprland`), not "Hyprland
+(uwsm-managed)". Only uwsm applies environment.d to the compositor, so the
+chain greetd → start-hyprland → Hyprland → kitty → zellij server kept
+`PATH=/usr/local/bin:/usr/bin`. tuigreet `--remember-user-session` then keeps
+picking the plain entry. **Fix:** `hypr/modules/environment.lua` now prepends
+`~/.local/bin` and `~/bin` with `hl.env("PATH", ...)` (no duplicates), so both
+sessions give children the same PATH. Verified after `hyprctl reload`: a
+child started with `hl.dsp.exec_cmd` gets
+`/home/jj/.local/bin:/home/jj/bin:/usr/local/bin:/usr/bin`. A zellij server
+that is already running keeps its old PATH until it restarts.
 
 **Separately, still open (not fixed by the above):** resize-induced duplicate
 prompt lines / scrollback corruption with the two-line `bira` prompt. Confirmed
@@ -1389,6 +1434,16 @@ plain 3-finger horizontal together produces **no** shadow error, so a differing
 `mods` makes them distinct gestures. The plain workspace swipe therefore does
 not also fire while SUPER is held.
 
+**One finger is not possible (2026-09-23).** The wiki's gesture table limits
+`fingers` to **[2 - 9]**, and libinput reports a 1-finger touchpad motion as
+pointer movement, not a swipe. A request for a 1-finger gesture becomes a
+2-finger one at best.
+
+**Toggling a named special workspace needs no Lua callback.** The built-in
+action does it: `action = "special", workspace_name = "zellij"` (bare name, no
+`special:` prefix). `input.lua` now has SUPER + 3-finger swipe up for the zellij
+scratchpad.
+
 **Verifying a Lua config edit:** Hyprland auto-reloads on file change, but the
 reload is not written to `hyprland.log`. `hyprctl configerrors` is the check —
 it printed the `["end"]` failure with the exact file and line, and prints
@@ -1626,3 +1681,18 @@ log in again. The zellij server runs outside Hyprland and survives either path.
 
 **Next steps:** watch for an aquamarine release after 0.15.0 that fixes the
 dispatchIdle UAF. Until then, expect a crash risk on every HDMI unplug.
+
+### Follow-up, 2026-09-22 — rules relaxed so this does not recur
+- Recyclarr (server repo 1785956): `x265 (HD)` set to 0 in both profiles (was -10000).
+  Bluray-720p and Bluray-1080p minimums lowered to the WEB minimum (Sonarr 10 and 15, Radarr
+  12.5). The x265 score alone was not enough, because the S03 x265 packs also failed
+  the 50.4 MB/min Bluray-1080p minimum. Verified with `recyclarr sync --preview`.
+- Recyclarr: the -10000 comes from the TRaSH guide PROFILE, not only from the
+  Golden Rule group. An explicit `custom_formats` score wins ("first value wins").
+- Decluttarr (server repo 86e6045): removed the "Not an upgrade" and "Not a Custom
+  Format upgrade" patterns. `remove_failed_imports` has `blocklist = True`
+  hard-coded, so narrowing the patterns is the only way to stop the blocklisting.
+- qBittorrent `max_active_downloads` 3 → 6: NOT done. The permission check blocked the API
+  call. Change it by hand in the Web UI (Options > BitTorrent > Torrent Queueing).
+- Side note: on 2026-09-22 the LAN path to pve-prod (10.42.0.11:22) timed out while
+  the tailnet path (`pve-prod-ts`) worked. Cause not checked.

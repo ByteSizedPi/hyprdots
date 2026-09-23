@@ -54,6 +54,25 @@ hl.gesture({
 	},
 })
 
+-- SUPER + 3-finger swipe UP: pull up the zellij scratchpad.
+--
+-- `action = "special"` is the built-in toggle for a special workspace, and it
+-- takes the bare name in `workspace_name` (no "special:" prefix). No Lua
+-- callback is needed for this one.
+--
+-- The action TOGGLES, so a second SUPER + 3-finger swipe up hides zellij again.
+-- The plain 3-finger swipe down below also dismisses it.
+--
+-- SUPER is what separates this gesture from the plain 3-finger gestures, the
+-- same way it does for the swap above: `mods` is part of a gesture's identity.
+hl.gesture({
+	fingers        = 3,
+	direction      = "up",
+	mods           = "SUPER",
+	action         = "special",
+	workspace_name = "zellij",
+})
+
 -- Plain 3-finger horizontal swipe: move between workspaces.
 hl.gesture({
 	fingers   = 3,
