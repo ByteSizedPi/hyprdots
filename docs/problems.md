@@ -1439,6 +1439,19 @@ not also fire while SUPER is held.
 pointer movement, not a swipe. A request for a 1-finger gesture becomes a
 2-finger one at best.
 
+**A dismiss gesture must NOT use the built-in `special` action (2026-09-29).**
+That action toggles, so a swipe down with nothing showing pulls the scratchpad
+UP. SUPER + 3-finger down therefore uses a Lua `finish` callback that returns
+early unless `hl.get_active_special_workspace()` is `special:zellij`.
+
+**`hl.get_active_special_workspace()` reads the FOCUSED monitor, and the name
+keeps the `special:` prefix.** Measured on 0.56.2 with zellij showing on the
+focused DP-1: no-arg, `"current"` and `"DP-1"` all returned `special:zellij`.
+It returns nil when the focused monitor shows no special workspace, even if
+another monitor shows one. Test method: toggle the workspace on, confirm with
+`hyprctl monitors -j`, then read it with `hyprctl eval` writing to a file
+(`print` from eval reaches nothing).
+
 **Toggling a named special workspace needs no Lua callback.** The built-in
 action does it: `action = "special", workspace_name = "zellij"` (bare name, no
 `special:` prefix). `input.lua` now has SUPER + 3-finger swipe up for the zellij

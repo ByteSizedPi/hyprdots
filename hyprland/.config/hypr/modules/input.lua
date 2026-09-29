@@ -73,6 +73,34 @@ hl.gesture({
 	workspace_name = "zellij",
 })
 
+-- SUPER + 3-finger swipe DOWN: dismiss the zellij scratchpad.
+--
+-- This gesture only dismisses. It does NOT use the built-in `special` action,
+-- because that action toggles: with nothing showing, a swipe down would pull
+-- zellij UP, which is the opposite of what a down swipe should do.
+--
+-- The callback therefore checks first, and does nothing unless zellij is the
+-- special workspace on the focused monitor. A swipe down over youtube, beeper
+-- or jjserver is a no-op here, and the plain 3-finger swipe down below still
+-- dismisses those.
+--
+-- Declared BEFORE the plain 3-finger down gesture, per the order rule at the
+-- top of this file. The two coexist because `mods` is part of the identity.
+hl.gesture({
+	fingers   = 3,
+	direction = "down",
+	mods      = "SUPER",
+	action    = {
+		finish = function()
+			local ws = hl.get_active_special_workspace()
+			if not ws or ws.name ~= "special:zellij" then
+				return
+			end
+			hl.dispatch(hl.dsp.workspace.toggle_special("zellij"))
+		end,
+	},
+})
+
 -- Plain 3-finger horizontal swipe: move between workspaces.
 hl.gesture({
 	fingers   = 3,
