@@ -269,7 +269,7 @@ option is a udev rule setting `LIBINPUT_IGNORE_DEVICE=1` on the Lid Switch.
 
 ## `/usr/share/noctalia/assets/templates/hyprland/hyprland.lua` — inactive border color
 
-Package file from `noctalia-git` (matugen-style template noctalia renders into
+Package file from `noctalia` (matugen-style template noctalia renders into
 `~/.config/hypr/noctalia.lua`, symlinked from this repo's `hyprland` stow
 package). Not part of the stow tree, so a package update will overwrite it
 back to stock.
@@ -287,7 +287,7 @@ general = {
 **Why:** Cosmetic preference — inactive window borders should use the accent
 (`primary`) color instead of the neutral `surface` color.
 
-**To reapply** (e.g. after a `noctalia-git` package update resets the file):
+**To reapply** (e.g. after a noctalia package update resets the file):
 ```
 sudo sed -i 's/inactive_border = surface,/inactive_border = primary,/' \
   /usr/share/noctalia/assets/templates/hyprland/hyprland.lua
@@ -299,82 +299,49 @@ noctalia msg templates-apply
 
 ---
 
-## `/etc/dnf/versionlock.toml` — pin noctalia to the v5.0.1 release commit
+## noctalia package source — Fedora `noctalia` from `updates` (versionlock removed)
 
-**Created 2026-09-05.** Holds `noctalia-git` at the exact upstream v5.0.1
-release commit `f95e95c`.
+**Current state (2026-10-03).** `noctalia-5.2.0-1.fc44` from Fedora `updates`.
+`/etc/dnf/versionlock.toml` is empty (`packages = []`). No noctalia lock is active.
 
-**Why.** Upstream tagged v5.0.1 on 2026-09-03. No repo ships a stable-channel
-build of that tag:
+**History.** From 2026-09-05 to 2026-10-03, `/etc/dnf/versionlock.toml` held
+`noctalia-git` (copr lionheartp/Hyprland) at `5.0.1^1.f95e95c`, the upstream
+v5.0.1 release commit. At that time no repo shipped a stable build of v5.0.1
+(Fedora `updates` had 5.0.0~beta.10). The lock stopped `dnf upgrade` from
+moving onto later git snapshots. The lock covered `noctalia-git`,
+`noctalia-git-bash-completion` and `noctalia-git-zsh-completion`.
+
+**Why it was removed.** On 2026-10-03 Fedora `updates` shipped stable
+`noctalia` 5.2.0, which was the exit condition for the lock. Repo state on that date:
 
 | Repo | Package | Version |
 |---|---|---|
-| updates (Fedora) | `noctalia` | 5.0.0~beta.10 |
-| terra | `noctalia` | 5.0.0~beta.9 |
-| terra | `noctalia-nightly` | 5.0.0^20260903git.a1a0e0f (12 commits behind the tag) |
-| copr lionheartp/Hyprland | `noctalia-git` | 5.0.1^1.f95e95c ← the tag commit |
+| updates (Fedora) | `noctalia` | 5.2.0 ← installed |
+| terra | `noctalia` | 5.0.0~beta.9 (stale) |
+| terra | `noctalia-nightly` | 5.2.1^20261003git.6368599 |
+| copr lionheartp/Hyprland | `noctalia-git` | 5.2.1^3.064476d |
 
-`noctalia-git-5.0.1^1.f95e95c` is the only packaged build of the release
-commit. Without a lock, `dnf upgrade` walks forward onto later git snapshots
-(`5.0.1^2`, `5.0.1^3`, ...), which is a nightly channel, not a release.
-
-**What was done.** Replaced `noctalia-nightly` (terra) with `noctalia-git`
-(copr lionheartp/Hyprland), then locked all three package names:
-
-```
-sudo dnf swap -y noctalia-nightly 'noctalia-git-5.0.1^1.f95e95c-1.fc44.x86_64'
-sudo dnf versionlock add noctalia-git noctalia-git-bash-completion noctalia-git-zsh-completion
-```
-
-`noctalia-git` conflicts with `noctalia` but not with `noctalia-nightly`, so
-the swap must remove `noctalia-nightly` explicitly. `noctalia-nightly`
-obsoletes `noctalia-git <= 5.0.0^20260824git.a9cd1c8-1` only, so 5.0.1 is not
-pulled back.
-
-**File content:**
-```toml
-version = "1.0"
-
-[[packages]]
-name = "noctalia-git"
-comment = "Added by 'versionlock add' command on 2026-09-05 11:00:16"
-
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "5.0.1^1.f95e95c-1.fc44"
-
-[[packages]]
-name = "noctalia-git-bash-completion"
-comment = "Added by 'versionlock add' command on 2026-09-05 11:00:22"
-
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "5.0.1^1.f95e95c-1.fc44"
-
-[[packages]]
-name = "noctalia-git-zsh-completion"
-comment = "Added by 'versionlock add' command on 2026-09-05 11:00:22"
-
-[[packages.conditions]]
-key = "evr"
-comparator = "="
-value = "5.0.1^1.f95e95c-1.fc44"
-```
-
-**To move off the lock** (for example when Fedora ships `noctalia` 5.0.1 in
-`updates`):
+**What was done:**
 ```
 sudo dnf versionlock delete noctalia-git noctalia-git-bash-completion noctalia-git-zsh-completion
-sudo dnf swap noctalia-git noctalia
+sudo dnf swap -y noctalia-git noctalia
 ```
+DNF removed the two `noctalia-git-*-completion` packages as unused dependencies.
+The Fedora `noctalia` package ships the bash and zsh completions itself.
+DNF selects `updates` over terra because 5.2.0 is the higher version.
 
-**The swap reset the border patch.** Installing `noctalia-git` overwrote
+**The swap reset the border patch.** The `noctalia` install overwrote
 `/usr/share/noctalia/assets/templates/hyprland/hyprland.lua` back to stock
-(`inactive_border = surface`). Reapplied on 2026-09-05 with the sed command in
-the section above, then `noctalia msg templates-apply`. Any future
-`noctalia-git` install does the same — check that section after every swap.
+(`inactive_border = surface`). Reapplied on 2026-10-03 with the sed command in
+the section above, then `noctalia msg templates-apply`. Any future noctalia
+package install or upgrade does the same. Check that section after every
+upgrade.
+
+**File content** (`/etc/dnf/versionlock.toml`):
+```toml
+packages = []
+version = "1.0"
+```
 
 ---
 
