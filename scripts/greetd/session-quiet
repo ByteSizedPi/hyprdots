@@ -1,0 +1,12 @@
+#!/bin/sh
+# tuigreet session wrapper: start the chosen session without printing its output on the VT.
+# Installed to /usr/local/bin/session-quiet (see SYSTEM.md -> "greetd: quiet session start").
+# tuigreet runs this as the logged-in user and appends the session command (for example
+# /usr/bin/start-hyprland) as arguments. start-hyprland and Hyprland have no quiet flag,
+# so the wrapper sends stdout and stderr to a log file instead of the console.
+# Hyprland still writes its own log to $XDG_RUNTIME_DIR/hypr/<instance>/hyprland.log.
+log="${XDG_STATE_HOME:-$HOME/.local/state}/session.log"
+mkdir -p "$(dirname "$log")"
+# Clear the tuigreet frame and hide the cursor until the compositor takes the display.
+printf '\033[2J\033[H\033[?25l'
+exec "$@" >"$log" 2>&1

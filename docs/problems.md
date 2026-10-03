@@ -8,6 +8,32 @@ Status key: 🟥 OPEN · 🟧 MITIGATED (worked around, root cause unsolved) · 
 
 ---
 
+## 🟧 dnf skips `glaze-devel` 9.0.0 (terra) — `hyprland-devel` needs `glaze-static`
+
+**2026-09-29.** `sudo dnf upgrade --refresh --assumeno` showed one conflict and
+nothing else to do (dnf transaction 125 earlier the same day had already
+applied 46 changes):
+
+```
+Problem: installed package hyprland-devel-0.56.2-3.fc44.x86_64 requires glaze-static, but none of the providers can be installed
+  - cannot install both glaze-devel-9.0.0-1.fc44.x86_64 from terra and glaze-devel-8.4.0-1.fc44.noarch from @System
+Skipping packages with conflicts:
+ glaze-devel x86_64 9.0.0-1.fc44 terra
+```
+
+**Cause (from `dnf repoquery --provides`).** `hyprland-devel` from
+`copr:lionheartp:Hyprland` requires `glaze-static`. The COPR `glaze-devel`
+8.4.0 provides `glaze-static`. The terra `glaze-devel` 9.0.0 does not. dnf
+keeps 8.4.0 and skips 9.0.0 on every upgrade. `hyprland-devel` is on the
+system only for the hyprpm plugin build (see `SYSTEM.md`, dnf transaction 81).
+
+**Impact:** none. The skip is harmless and the rest of the upgrade runs.
+
+### Options (not applied)
+- Leave it. dnf skips `glaze-devel` 9.0.0 automatically.
+- Silence it: add `excludepkgs=glaze*` to `/etc/yum.repos.d/terra.repo` (log in `SYSTEM.md`).
+- Wait for the COPR to rebuild `hyprland-devel` against glaze 9.
+
 ## 🟧 tuigreet: fingerprint login, then a second password prompt
 
 **2026-09-23.** After the fingerprint login at tuigreet, a password prompt came
@@ -1310,6 +1336,55 @@ was replaced by the AX1500. See `SYSTEM.md` → NetworkManager profiles.
   normally uses jjlink Wi-Fi anyway; the cable was only for diagnosis.
 - **pve's own tailscale daemon** has not returned since the router reboot.
   pve-prod runs on that host and is fine, so only the daemon is down.
+
+---
+
+## 🟨 "jjlink has no internet" (2026-10-03) — laptop side is clean, the WAN is slow
+
+**Symptom.** jjlink felt like it had no internet. The suspicion was the old
+ethernet relay profile again, because that was the cause on 2026-09-29.
+
+**Laptop side: verified clean on 2026-10-03.**
+
+- `pe-share` does not exist. `/etc/NetworkManager/conf.d/` and
+  `dnsmasq-shared.d/` are empty. Tailscale `RouteAll` is `false`.
+- During the 19:04–19:20 jjlink session, NetworkManager set jjlink as the
+  default for routing and DNS (`10.42.0.12, 10.42.0.1`). No other interface
+  held a route.
+- Noctalia (pid 1896, uid 1000) tried to start `room-lan` at 19:04:02 and
+  19:04:10, right after Wi-Fi dropped. Both failed with "no carrier".
+  `room-lan` is `never-default` with no DNS, so it cannot take traffic even
+  if it starts.
+- What did fail in that window: tailscaled's DERP TCP read timed out at
+  19:06:33, and systemd-resolved dropped `10.42.0.12` to a degraded feature
+  set at 19:08:28. Both are symptoms of a slow WAN, not of local routing.
+
+**Live A/B test, run 2026-10-03 ~19:30, same laptop, same minute:**
+
+```
+                     jjlink (AX1500)         17 Mozart (Nokia direct)
+route / DNS          correct                 correct
+gw / Nokia ping      1.1 / 1.9 ms, 0% loss   -
+1.1.1.1 ping x20     322 ms avg, 0% loss     276 ms avg, 5% loss
+MTU                  1464 DF ok, 1472 fails  -   (1492 path, as fixed in Aug)
+DNS @.12 / @.1 / @1.1.1.1   5/5 each         -
+TCP 2 MB x8          0.58–2.8 MB/s           0.48–1.05 MB/s
+HTTPS google x3      200, ~1.1 s             200, ~2.2 s
+```
+
+Baseline from August on jjlink: 16 ms ping, ~11.4 MB/s. Both paths are now
+equally degraded, so the fault is at or above the Nokia. jjlink itself is
+not the cause.
+
+**Lead, not confirmed.** High latency together with low throughput points
+to one device saturating the line. The pve host showed ~15.5 MB/s summed
+across all its interfaces (bridge traffic counts more than once, so the
+real WAN share is unknown). jjserver was idle. The per-guest split on pve
+was not measured.
+
+**Next step.** On pve, find which guest is moving traffic
+(`cat /proc/net/dev` twice, 5 s apart, and compare `tap*`/`veth*`). If it is
+a downloader, cap it. If nothing on the LAN is busy, the ISP line is at fault.
 
 ---
 

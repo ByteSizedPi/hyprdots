@@ -1,0 +1,49 @@
+# Mount Google Drive (rclone remote "gdrive") at ~/GoogleDrive on login.
+#
+# Settings that keep file managers from stalling on the mount:
+#   --dir-cache-time 1000h + --poll-interval 30s
+#       Directory listings stay in memory. Drive's change feed invalidates
+#       them, so browsing never waits on a network listing.
+#   --vfs-refresh
+#       Fills the directory cache for the whole drive in the background
+#       right after the mount comes up.
+#   --vfs-cache-mode full
+#       File contents are cached on disk, so a second open (thumbnails,
+#       previews) is local.
+#   --timeout / --contimeout
+#       A dead network fails fast instead of hanging every stat() call.
+#   --drive-skip-gdocs
+#       Native Docs/Sheets/Slides have no real file content. Hiding them
+#       stops previewers from requesting exports.
+#   Type=notify
+#       systemd marks the unit started only once the mount is ready.
+
+[Unit]
+Description=rclone mount of Google Drive at ~/GoogleDrive
+Documentation=man:rclone(1)
+
+[Service]
+Type=notify
+ExecStartPre=/usr/bin/mkdir -p %h/GoogleDrive
+ExecStart=/usr/bin/rclone mount gdrive: %h/GoogleDrive \
+    --vfs-cache-mode full \
+    --vfs-cache-max-size 20G \
+    --vfs-cache-max-age 720h \
+    --vfs-cache-min-free-space 10G \
+    --vfs-fast-fingerprint \
+    --vfs-refresh \
+    --dir-cache-time 1000h \
+    --poll-interval 30s \
+    --attr-timeout 1m \
+    --timeout 30s \
+    --contimeout 10s \
+    --drive-skip-gdocs \
+    --umask 022 \
+    --log-level INFO \
+    --log-systemd
+ExecStopPost=-/usr/bin/fusermount3 -uz %h/GoogleDrive
+Restart=on-failure
+RestartSec=15
+
+[Install]
+WantedBy=default.target

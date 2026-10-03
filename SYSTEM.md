@@ -218,6 +218,9 @@ sudo systemctl enable greetd
 sudo systemctl enable getty@tty2
 ```
 
+> **Superseded 2026-09-23:** `command` now starts `/usr/local/bin/tuigreet-themed`
+> instead of `tuigreet`. See "greetd: noctalia colors on the tuigreet greeter" below.
+
 ### Recovery if greetd fails to start on boot
 Switch to tty2 (Ctrl+Alt+F2), log in, then revert:
 `sudo systemctl disable greetd && sudo systemctl enable plasmalogin && sudo reboot`
@@ -543,13 +546,37 @@ so, and the answer is to move them here alongside `kdeglobals`.
 
 ---
 
-## NetworkManager profiles for `enp0s31f6` — `pe-share` disabled, `room-lan` added
+## NetworkManager profiles for `enp0s31f6` — `pe-share` deleted, `room-lan` added
 
 **Changed 2026-08-16.** Both files live in
 `/etc/NetworkManager/system-connections/` and are root-owned `0600`, so they are
 outside the stow tree.
 
-### `pe-share` — `autoconnect` turned OFF
+### `pe-share` — DELETED 2026-09-29
+
+`/etc/NetworkManager/system-connections/pe-share.nmconnection` no longer
+exists. Removed with `nmcli con delete pe-share`.
+
+**Why autoconnect OFF was not enough.** At 17:57:37 and 17:57:42 on
+2026-09-29, Noctalia (the shell bar, uid 1000) activated `pe-share` by hand,
+right after a Wi-Fi reconnect. The profile claimed `10.42.0.1/24` on the
+unplugged port, with a `linkdown` route at metric 100. On jjlink, all traffic
+to the gateway `10.42.0.1` and to AdGuard `10.42.0.12` went to the dead port.
+DNS timed out and jjlink had no internet. A profile that is visible in the
+network menu can be started with one click, so the only safe state is no
+profile at all.
+
+**If a relay is ever needed again,** make it on a subnet that nothing else
+uses. NetworkManager's `shared` default is `10.42.0.1/24`, so never use the
+default:
+```
+nmcli con add type ethernet ifname enp0s31f6 con-name relay-share \
+  connection.autoconnect no ipv4.method shared ipv4.addresses 192.168.77.1/24
+```
+
+The record from 2026-08-16 follows, kept for history.
+
+#### (history) `pe-share` — `autoconnect` turned OFF
 
 ```ini
 [connection]
@@ -589,13 +616,7 @@ instead, so the profile is obsolete and actively harmful. Kept rather than
 deleted because the relay is still a useful fallback for bootstrapping a box
 with no network.
 
-**To reapply the fix:**
-```
-nmcli con modify pe-share connection.autoconnect no
-```
-
-**Before ever bringing it up again**, confirm nothing else owns `10.42.0.0/24`.
-Today the room router does.
+(Superseded 2026-09-29: the profile is deleted. See above.)
 
 ### `room-lan` — added, deliberately has no default route
 
@@ -824,3 +845,90 @@ start with no configuration.
 (PostScript), `zathura-cb` (comic book), or `zathura-plugins-all`.
 `zathura-pdf-poppler` is the alternative PDF backend. Do not install both PDF
 backends.
+
+---
+
+## greetd: password only at the greeter (fingerprint stays for su, polkit, lock screen)
+
+**Added 2026-09-23.** A fingerprint login at tuigreet gave PAM no password.
+`pam_kwallet5` then logged `Couldn't get password (it is empty)` and could not
+unlock `~/.local/share/kwalletd/kdewallet.kwl`. `ksecretd` then asked for the
+password a second time. No PAM setting can fix this, because the wallet is
+encrypted with the password. The greetd auth stack now uses `password-auth`
+(authselect file with no `pam_fprintd`) instead of `system-auth`.
+
+**Changed line in `/etc/pam.d/greetd`** (only line 2 changed, the rest is stock):
+```
+auth       substack    password-auth
+```
+Before: `auth       substack    system-auth`. Backup: `/etc/pam.d/greetd.bak-2026-09-23`.
+
+**To reapply:**
+```
+sudo sed -i 's|^auth       substack    system-auth$|auth       substack    password-auth|' /etc/pam.d/greetd
+```
+**To undo:** `sudo cp -a /etc/pam.d/greetd.bak-2026-09-23 /etc/pam.d/greetd`.
+A `greetd` package update can replace `/etc/pam.d/greetd`. If the double prompt
+comes back after an update, check line 2 first.
+
+---
+
+## greetd: noctalia colors on the tuigreet greeter
+
+**Added 2026-09-23.** tuigreet runs on the bare console (VT1), which has 16
+color slots. noctalia renders the template
+`noctalia/.config/noctalia/templates/greetd-palette` (registered in
+`user-templates.toml` as `[theme.templates.user.greetd]`) to
+`/var/lib/greetd-theme/palette` on every theme change: 16 lines of `RRGGBB`,
+slots 0-15. The wrapper loads the lines into VT1 with `ESC ] P<slot><rrggbb>`
+and then starts tuigreet. The `--theme` string uses ANSI slot names, so it
+takes the noctalia colors. The greetd user cannot read `/home/jj`, so the
+palette lives outside `$HOME`. The escapes change VT1 only. tty2 keeps stock colors.
+
+**`/usr/local/bin/tuigreet-themed`** (root:root 0755) is a copy of
+`scripts/greetd/tuigreet-themed` in this repo. Edit the repo copy and reinstall.
+
+**`/etc/greetd/config.toml`**: `command` starts with
+`/usr/local/bin/tuigreet-themed` instead of `tuigreet`. All flags are unchanged.
+Backup: `/etc/greetd/config.toml.bak-2026-09-23`.
+
+**To reapply:**
+```
+sudo install -d -o jj -g jj -m 0755 /var/lib/greetd-theme
+sudo install -o root -g root -m 0755 ~/dotfiles/scripts/greetd/tuigreet-themed /usr/local/bin/tuigreet-themed
+sudo restorecon -v /var/lib/greetd-theme /usr/local/bin/tuigreet-themed
+sudo sed -i 's|^command = "tuigreet |command = "/usr/local/bin/tuigreet-themed |' /etc/greetd/config.toml
+noctalia msg templates-apply
+```
+**To undo:** `sudo cp -a /etc/greetd/config.toml.bak-2026-09-23 /etc/greetd/config.toml`.
+If the palette file is missing or unreadable, the wrapper starts tuigreet with stock colors.
+
+---
+
+## greetd: quiet session start (no start-hyprland output on VT1)
+
+**Added 2026-09-29.** After login, tuigreet starts the session on VT1. Before
+Hyprland takes the display, `start-hyprland` and Hyprland print their startup
+log on the console. Neither binary has a `--quiet` or `--silent` flag
+(checked with `start-hyprland --help` and `Hyprland --help`). tuigreet now
+starts every session through a wrapper. The wrapper clears the screen, hides
+the cursor, and sends the session stdout and stderr to
+`~/.local/state/session.log`.
+
+**`/usr/local/bin/session-quiet`** (root:root 0755) is a copy of
+`scripts/greetd/session-quiet` in this repo. Edit the repo copy and reinstall.
+
+**`/etc/greetd/config.toml`**: `command` gets one more flag,
+`--session-wrapper /usr/local/bin/session-quiet`. The wrapper applies to all
+sessions in `/usr/share/wayland-sessions` (Hyprland, Hyprland uwsm, Plasma, niri).
+Backup: `/etc/greetd/config.toml.bak-2026-09-29`.
+
+**To reapply:**
+```
+sudo cp -a /etc/greetd/config.toml /etc/greetd/config.toml.bak-2026-09-29
+sudo install -o root -g root -m 0755 ~/dotfiles/scripts/greetd/session-quiet /usr/local/bin/session-quiet
+sudo restorecon -v /usr/local/bin/session-quiet
+sudo sed -i 's|^command = "/usr/local/bin/tuigreet-themed |command = "/usr/local/bin/tuigreet-themed --session-wrapper /usr/local/bin/session-quiet |' /etc/greetd/config.toml
+```
+greetd reads `/etc/greetd/config.toml` when the daemon starts. To test, reboot, or log out of the tty1 session and run `sudo systemctl restart greetd` from tty2. A restart stops any running greetd session.
+**To undo:** `sudo cp -a /etc/greetd/config.toml.bak-2026-09-29 /etc/greetd/config.toml`.

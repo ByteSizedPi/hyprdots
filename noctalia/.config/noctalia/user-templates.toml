@@ -15,3 +15,12 @@ output_path = "$XDG_CONFIG_HOME/zsh/noctalia-theme.zsh"
 # [theme.templates.user.hyprland-windowrules]
 # input_path = "~/.config/noctalia/templates/hyprland-windowrules.lua"
 # output_path = "~/.config/hypr/noctalia-windowrules.lua"
+
+# Linux console palette for the tuigreet greeter on VT1: 16 lines of RRGGBB,
+# slots 0-15 in ANSI order (0 = background, 7 = default text). The greetd
+# wrapper /usr/local/bin/tuigreet-themed loads it into VT1 before tuigreet
+# starts. The greetd user cannot read /home/jj, so the output goes to a
+# jj-owned dir outside $HOME (see SYSTEM.md -> "greetd: noctalia colors").
+[theme.templates.user.greetd]
+input_path = "~/.config/noctalia/templates/greetd-palette"
+output_path = "/var/lib/greetd-theme/palette"

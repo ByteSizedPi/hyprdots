@@ -34,10 +34,13 @@ hl.config({
 		-- builds the same superellipse SDF (`lpNorm(q, roundingPower)`), so the glass
 		-- boundary tracks this exactly rather than approximating it with a circle.
 		--
+		-- 30 -> 20 on 2026-09-22: 30 read as too round. rounding_power stays 4.0,
+		-- so the corner keeps its squircle shape and only gets shorter.
+		--
 		-- Hyprland clamps the radius to half the window's smallest dimension, so a
-		-- short window quietly gets less than 30. Keep that in mind before blaming
+		-- short window quietly gets less than 20. Keep that in mind before blaming
 		-- the theme for an inconsistent corner on a small floating window.
-		rounding = 30,
+		rounding = 20,
 		rounding_power = 4.0,
 
 		-- FULLY OPAQUE, deliberately — and this is NOT the same as "no glass".

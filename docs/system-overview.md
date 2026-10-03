@@ -204,7 +204,7 @@ that block at login. Nothing outside the repo; no `SYSTEM.md` entry. See
 [problems.md](problems.md) → "noctalia can't turn Bluetooth *on*".
 
 ## Stow packages
-`alacritty, btop, environment, home, hyprland, kitty, noctalia, nvim,
+`alacritty, btop, dolphin, environment, home, hyprland, kitty, noctalia, nvim,
 systemd, zellij, zen` — each `stow <pkg>` symlinks into `$HOME`.
 Not packages (never `stow` these): `docs`, `scripts`, `themes`.
 
