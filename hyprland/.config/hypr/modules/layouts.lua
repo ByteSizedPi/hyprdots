@@ -14,3 +14,10 @@ hl.bind(mainMod .. " + SHIFT + R", hl.dsp.layout("colresize -conf"))
 -- Swap the focused column with its neighbour.
 hl.bind(mainMod .. " + CTRL + h", hl.dsp.layout("swapcol l"))
 hl.bind(mainMod .. " + CTRL + l", hl.dsp.layout("swapcol r"))
+
+-- Monocle binds: cycle the windows on a monocle workspace (SUPER+S zellij).
+-- Hyprland wiki, Monocle Layout, "Quirks": hl.dsp.window.cycle_next() does not
+-- work with monocle, so these use the layout messages. On a workspace with
+-- another layout these do nothing.
+hl.bind(mainMod .. " + Tab", hl.dsp.layout("cyclenext"))
+hl.bind(mainMod .. " + SHIFT + Tab", hl.dsp.layout("cycleprev"))

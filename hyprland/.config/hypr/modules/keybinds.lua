@@ -54,16 +54,14 @@ end
 
 -- Scratchpad
 hl.bind(mainMod .. " + S", hl.dsp.workspace.toggle_special("zellij"))
--- SUPER+A: unbound since 2026-10-07. jjserver moved into the SUPER+S group.
+-- SUPER+A: unbound since 2026-10-07. Reach jjserver with ssh from SUPER+S.
 hl.bind(mainMod .. " + Y", hl.dsp.workspace.toggle_special("youtube"))
 hl.bind(mainMod .. " + B", hl.dsp.workspace.toggle_special("beeper"))
 
 -- Window groups (tabs). SUPER+G makes the focused window a group, or ungroups it.
--- SUPER+Tab / SUPER+SHIFT+Tab switch tabs in the focused group (for example the
--- zellij sessions on SUPER+S).
+-- No bind switches group tabs since 2026-10-09: SUPER+Tab / SUPER+SHIFT+Tab moved
+-- to monocle window cycling (modules/layouts.lua).
 hl.bind(mainMod .. " + G", hl.dsp.group.toggle())
-hl.bind(mainMod .. " + Tab", hl.dsp.group.next())
-hl.bind(mainMod .. " + SHIFT + Tab", hl.dsp.group.prev())
 -- hl.bind(mainMod .. " + SHIFT + S", hl.dsp.window.move({ workspace = "special:magic" }))
 
 -- Mouse

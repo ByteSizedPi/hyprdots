@@ -18,7 +18,7 @@ modules/            hand-written config, one concern per file
   behaviour.lua     what the compositor DOES — layout, misc, debug
   keybinds.lua      all binds except voxtype's (see voxtype.lua)
   autostart.lua     noctalia daemon
-  scratchpads.lua   special workspaces: SUPER+S zellij group (local + servers), YouTube Music, Beeper
+  scratchpads.lua   special workspaces: SUPER+S zellij (monocle, local only), YouTube Music, Beeper
   specialbar.lua    hides the Noctalia bar while a special workspace shows
   layouts.lua       scrolling-layout binds and per-workspace layout rules
   groups.lua        group borders + groupbar (loaded AFTER the palette)

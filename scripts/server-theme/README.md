@@ -39,8 +39,8 @@ Local, named by label so nothing else needs editing when a palette changes:
 
 | file | consumed by |
 | --- | --- |
-| `kitty/.config/kitty/themes/server-<label>.conf` | `kitty/<label>.conf` (the SUPER+S tab) and `kitty/ssh.conf` (any `kitten ssh` to that host) |
-| `hyprland/.config/hypr/theme/<label>.lua` | `modules/scratchpads.lua`, the tab's border colour |
+| `kitty/.config/kitty/themes/server-<label>.conf` | `kitty/ssh.conf` (any `kitten ssh` to that host). Also `kitty/<label>.conf`, unused since the SUPER+S group was removed on 2026-10-09 |
+| `hyprland/.config/hypr/theme/<label>.lua` | nothing since 2026-10-09 (was the SUPER+S tab border colour in `modules/scratchpads.lua`) |
 
 ## Adding a server
 
@@ -48,9 +48,7 @@ Local, named by label so nothing else needs editing when a palette changes:
 2. On the server: clone the dotfiles to `~/dotfiles` and symlink
    `~/.config/nvim` and `~/.config/zellij` into it (no stow on the servers).
 3. Run `./deploy.sh <label>`.
-4. Add `kitty/.config/kitty/<label>.conf` (copy `pve-prod.conf`) and a
-   `hostname` block in `kitty/.config/kitty/ssh.conf`.
-5. Add the host to the `servers` table in `hyprland/.config/hypr/modules/scratchpads.lua`.
+4. Add a `hostname` block in `kitty/.config/kitty/ssh.conf`.
 
 ## Palettes
 
