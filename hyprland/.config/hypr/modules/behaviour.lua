@@ -6,7 +6,11 @@
 
 hl.config({
 	general = {
-		-- layout = "master", -- master (not dwindle) to avoid CDwindleAlgorithm shutdown crash; see docs/hyprland-plasma-diagnosis.md ISSUE 2
+		-- Scrolling on every workspace (chosen 2026-10-07 after a trial on workspace 3).
+		-- Per-workspace exceptions live in modules/layouts.lua. This also moves off
+		-- dwindle, which had the CDwindleAlgorithm shutdown crash; see
+		-- docs/hyprland-plasma-diagnosis.md ISSUE 2.
+		layout = "scrolling",
 		resize_on_border = true,
 		-- allow_tearing = false,
 	},

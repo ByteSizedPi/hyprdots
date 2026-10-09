@@ -1,0 +1,32 @@
+{
+  "_about": "Proxmox ember: the SERVER theme for pve-prod (VM 110 on pve). Dark warm-grey surfaces with the Proxmox orange (#e57000) as primary, so the accent, the zellij highlights and the Hyprland border are orange. primary also feeds ANSI green (color2) and nvim strings, so those render orange too. That is the accepted trade-off for a single-accent theme. primary_fixed_dim=blue, secondary=yellow, secondary_fixed_dim=magenta, tertiary_fixed_dim=cyan, error=red, as in macchiato.json.",
+
+  "background":               "#1a1614",
+  "on_background":            "#f2e6dc",
+
+  "surface":                  "#211c19",
+  "surface_container":        "#2c2521",
+  "surface_container_high":   "#3a302a",
+  "surface_container_highest":"#4a3d35",
+  "on_surface":               "#e8dcd0",
+  "on_surface_variant":       "#b8a898",
+
+  "primary":                  "#e57000",
+  "on_primary":               "#1a1614",
+  "primary_container":        "#4a3d35",
+  "primary_fixed_dim":        "#7aa6c2",
+
+  "secondary":                "#e8b04b",
+  "secondary_container":      "#2c2521",
+  "secondary_fixed_dim":      "#c48bb5",
+
+  "tertiary":                 "#f29b4c",
+  "tertiary_container":       "#2c2521",
+  "tertiary_fixed_dim":       "#7fb8a4",
+
+  "error":                    "#e0584a",
+  "error_container":          "#f07a6c",
+
+  "outline":                  "#6e6058",
+  "outline_variant":          "#3a302a"
+}

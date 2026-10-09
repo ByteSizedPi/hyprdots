@@ -208,7 +208,7 @@ then deploys everything else from the repo.
 - [x] 1. **DNS LXC** — AdGuard Home via `ct/adguard.sh` helper. Up, wizard done.
       (Blocklists/local-DNS-rewrites + jjserver config import deferred to cutover.)
 - [x] 2. **App VM** — Debian 13 cloud image → **template VM 9000** (`debian13-tmpl`),
-      full-cloned to **VM 110 `app-prod`** (8c/24 GB). Cloud-init planted user `jj`
+      full-cloned to **VM 110 `pve-prod`** (now 12c/44 GB). Named `app-prod` in Proxmox until 2026-10-07, when it was renamed to match its OS and Tailscale hostname `pve-prod`. Cloud-init planted user `jj`
       + laptop ed25519 SSH key; reachable key-only from the laptop. Docker CE +
       compose plugin (official repo) installed. *Dev VM later = clone 9000.*
 - [x] 3. **Komodo** hand-installed on VM 110 (`~/komodo/`, Mongo variant:
@@ -234,7 +234,7 @@ then deploys everything else from the repo.
 > | --- | --- |
 > | `10.42.0.1` | TP-Link AX1500 room router (SSID `jjlink`) |
 > | `10.42.0.10` | pve host — Proxmox UI on `:8006` |
-> | `10.42.0.11` | pve-prod |
+> | `10.42.0.11` | pve-prod — VM 110 on pve (Debian 13, Docker + Komodo). Not a second Proxmox host. |
 > | `10.42.0.12` | DNS LXC (the address the router hands out as DNS) |
 > | `10.42.0.13`, `10.42.0.100` | further guests, roles not re-verified |
 >
@@ -366,9 +366,26 @@ Ordered by impact-per-dollar:
   DNS (AdGuard) LXC.
 - **2026-07-14 (cont.)** — Platform stood up on the R720xd (all guests still on
   the `10.42.0.x` laptop relay): (1) AdGuard LXC; (2) Debian 13 cloud-init
-  **template 9000** + **app-prod VM 110** (Docker CE + compose, `proxy` network
+  **template 9000** + **pve-prod VM 110** (formerly named app-prod) (Docker CE + compose, `proxy` network
   created); (3) **Komodo** (Mongo + Core + Periphery) live on `:9120`, admin
   logged in, all containers healthy. Build-order §6-GitOps items 1–3 done, 4
   half (proxy net up, Traefik pending). Working style: **coach the user through
   steps, he runs them** ([[feedback-coach-dont-do]]). Next: `homelab-stacks`
   git repo + first Komodo-deployed stack (Traefik).
+
+
+## pve-prod: workstation tools (2026-10-07)
+
+pve-prod (VM 110) is the third tab of the SUPER+S zellij group on the laptop,
+themed with the `ember` palette (Proxmox orange). Set up like jjserver:
+
+* `/usr/local/bin/zellij` — zellij 0.45.1 musl release (sha256 checked against
+  the release `.sha256sum`), to match the laptop.
+* `/opt/nvim` + `/usr/local/bin/nvim` symlink — nvim 0.12.5 release tarball
+  (sha256 checked against the GitHub release digest). Debian 13 ships 0.10.4,
+  older than the config expects.
+* apt: `unzip build-essential nodejs npm ripgrep fd-find` (Mason, treesitter,
+  telescope need them; jjserver already had most).
+* `~/dotfiles` cloned from `git@github.com:ByteSizedPi/hyprdots.git` (default
+  branch `main`); `~/.config/nvim` and `~/.config/zellij` are symlinks into it.
+* Theme: `scripts/server-theme/deploy.sh pve-prod`.

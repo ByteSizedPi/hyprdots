@@ -478,7 +478,7 @@ All of it was removed on 2026-08-01: containers, the `komodo_keys` /
 `komodo_mongo-data` / `komodo_mongo-config` volumes, the images, and the
 root-owned `/mnt/docker-data` tree.
 
-**Policy going forward:** Komodo runs on `app-prod`, not here. Container
+**Policy going forward:** Komodo runs on `pve-prod` (VM 110, formerly named `app-prod`), not here. Container
 testing on this laptop is fine, but nothing homelab-related should write to
 `/etc`, install systemd units, or create root-owned directories outside
 `/home`. The `~/server` git repo is just source — it changes nothing on this

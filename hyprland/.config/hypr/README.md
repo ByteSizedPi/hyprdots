@@ -18,7 +18,10 @@ modules/            hand-written config, one concern per file
   behaviour.lua     what the compositor DOES — layout, misc, debug
   keybinds.lua      all binds except voxtype's (see voxtype.lua)
   autostart.lua     noctalia daemon
-  scratchpads.lua   special:zellij and special:jjserver
+  scratchpads.lua   special workspaces: SUPER+S zellij group (local + servers), YouTube Music, Beeper
+  specialbar.lua    hides the Noctalia bar while a special workspace shows
+  layouts.lua       scrolling-layout binds and per-workspace layout rules
+  groups.lua        group borders + groupbar (loaded AFTER the palette)
   plugins.lua       hyprpm loading model (read before touching plugins)
   voxtype.lua       dictation — SUPER+D push-to-talk + its submaps
 
@@ -30,7 +33,7 @@ theme/              ⚙ ALL GENERATED — see below
   appearance.lua    gaps, rounding, opacity, shadow, blur, animations
   layers.lua        noctalia layer rules — native blur, or ceded to hyprglass
   glass.lua         hyprglass config, or an explicit disable stub
-  jjserver.lua      border colour for the jjserver scratchpad
+  <label>.lua       border colour per server tab (jjserver.lua, pve-prod.lua)
 
 noctalia.lua        ⚙ Noctalia builtin template — palette + apply_theme()
 hyprtoolkit.conf    ⚙ Noctalia community template
@@ -43,7 +46,7 @@ hyprtoolkit.conf    ⚙ Noctalia community template
 | `theme/appearance.lua` | `scripts/desktop-theme/apply.sh` | no — input is `themes/<name>/hypr/appearance.lua` |
 | `theme/layers.lua` | `scripts/desktop-theme/apply.sh` | no — input is `themes/<name>/hypr/layers.lua` |
 | `theme/glass.lua` | `scripts/desktop-theme/apply.sh` | no — input is `themes/<name>/hypr/glass.lua` |
-| `theme/jjserver.lua` | `scripts/server-theme/deploy.sh` | **yes** — regenerated rarely, and committing it records the pinned server palette |
+| `theme/<label>.lua` (jjserver, pve-prod) | `scripts/server-theme/deploy.sh <label>` | **yes** — regenerated rarely, and committing it records the pinned server palette |
 | `noctalia.lua` | Noctalia | no |
 | `hyprtoolkit.conf` | Noctalia | no |
 

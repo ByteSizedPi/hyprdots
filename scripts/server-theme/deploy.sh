@@ -1,27 +1,30 @@
 #!/usr/bin/env bash
-# Generate the server theme from a fixed palette through the SAME Noctalia templates
-# used for the wallpaper flow, then push it to the server.
+# Generate a server theme from a fixed palette through the SAME Noctalia templates
+# used for the wallpaper flow, then push it to that server.
 #
-# SINGLE SOURCE OF TRUTH: noctalia/.config/noctalia/palettes/active  (one line, the
-# palette name, e.g. "cobalt"). Change that one file and re-run this — nothing else.
-# All outputs use FIXED names, so ssh.conf / jjserver.conf never need editing when you
-# switch themes. Override the active palette ad-hoc with arg 1 or $SERVER_THEME.
+# SINGLE SOURCE OF TRUTH: scripts/server-theme/hosts.conf, one line per server
+# (<label> <ssh target> <palette>). Change a palette there and re-run this for that
+# label. Outputs are named by label, so kitty/ssh.conf, the per-host kitty configs
+# and modules/scratchpads.lua never need editing when a palette changes.
 #
-# Usage: scripts/server-theme/deploy.sh [palette-name] [user@host]
+# Usage: scripts/server-theme/deploy.sh [label] [palette]
+#   label    a label from hosts.conf (default: jjserver)
+#   palette  override the hosts.conf palette for this run (or set $SERVER_THEME)
 set -euo pipefail
 
 # Repo root (this script lives in <repo>/scripts/server-theme) and the paths we read from.
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)" # scripts/server-theme
 repo="$(cd "$here/../.." && pwd)"                    # repo root
-pal_dir="$repo/noctalia/.config/noctalia/palettes"   # palette JSONs + the `active` pointer
+pal_dir="$repo/noctalia/.config/noctalia/palettes"   # palette JSONs
 tpl="$repo/noctalia/.config/noctalia/templates"      # shared Noctalia templates
 render="$here/render.py"                             # substitutes a palette into a template
 
-# Resolve the active palette: arg 1 > $SERVER_THEME > palettes/active > "cobalt".
-active="cobalt"                                                              # last-resort default
-[ -f "$pal_dir/active" ] && active="$(tr -d '[:space:]' <"$pal_dir/active")" # the single source of truth
-name="${1:-${SERVER_THEME:-$active}}"                                        # let arg/env override ad-hoc
-remote="${2:-jjserver@100.68.211.32}"                                        # target host (arg 2 overrides)
+label="${1:-jjserver}"
+read -r _ remote host_palette < <(awk -v l="$label" '$1 == l { print; exit }' "$here/hosts.conf") || {
+  echo "no host '$label' in $here/hosts.conf" >&2
+  exit 1
+}
+name="${2:-${SERVER_THEME:-$host_palette}}" # arg/env override the hosts.conf palette
 
 palette="$pal_dir/$name.json" # the chosen palette file
 [ -f "$palette" ] || {
@@ -53,12 +56,15 @@ new="$(sed "s|^// noctalia-theme-applied:.*|// noctalia-theme-applied: $(date +%
 printf '%s\n' "$new" >"$cfg"
 EOSSH
 
-# --- client side: fixed names so ssh.conf/jjserver.conf stay stable across theme swaps ---
-python3 "$render" "$palette" "$tpl/kitty-theme.conf" \
-  >"$repo/kitty/.config/kitty/themes/server-theme.conf" # kitty 'Server' scheme
+# --- client side: named by label so ssh.conf and kitty/<label>.conf stay stable ---
+# The kitty theme's "## name:" header is made unique per host, so the themes kitten
+# lists each server theme separately.
+python3 "$render" "$palette" "$tpl/kitty-theme.conf" |
+  sed "s/^## name: Server$/## name: Server $label/" \
+    >"$repo/kitty/.config/kitty/themes/server-$label.conf" # kitty scheme for this host
 python3 "$render" "$palette" "$tpl/hyprland-jjserver-colors.lua" \
-  >"$repo/hyprland/.config/hypr/theme/jjserver.lua" # hypr jjserver border colors
+  >"$repo/hyprland/.config/hypr/theme/$label.lua" # hypr border colour for this host
 
-echo "Deployed server theme: palette '$name' -> $remote"
+echo "Deployed server theme: palette '$name' -> $label ($remote)"
 echo "  server: nvim + zellij theme files, ~/.config/server-theme.txt (live-poked)"
-echo "  client: kitty 'Server' scheme + hypr jjserver border"
+echo "  client: kitty/themes/server-$label.conf + hypr/theme/$label.lua"

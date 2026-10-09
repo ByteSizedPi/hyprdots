@@ -1,0 +1,5 @@
+@import "/home/jj/.cache/noctalia/zen-browser/zen-userChrome.css";
+/* YouTube Music web app profile. Unlike the main profile, nothing rewrites this
+   file, so it is stow-tracked. Same Noctalia theme and transparency as the main
+   profile, by import. */
+@import "/home/jj/.zen/xen9lela.Default (release)/chrome/noctalia-transparency.css";

@@ -8,6 +8,37 @@ Status key: 🟥 OPEN · 🟧 MITIGATED (worked around, root cause unsolved) · 
 
 ---
 
+## 🟩 Show the playing track next to the bar audio visualizer
+
+**2026-10-07, noctalia 5.2.1.** The `audio_visualizer` bar widget has no text
+option. Its only settings (from the `AudioVisualizerWidget::Options` symbols in
+`/usr/bin/noctalia`) are `bands`, `width`, `color1`, `color2`, `mirrored`,
+`reversed`, `centered`, `showWhenIdle` (C++ field names, not TOML keys). Text cannot go inside it without a
+plugin widget.
+
+**Worked:** add the built-in `media` widget directly after it, in
+`~/.local/state/noctalia/settings.toml` (not `config.toml`, see the precedence
+entry):
+
+```toml
+[bar.default]
+start = [ "workspaces", "audio_visualizer", "media" ]
+
+[widget.media]
+color = "tertiary"
+hide_album_art = true
+hide_when_no_media = true
+max_length = 260
+min_length = 0
+title_scroll = "on_hover"
+```
+
+`noctalia config export merged` showed both values live 2 seconds after the
+edit. No theme file in `themes/` sets `bar.default.start`, so a theme apply
+does not remove the `media` entry.
+
+---
+
 ## 🟧 dnf skips `glaze-devel` 9.0.0 (terra) — `hyprland-devel` needs `glaze-static`
 
 **2026-09-29.** `sudo dnf upgrade --refresh --assumeno` showed one conflict and
@@ -1570,6 +1601,14 @@ signed in and Google Cloud is not involved at all. Added to `[ytmusic]`:
 cookies_from = "chromium"
 ```
 
+> **2026-10-07:** the `special:youtube` scratchpad moved from the Chromium web
+> app to a separate Zen profile (`~/.zen/ytmusic`, see `zen/README.md`).
+> `cookies_from = "chromium"` still reads the Chromium `Default` profile. That
+> works only while the Chromium Google sign-in stays valid. If cliamp stops
+> streaming, check that sign-in first. yt-dlp also accepts
+> `firefox:/home/jj/.zen/ytmusic` as a cookie source, but nobody has tested it
+> with cliamp.
+
 **2. yt-dlp could not resolve any audio format.** cliamp streams by shelling out
 to `yt-dlp` (confirmed by `strings` on the binary: `--cookies-from-browser`,
 `-f`, `bestaudio`). Run by hand, yt-dlp 2026.08.19 failed:
@@ -1784,3 +1823,33 @@ dispatchIdle UAF. Until then, expect a crash risk on every HDMI unplug.
   call. Change it by hand in the Web UI (Options > BitTorrent > Torrent Queueing).
 - Side note: on 2026-09-22 the LAN path to pve-prod (10.42.0.11:22) timed out while
   the tailnet path (`pve-prod-ts`) worked. Cause not checked.
+
+## 🟩 Zen Internet did not theme the YouTube Music web app profile
+
+**Symptom (2026-10-07):** the `~/.zen/ytmusic` profile (the `special:youtube`
+scratchpad, see `zen/README.md`) showed stock YouTube Music. Zen Internet was
+installed, enabled, and had the same settings as the main profile.
+
+**Cause:** the Zen Internet UUID in the ytmusic profile was changed to the main
+profile UUID, so that the copied IndexedDB settings would match. The startup
+cache (`~/.cache/zen/ytmusic/startupCache/webext.sc.lz4`) still held the old
+UUID in the generated background page. The background script loaded from
+`moz-extension://<old uuid>/background.js`, the load failed, and
+`backgroundState` stayed `stopped`. Without the background script, no page
+gets any style.
+
+**Fix:** stop the profile, delete `~/.cache/zen/ytmusic/startupCache`, start it.
+
+**Tried, did NOT work:**
+* Copying the Transparent Zen mod and its prefs. The mod is needed for the
+  transparent look, but it was not the cause.
+* `extensions.webextensions.background-delayed-startup = false`, on the theory
+  that the page loaded before the extension listened. A page reload over BiDi
+  still gave no style, so the race theory was wrong. Pref removed.
+* `extensions.activeThemeID` in `user.js` to activate the Catppuccin theme.
+  The theme stayed inactive. It was enabled through the add-on manager instead.
+
+**How it was found:** WebDriver BiDi (`--remote-debugging-port 9223
+--remote-allow-system-access`), then `Services.console.getMessageArray()` in
+the chrome context showed "Loading failed for the <script> with source
+moz-extension://88183f85-…/background.js".

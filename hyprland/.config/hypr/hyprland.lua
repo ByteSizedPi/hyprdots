@@ -12,9 +12,12 @@ require("modules.environment")
 require("modules.monitors")
 require("modules.input")
 require("modules.behaviour")
+require("modules.effects")
+require("modules.layouts")
 require("modules.keybinds")
 require("modules.autostart")
 require("modules.scratchpads")
+require("modules.urgent")
 require("modules.plugins")
 require("modules.voxtype")
 
@@ -33,6 +36,12 @@ require("theme")
 --
 -- So: don't move it, don't reword it, and don't let the string drift.
 require("noctalia").apply_theme()
+
+-- Group borders and groupbar colours override the palette, so they load here.
+require("modules.groups")
+
+-- Special-workspace look (opaque background) overrides theme/appearance.lua.
+require("modules.specialbar")
 
 -- Anything that must OVERRIDE the palette goes after it. apply_theme() sets
 -- col.active_border and col.inactive_border, so a theme's gradient borders and glow

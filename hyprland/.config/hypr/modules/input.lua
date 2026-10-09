@@ -139,3 +139,34 @@ hl.gesture({
 		end,
 	},
 })
+
+-- TRIAL 2026-10-08: SUPER + 2-finger pinch zooms the whole screen around the
+-- cursor (Hyprland 0.54+ cursorZoom gesture). mode "live" follows the fingers
+-- while they move. Pinch out to zoom in, pinch in to zoom back out. SUPER is
+-- required so a plain pinch still reaches apps (pinch-zoom in Zen).
+-- The zoom animation is theme/appearance.lua's "zoomFactor" animation.
+hl.gesture({
+	fingers = 2,
+	direction = "pinch",
+	mods = "SUPER",
+	action = "cursorZoom",
+	mode = "live",
+	zoom_level = 1,
+})
+
+-- Keyboard zoom, same trial: SUPER+CTRL+= zooms in, SUPER+CTRL+- zooms out,
+-- SUPER+CTRL+0 resets. Each step multiplies cursor.zoom_factor by 1.5
+-- (1 = no zoom). Animated by the same "zoomFactor" animation.
+local function zoom(f)
+	return function()
+		local z = f and math.max(1, (hl.get_config("cursor.zoom_factor") or 1) * f) or 1
+		hl.config({ cursor = { zoom_factor = z } })
+	end
+end
+hl.bind("SUPER + CTRL + equal", zoom(1.5), { repeating = true })
+hl.bind("SUPER + CTRL + minus", zoom(1 / 1.5), { repeating = true })
+hl.bind("SUPER + CTRL + 0", zoom(nil))
+
+-- Tried and removed 2026-10-08: a 4-finger horizontal LIVE gesture (update
+-- callback, e.delta.x) that slid the scrolling-layout strip with
+-- hl.dsp.layout("move <px>"), niri-style. Not liked.

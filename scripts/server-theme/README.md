@@ -9,17 +9,20 @@ groups share only the Noctalia templates in
 `noctalia/.config/noctalia/templates/`.
 
 ```bash
-./deploy.sh                      # use the active palette + default host
-./deploy.sh cobalt               # override the palette
-./deploy.sh cobalt user@host     # override palette + host
+./deploy.sh                      # jjserver, with its palette from hosts.conf
+./deploy.sh pve-prod             # another host from hosts.conf
+./deploy.sh pve-prod cobalt      # override the palette for one run
 SERVER_THEME=cobalt ./deploy.sh  # override via env
 ```
 
-**Single source of truth:** `noctalia/.config/noctalia/palettes/active` — one line,
-the palette name. Change that file and re-run; nothing else needs editing.
+**Single source of truth:** `hosts.conf`, one line per server:
+`<label> <ssh target> <palette>`. Change a palette there and re-run for that
+label. (Until 2026-10-07 this was `noctalia/.config/noctalia/palettes/active`,
+one palette for the one server.)
 
 | file | role |
 | --- | --- |
+| `hosts.conf` | servers, their ssh target and palette |
 | `deploy.sh` | render → `scp` → live-poke the remote session |
 | `render.py` | substitute a palette JSON into a Noctalia template → stdout |
 
@@ -32,10 +35,22 @@ needed on the server.
 Remote: `~/.config/nvim/lua/noctalia-theme.lua`,
 `~/.config/zellij/themes/noctalia.kdl`, `~/.config/server-theme.txt` (breadcrumb).
 
-Local, fixed names so `ssh.conf` / `jjserver.conf` never need editing when the
-palette changes: `kitty/.config/kitty/themes/server-theme.conf` and
-`hyprland/.config/hypr/jjserver-colors.lua` (consumed by `windowrules.lua` so the
-`jjserver` special-workspace border matches).
+Local, named by label so nothing else needs editing when a palette changes:
+
+| file | consumed by |
+| --- | --- |
+| `kitty/.config/kitty/themes/server-<label>.conf` | `kitty/<label>.conf` (the SUPER+S tab) and `kitty/ssh.conf` (any `kitten ssh` to that host) |
+| `hyprland/.config/hypr/theme/<label>.lua` | `modules/scratchpads.lua`, the tab's border colour |
+
+## Adding a server
+
+1. Add a line to `hosts.conf`.
+2. On the server: clone the dotfiles to `~/dotfiles` and symlink
+   `~/.config/nvim` and `~/.config/zellij` into it (no stow on the servers).
+3. Run `./deploy.sh <label>`.
+4. Add `kitty/.config/kitty/<label>.conf` (copy `pve-prod.conf`) and a
+   `hostname` block in `kitty/.config/kitty/ssh.conf`.
+5. Add the host to the `servers` table in `hyprland/.config/hypr/modules/scratchpads.lua`.
 
 ## Palettes
 
