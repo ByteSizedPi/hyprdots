@@ -24,3 +24,10 @@ output_path = "$XDG_CONFIG_HOME/zsh/noctalia-theme.zsh"
 [theme.templates.user.greetd]
 input_path = "~/.config/noctalia/templates/greetd-palette"
 output_path = "/var/lib/greetd-theme/palette"
+
+# Beeper Desktop reads custom.css from its userData dir at start. Beeper has no
+# working file watcher (4.2.985), so no post_hook can reload it: type
+# "Reload custom CSS" in the Beeper command bar, or restart Beeper.
+[theme.templates.user.beeper]
+input_path = "~/.config/noctalia/templates/beeper.css"
+output_path = "~/.config/BeeperTexts/custom.css"
