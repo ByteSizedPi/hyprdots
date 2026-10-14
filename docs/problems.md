@@ -91,6 +91,32 @@ Inference: I did not see the prompt on screen.
 **To verify:** log out, log in at tuigreet with the password, confirm no
 KWallet prompt, and confirm the journal no longer shows `Couldn't get password`.
 
+### 2026-10-14: second cause, Hyprland never ran `pam_kwallet_init`
+Symptom: the notification "There have been repeated failed attempts to gain
+access to a wallet". The greetd fix works. The 11 Oct 19:51 login shows
+`grantors=pam_unix` and no `Couldn't get password`.
+
+Evidence (I ran these checks):
+- `ksecretd --pam-login 10 11` (PID 2195, started 11 Oct 19:51) had no D-Bus
+  connection. It only held the `kwallet5.socket` listener.
+- Okular started at 14 Oct 10:38:24. D-Bus then activated a second `ksecretd`
+  and `kwalletd6`. The second `ksecretd` owned `org.freedesktop.secrets`, and
+  `kdewallet` was locked (`isOpen` = false).
+- `/etc/xdg/autostart/pam_kwallet_init.desktop` has `X-systemd-skip=true`.
+  Plasma runs it from its own autostart. Hyprland does not run it.
+- `pam_kwallet_init` pipes `env` into `$PAM_KWALLET5_LOGIN` with `socat`.
+  Without that step, the PAM `ksecretd` never joins the bus.
+
+Fix (not yet verified at a real login): `hyprland/.config/hypr/modules/autostart.lua`
+runs `/usr/libexec/pam_kwallet_init` on `hyprland.start`, before noctalia.
+
+**To verify:** after the next Hyprland login, `busctl --user status
+org.freedesktop.secrets` must show the `ksecretd --pam-login` PID, and
+`isOpen kdewallet` must return true.
+
+Open: I did not identify which app made the repeated attempts. Okular is the
+first wallet client in the 10:38 journal window.
+
 Also on 2026-09-23: tuigreet now takes noctalia colors (template
 `greetd-palette` + wrapper `/usr/local/bin/tuigreet-themed`). See `SYSTEM.md`.
 If the greeter shows stock colors, check `ausearch -m avc -ts boot | grep greetd`
