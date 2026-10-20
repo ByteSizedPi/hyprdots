@@ -8,6 +8,30 @@ Status key: 🟥 OPEN · 🟧 MITIGATED (worked around, root cause unsolved) · 
 
 ---
 
+## 🟩 Scrolling layout: hover sometimes moves the view, sometimes not
+
+**Symptom (2026-10-20):** a hover onto a window that overflows the screen
+sometimes scrolled the view to fit the window and sometimes did not. The user
+saw a left/right asymmetry.
+
+**Root cause (from Hyprland 0.56.2 source, `ScrollingAlgorithm.cpp`
+`focusOnInput()`):** hover (`follow_mouse = 1`) is soft input. For soft input
+the layout moves the view only when the visible part of the window is at least
+`scrolling:follow_min_visible` × monitor width (default 0.4 = 768 px at
+1920 px). The check is the same on both sides. The apparent asymmetry came from
+mixed column widths and different overflow amounts. A column narrower than
+768 px can never pass the check.
+
+**Fix (wanted: hover never moves the view):** `follow_min_visible = 1.0` in
+`hyprland/.config/hypr/modules/behaviour.lua`. Gaps keep every column narrower
+than the monitor, so a soft focus never passes. Keybind, click and new-window
+focus are hard input and skip the check.
+
+**Rejected:** `follow_focus = false`. It also stops the view following on click
+release and on the `focuswindow` dispatch.
+
+---
+
 ## 🟩 Show the playing track next to the bar audio visualizer
 
 **2026-10-07, noctalia 5.2.1.** The `audio_visualizer` bar widget has no text

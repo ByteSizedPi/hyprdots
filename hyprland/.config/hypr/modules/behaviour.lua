@@ -16,6 +16,17 @@ hl.config({
 	},
 })
 
+-- Hover (follow_mouse focus) never moves the scrolling view (2026-10-20).
+-- Hyprland 0.56.2 moves the view on a soft (hover) focus only when the window
+-- shows at least follow_min_visible x monitor width. 1.0 can never pass because
+-- gaps keep every column narrower than the monitor. Keybind, click and new
+-- window focus are hard input and skip this check, so they still move the view.
+hl.config({
+	scrolling = {
+		follow_min_visible = 1.0,
+	},
+})
+
 hl.config({
 	dwindle = {
 		preserve_split = true,
