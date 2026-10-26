@@ -162,6 +162,11 @@ seat/DRM-master contention (see problems.md → "tty1 dead screen").
 - **Terminals/tools:** kitty (+ zellij multiplexer; zellij sessions **persist**
   across compositor restarts — reattach after), alacritty, nvim, yazi, btop,
   zen browser.
+- **espanso** (text expander, `systemctl --user` unit `espanso`). Stow package
+  `espanso` links all of `~/.config/espanso`. `show_notifications: false` stops
+  the login toast. Personal triggers live in `match/private.yml`, which is
+  gitignored because this repo is public. Recreate that file by hand on a new
+  machine.
 
 ## Session environment / PATH
 `~/.config/environment.d/dotfiles-path.conf` (stow package `environment`) adds
@@ -204,7 +209,7 @@ that block at login. Nothing outside the repo; no `SYSTEM.md` entry. See
 [problems.md](problems.md) → "noctalia can't turn Bluetooth *on*".
 
 ## Stow packages
-`alacritty, btop, dolphin, environment, home, hyprland, kitty, noctalia, nvim,
+`alacritty, btop, dolphin, environment, espanso, home, hyprland, kitty, noctalia, nvim,
 systemd, zellij, zen` — each `stow <pkg>` symlinks into `$HOME`.
 Not packages (never `stow` these): `docs`, `scripts`, `themes`.
 

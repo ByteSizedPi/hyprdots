@@ -77,3 +77,8 @@ yazi/.config/yazi/flavors/
 # in git history stays there after the file is deleted, and has to be rotated
 # at the provider instead. Keep the directory, track nothing inside it.
 environment/secrets/
+
+# espanso: personal snippets (addresses, emails) stay local, this repo is public.
+# match/packages/ holds packages installed by `espanso install`.
+espanso/.config/espanso/match/private.yml
+espanso/.config/espanso/match/packages/

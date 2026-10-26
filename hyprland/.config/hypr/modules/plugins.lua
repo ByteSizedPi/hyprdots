@@ -20,7 +20,10 @@
 -- Enable/disable a plugin with `hyprpm enable|disable <name>`; that state lives
 -- outside this repo, in /var/cache/hyprpm/$USER/. Per-plugin *appearance* config
 -- is theme-owned (theme/glass.lua); anything behavioural would get its own module.
+--
+-- No `-n`: that flag pops a Hyprland overlay toast on every successful load.
+-- hyprpm still notifies on warnings/errors without it.
 
 hl.on("hyprland.start", function()
-	hl.exec_cmd("hyprpm reload -n && hyprctl reload config-only")
+	hl.exec_cmd("hyprpm reload && hyprctl reload config-only")
 end)
