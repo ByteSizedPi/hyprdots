@@ -1,0 +1,33 @@
+// Keyboard, touchpad, focus. Hyprland: modules/input.lua.
+
+input {
+    keyboard {
+        xkb {
+            layout "us"
+            options "compose:ralt"
+        }
+        numlock
+    }
+
+    touchpad {
+        // Hyprland enables tap-to-click by default. niri does not.
+        tap
+        natural-scroll
+    }
+
+    // Focus follows the pointer, like follow_mouse = 1. max-scroll-amount 0%
+    // means hovering a partly visible window focuses it but never scrolls the
+    // strip to it.
+    focus-follows-mouse max-scroll-amount="0%"
+}
+
+// GESTURES — niri's are built in and fixed, unlike hl.gesture():
+//   3-finger horizontal  scrolls the strip left/right (Hyprland: switch workspace)
+//   3-finger vertical    switches workspace up/down
+//   4-finger vertical    opens the overview
+// There is no modifier on a gesture, so the SUPER + swipe gestures (monitor
+// swap, zellij up/down) and the SUPER + pinch zoom have no niri equivalent.
+//
+// Hot corner: pushing the pointer into the top-left corner opens the overview.
+// This is niri's default. To turn it off:
+//   gestures { hot-corners { off; } }

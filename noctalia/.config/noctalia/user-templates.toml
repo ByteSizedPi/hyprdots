@@ -31,3 +31,14 @@ output_path = "/var/lib/greetd-theme/palette"
 [theme.templates.user.beeper]
 input_path = "~/.config/noctalia/templates/beeper.css"
 output_path = "~/.config/BeeperTexts/custom.css"
+
+# Obsidian: one CSS snippet for every vault. The template renders the palette
+# roles to a JSON file. The post_hook fixes text contrast (WCAG minimums), then
+# writes .obsidian/snippets/noctalia.css into each vault in obsidian.json and
+# each .obsidian under $HOME (symlinks too), and enables the snippet.
+# This replaces the community "obsidian" template, which skipped symlinked
+# vaults and set the active file-explorer text to on_primary (dark on dark).
+[theme.templates.user.obsidian]
+input_path = "~/.config/noctalia/templates/obsidian-palette.json"
+output_path = "~/.cache/noctalia/obsidian-palette.json"
+post_hook = "python3 ~/.config/noctalia/scripts/obsidian-theme-apply.py ~/.cache/noctalia/obsidian-palette.json"

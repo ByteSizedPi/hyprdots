@@ -8,6 +8,151 @@ Status key: 🟥 OPEN · 🟧 MITIGATED (worked around, root cause unsolved) · 
 
 ---
 
+## 🟥 Scrolling layout: a dragged window stacks vertically on drop
+
+**Symptom (2026-10-20):** SUPER + left-drag a tiled window onto another window,
+and it lands in that window's column, one above the other.
+
+**Cause (read in the v0.56.2 source):** `ScrollingAlgorithm.cpp`, `newTarget()`.
+A drop on the outer 30% at either side of the target window makes a new column.
+A drop on the middle 40% adds the window to the target's column, above or below
+by cursor height. `RANGE_THRESHOLD = 0.3` is hardcoded. No config option.
+
+**Status: no fix in place.** The workaround below was REMOVED the same day: the
+window visibly stacks first and then jumps, which looked worse than the stack.
+A real fix needs the drop rule changed upstream (or an option for it). Until
+then: drop on the outer 30% of a window, or move columns with the keyboard
+(SUPER+SHIFT+H/L, SUPER+CTRL+H/L).
+
+**Tried:** `modules/nostack.lua`. A 250 ms timer checks whether the focused
+window shares its column (same x and width) with another tiled window, and sends
+`layout expel`. Tested: `consume` stacked Dolphin onto Obsidian (2 x 511 px high),
+and the module restored two 950 px columns within 1 s. Side effect: stacked
+columns are impossible on scrolling workspaces. Remove the module to allow them.
+
+---
+
+## 🟧 Recolour the Noctalia bar while a special workspace shows — not feasible on 5.3
+
+**Goal (2026-10-20):** the bar stays visible over special workspaces (bar-hide was
+glitchy). Special windows get a `tertiary` border, and the bar accent switches to
+the same `tertiary` while a special workspace is focused.
+
+**Outcome:** the tertiary border was built (user template `hyprland-palette` +
+rule in `modules/specialbar.lua`) and REMOVED the same day: not liked. Special
+windows now look like all others (pink border). The bar part was never wired.
+
+**Tried:**
+- Noctalia IPC: no command for bar or widget colours (`noctalia msg --help`, 5.3.0).
+- Editing `[bar.default] border/color` in `~/.local/state/noctalia/settings.toml`:
+  Noctalia picks it up live (border changed within 2 s). BUT every edit makes
+  Noctalia reload its WHOLE config. It recreates the bar surfaces and re-runs every
+  theme template (log: ghostty template hook ran at 14:16:31). Far too heavy for
+  a toggle. A script (`bar-accent.py`, swap primary<->tertiary with a stash) was
+  written, then deleted unused.
+
+**Incident, same test:** restoring `settings.toml` with `cat backup > file`
+truncated the file first. Noctalia read it mid-write and saved its own state over
+it: 397 lines became 66. Restored from the backup with `cp` to a temp file + `mv`
+(atomic). The surface churn also left a stale 127 px reserved area on top of
+eDP-1 (bar drawn at y=131). `noctalia msg bar-hide/bar-show` did not clear it.
+`hyprctl reload` did.
+
+**Worse damage, found later the same day:** the 66-line file had no enabled
+template list, so Noctalia ran the UNDO hook of every builtin template, and the
+apply hooks after the restore did not fully reverse that:
+- `hyprland.lua`: `require("noctalia").apply_theme()` deleted (the hyprland
+  undo.sh removes it). The apply hook did not add it back. Hyprland ran on its
+  default white/grey borders until the line was restored by hand.
+- `kitty.conf`, `alacritty.toml`, `btop.conf`: the palette include was removed,
+  then appended at the END of the file. In kitty and alacritty that put it after
+  `theme-extra`, changing which file wins. The alacritty undo also deleted a
+  comment line mentioning `noctalia.toml`. Fixed with `git checkout --`.
+- niri `config.kdl`: include removed and re-appended in the same place.
+- Theme files (kitty, btop, alacritty, gtk, qt, kde, niri) were deleted and
+  regenerated at 14:16.
+After any Noctalia settings mishap: `git status` the dotfiles and check
+`hyprland.lua` for the apply_theme line.
+
+**Rule:** never write `settings.toml` in place while Noctalia runs. Write a temp
+file in the same dir and `mv` it over.
+
+**Open:** a bar accent switch needs Noctalia support (IPC or a runtime colour
+override). A feature request upstream is the next step.
+
+---
+
+## 🟥 Session restore on Hyprland with hyprwake (trial 2026-10-20, REMOVED same day)
+
+**Removed 2026-10-20 at the user's request.** The real-reboot test below was never
+run, so this entry records no verdict on hyprwake itself. Removed: the autostart
+lines in `modules/autostart.lua` (reverted), the `hyprwake` stow package
+(unstowed and deleted), `~/.cargo/bin/hyprwake` (`cargo uninstall`), and
+`~/.local/state/hyprwake` + `~/.local/share/hyprwake` (log and saved sessions).
+Session restore is still unsolved. The notes below stay for a future attempt.
+
+**Goal:** after a reboot, reopen the windows on their workspaces. Do NOT start
+the scratchpad apps a second time or put them on normal workspaces.
+
+**Native support:** none. Hyprland 0.56.2 and niri v26.04 do not implement
+`xdg-session-management-v1` (checked both source trees on 2026-10-20).
+
+**Chosen:** hyprwake v0.2.0 (github.com/rumen-cholakov/hyprwake), built with
+`cargo install --locked --git ... --tag v0.2.0` into `~/.cargo/bin`. Compared
+with hypr-session-restore, hyprflow, hyprsession, omarchy-session and
+hyprland-session-saver. Picked for `ignore_classes`, the populated-desktop and
+empty-save guards, and a launch per process instead of per window.
+
+**Setup:**
+- Config: `hyprwake/.config/hyprwake/config.toml` (stow package).
+  `ignore_classes` lists `zellij-local`, `zen-ytmusic`, `Beeper`. The filter
+  applies at capture (`src/capture.rs:66`), so those windows are never saved.
+  The list REPLACES the built-in list, so the built-ins are copied into it.
+- `use_uwsm = false`: Hyprland starts from greetd, not uwsm.
+- Zen: `binary = "zen-browser"` (the wrapper sets `MOZ_ENABLE_WAYLAND`).
+- Obsidian (Flatpak): `/proc` shows `/app/obsidian ...` as ONE argv string, a
+  path that exists only in the sandbox. `binary` points at
+  `/var/lib/flatpak/exports/bin/md.obsidian.Obsidian`.
+- Start: `modules/autostart.lua` runs `restore --max-age 7d`, then
+  `exec hyprwake watch --replace`, in one chain. The watcher starts only after
+  the restore exits.
+
+**Rejected:** `hyprwake install`. Its watcher unit is
+`WantedBy=graphical-session.target`, which is inactive under Hyprland here and
+active under Plasma.
+
+**Tested 2026-10-20:**
+- `restore --dry-run` lists zen (ws 1), Obsidian and kitty (ws 2). No special
+  workspace.
+- A test kitty on ws 3: save, close, `restore --missing-only`. hyprwake
+  launched 1 window on ws 3 and left the other windows and all 3 scratchpads
+  alone.
+
+**Still to verify:** a real logout or reboot. After that, check:
+`hyprwake diff`, `~/.local/state/hyprwake/hyprwake.log`, and that each
+scratchpad appears only on its SUPER+S / SUPER+Y / SUPER+B toggle.
+
+## 🟥 Scrolling layout: full-width column in the middle is 4 px narrower
+
+**Symptom (2026-10-20):** a column at width 1.0 in the middle of the strip does
+not look full screen. A column at an end, or the only column, does.
+
+**Measured (HDMI-A-1, 1920 px, gaps_in 2, gaps_out 4, border 2):**
+- Only column (ws 1): x 6, w 1908. Edge margin 6 px on both sides.
+- Middle column (ws 2, kitty): x 1928, w 1904. Edge margin 8 px on both sides.
+- End column (from the source, not measured): 6 px on the outer side, 8 px on
+  the inner side.
+
+**Cause (Hyprland 0.56.2 `ScrollingAlgorithm.cpp`, `targetBoxWithGaps`):** the
+column box is the work area (gaps_out already removed). Hyprland then subtracts
+gaps_in from each side that has a neighbour column (`COL_NOT_LEFT`,
+`COL_NOT_RIGHT`). A middle column loses 2 × gaps_in, an end column 1 ×, a lone
+column 0. `MAX_COLUMN_WIDTH = 1.F`, so a width above 1.0 cannot compensate.
+
+**Options:** `gaps_in = 0` makes every full-width column identical, but tiled
+windows then touch (only the 2 px borders between them). Otherwise accept the
+2 px per side. No upstream issue checked yet.
+
 ## 🟩 Scrolling layout: hover sometimes moves the view, sometimes not
 
 **Symptom (2026-10-20):** a hover onto a window that overflows the screen
@@ -29,6 +174,37 @@ focus are hard input and skip the check.
 
 **Rejected:** `follow_focus = false`. It also stops the view following on click
 release and on the `focuswindow` dispatch.
+
+## 🟧 Scrolling layout: wallpaper shows after shrinking the last column
+
+**Symptom (2026-10-20):** on a scrolling workspace, scroll to the last column and
+shrink it with the mouse. The column gets smaller but the view does not move, so
+the wallpaper shows on the right. Panning left and back closes the gap.
+Measured on workspace 2, HDMI-A-1: last window ended at x 2559 of 3840.
+
+**Cause:** Hyprland 0.56.2 moves the scrolling view only on focus or scroll
+events. A mouse resize does not move it. No upstream issue found.
+
+**Tried:**
+- `colresize` (SUPER+R) — no gap. Hyprland corrects the view after this message.
+- `hl.dsp.window.resize({x=-300, relative=true})` — reproduces the gap (300 px).
+- `layout move +200` — shifts the windows 200 px right. Usable as the fix.
+- `layout move -200` with a gap on the right — does nothing.
+- Lua resize event — none exists (see the `hl.on` list in this file).
+
+**Fix:** `hyprland/.config/hypr/modules/scrollfill.lua`. `settle()` sends
+`move +/-<gap>` to close the gap, and `fit expand` when all columns together are
+narrower than the screen. Runs on window open/close/active, workspace active,
+and a 300 ms repeating timer (for mouse resizes). Tested 2026-10-20: the gap
+closed within 0.9 s, and `colresize all 0.2` was refilled.
+
+**Also found:** the Zen "shrinks when a second window opens" behaviour is
+`scrolling.fullscreen_on_one_column = true` (default). A single column is drawn
+full width, and drops back to `column_width` 0.5 when a second column appears.
+A `scrolling_width` window rule sets a per-app start width. Left as is by choice.
+
+**Watch for:** the timer may shift the view during a mouse drag. If it fights the
+drag, raise the interval.
 
 ---
 
@@ -998,8 +1174,11 @@ comicmono/paper_bw. Hyprland 0.56.0, hyprglass 1.0.0.
    `if hl.plugin.hyprglass` guard is skipped and no theme glass config applies —
    landing in exactly the default-on state above. Autostart therefore has to load
    *then* re-parse:
-   `hyprpm reload -n && hyprctl reload config-only`
+   `hyprpm reload && hyprctl reload config-only`
    (`config-only` avoids re-running monitor reload — see the monitor entry above.)
+   (2026-10-26: dropped `-n`. `-n` is `--notify`, which shows a Hyprland
+   overlay toast on every successful load. hyprpm still notifies on
+   warnings/errors without it.)
 
 ### hyprglass vs Hyprland layer blur — they do NOT deconflict
 `manage_window_blur` (default on) auto-sets `noblur` on glassed **windows**.
@@ -1035,7 +1214,7 @@ appeared in any capture — likely dead.
 
 ### Fix in place (2026-07-28)
 Implemented in the `refactor(hyprland)` commit:
-- `modules/plugins.lua` runs `hyprpm reload -n && hyprctl reload config-only` on
+- `modules/plugins.lua` runs `hyprpm reload && hyprctl reload config-only` on
   `hyprland.start` — load, then re-parse so theme glass config actually applies.
 - `themes/<name>/manifest.conf` carries `hyprglass = on|off`;
   `themes/<name>/hypr/glass.lua` carries the config.

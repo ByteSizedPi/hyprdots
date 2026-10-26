@@ -21,6 +21,11 @@ tried on it. Read order for a new session:
 - **[../themes/README.md](../themes/README.md)** — quick reference for what's in
   `themes/`.
 
+## Compositors
+
+- **[niri.md](niri.md)** — the niri session: Hyprland -> niri map, what is
+  tested, what differs, and the open items.
+
 ## Maintenance
 
 - **`../scripts/stow-audit.sh`** — verifies every stow package file is really a

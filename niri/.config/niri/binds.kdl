@@ -1,0 +1,148 @@
+// Key bindings. Hyprland: modules/keybinds.lua, modules/layouts.lua,
+// modules/voxtype.lua. Same keys wherever niri has the same action.
+//
+// niri ALSO has built-in mouse binds that need no config:
+//   Mod + left-drag    move a window
+//   Mod + right-drag   resize a window
+
+binds {
+    Mod+Shift+Slash { show-hotkey-overlay; }
+
+    // Terminal / apps. $TERMINAL first, like lib/terminal.lua.
+    Mod+Return { spawn-sh "exec ${TERMINAL:-xdg-terminal-exec}"; }
+    Mod+Q repeat=false { close-window; }
+    Mod+E { spawn "dolphin"; }
+    Mod+V { toggle-window-floating; }
+    Mod+F { fullscreen-window; }
+    // NEW: maximize the column. Full width, but the bar and gaps stay.
+    Mod+Shift+F { maximize-column; }
+    // NEW: grow the column into the free space beside it.
+    Mod+Ctrl+F { expand-column-to-available-width; }
+    // NEW: center the focused column on screen.
+    Mod+C { center-column; }
+    // NEW: the overview. All workspaces of all monitors, zoomed out. Drag
+    // windows between them. Also the top-left hot corner and a 4-finger swipe.
+    Mod+O repeat=false { toggle-overview; }
+
+    // Not ported: Mod+P (pseudo) and Mod+Shift+J (togglesplit) are dwindle-only.
+
+    // Noctalia shell UI
+    Mod+Space      { spawn "noctalia" "msg" "panel-toggle" "launcher"; }
+    Mod+N          { spawn "noctalia" "msg" "panel-toggle" "control-center"; }
+    Mod+W          { spawn "noctalia" "msg" "panel-toggle" "wallpaper"; }
+    Mod+Alt+Escape { spawn "noctalia" "msg" "session" "lock"; }
+    Mod+M          { spawn "noctalia" "msg" "panel-toggle" "session"; }
+    Mod+Comma      { spawn "noctalia" "msg" "settings-toggle"; }
+
+    // Focus (arrows and vim hjkl)
+    Mod+Left  { focus-column-left; }
+    Mod+Right { focus-column-right; }
+    Mod+Up    { focus-window-up; }
+    Mod+Down  { focus-window-down; }
+    Mod+H { focus-column-left; }
+    Mod+L { focus-column-right; }
+    Mod+K { focus-window-up; }
+    Mod+J { focus-window-down; }
+
+    // Move (Shift carries the window in the same direction)
+    Mod+Shift+H { move-column-left; }
+    Mod+Shift+L { move-column-right; }
+    Mod+Shift+K { move-window-up; }
+    Mod+Shift+J { move-window-down; }
+
+    // Hyprland Mod+Ctrl+H/L swapped columns, which Mod+Shift+H/L already do
+    // here. NEW meaning: push the window INTO the neighbouring column (stack
+    // them), or out of its column again. This is how niri builds columns of
+    // more than one window.
+    Mod+Ctrl+H { consume-or-expel-window-left; }
+    Mod+Ctrl+L { consume-or-expel-window-right; }
+
+    // Column width, like scrolling colresize +conf / -conf.
+    Mod+R       { switch-preset-column-width; }
+    Mod+Shift+R { switch-preset-column-width-back; }
+
+    // Tabs: Hyprland groups (Mod+G) become a TABBED COLUMN. Stack windows into
+    // one column with Mod+Ctrl+H/L, then Mod+G shows them as tabs. Mod+Tab
+    // cycles the windows of the column, like the monocle cycle.
+    Mod+G           { toggle-column-tabbed-display; }
+    Mod+Tab         { focus-window-down-or-top; }
+    Mod+Shift+Tab   { focus-window-up-or-bottom; }
+
+    // Workspaces. DIFFERENCE: niri workspaces are a vertical stack per monitor,
+    // and they are dynamic. A workspace exists while it has windows, and there
+    // is always one empty workspace at the bottom. Mod+1..9 pick by POSITION
+    // in the focused monitor's stack, not by a global ID.
+    // Mod+Alt+H/L keep the Hyprland keys for "previous/next on this monitor".
+    Mod+Alt+H       { focus-workspace-up; }
+    Mod+Alt+L       { focus-workspace-down; }
+    Mod+Alt+Shift+H { move-column-to-workspace-up; }
+    Mod+Alt+Shift+L { move-column-to-workspace-down; }
+
+    Mod+1 { focus-workspace 1; }
+    Mod+2 { focus-workspace 2; }
+    Mod+3 { focus-workspace 3; }
+    Mod+4 { focus-workspace 4; }
+    Mod+5 { focus-workspace 5; }
+    Mod+6 { focus-workspace 6; }
+    Mod+7 { focus-workspace 7; }
+    Mod+8 { focus-workspace 8; }
+    Mod+9 { focus-workspace 9; }
+    Mod+0 { focus-workspace 10; }
+    Mod+Shift+1 { move-column-to-workspace 1; }
+    Mod+Shift+2 { move-column-to-workspace 2; }
+    Mod+Shift+3 { move-column-to-workspace 3; }
+    Mod+Shift+4 { move-column-to-workspace 4; }
+    Mod+Shift+5 { move-column-to-workspace 5; }
+    Mod+Shift+6 { move-column-to-workspace 6; }
+    Mod+Shift+7 { move-column-to-workspace 7; }
+    Mod+Shift+8 { move-column-to-workspace 8; }
+    Mod+Shift+9 { move-column-to-workspace 9; }
+    Mod+Shift+0 { move-column-to-workspace 10; }
+
+    // Monitors (NEW: Hyprland had no keys for this). Focus or carry the column
+    // to the other monitor.
+    Mod+Alt+Left        { focus-monitor-left; }
+    Mod+Alt+Right       { focus-monitor-right; }
+    Mod+Alt+Shift+Left  { move-column-to-monitor-left; }
+    Mod+Alt+Shift+Right { move-column-to-monitor-right; }
+
+    // Scratchpads (named workspaces, see scratchpads.kdl).
+    Mod+S repeat=false { spawn-sh "~/.config/niri/scripts/scratch zellij"; }
+    Mod+Y repeat=false { spawn-sh "~/.config/niri/scripts/scratch youtube"; }
+    Mod+B repeat=false { spawn-sh "~/.config/niri/scripts/scratch beeper"; }
+
+    // Mouse wheel with Mod: workspaces. With Mod+Shift: columns.
+    Mod+WheelScrollDown cooldown-ms=150 { focus-workspace-down; }
+    Mod+WheelScrollUp   cooldown-ms=150 { focus-workspace-up; }
+    Mod+Shift+WheelScrollDown { focus-column-right; }
+    Mod+Shift+WheelScrollUp   { focus-column-left; }
+
+    // Screenshots (via Noctalia). Print draws a selection box, Shift+Print
+    // grabs the focused monitor.
+    Print       { spawn "noctalia" "msg" "screenshot-region"; }
+    Shift+Print { spawn "noctalia" "msg" "screenshot-fullscreen"; }
+
+    // Volume, brightness, media (via Noctalia OSD)
+    XF86AudioRaiseVolume  allow-when-locked=true { spawn "noctalia" "msg" "volume-up"; }
+    XF86AudioLowerVolume  allow-when-locked=true { spawn "noctalia" "msg" "volume-down"; }
+    XF86AudioMute         allow-when-locked=true { spawn "noctalia" "msg" "volume-mute"; }
+    XF86AudioMicMute      allow-when-locked=true { spawn "noctalia" "msg" "mic-mute"; }
+    XF86MonBrightnessUp   allow-when-locked=true { spawn "noctalia" "msg" "brightness-up"; }
+    XF86MonBrightnessDown allow-when-locked=true { spawn "noctalia" "msg" "brightness-down"; }
+    XF86AudioNext  allow-when-locked=true { spawn "noctalia" "msg" "media" "next"; }
+    XF86AudioPrev  allow-when-locked=true { spawn "noctalia" "msg" "media" "previous"; }
+    XF86AudioPause allow-when-locked=true { spawn "noctalia" "msg" "media" "toggle"; }
+    XF86AudioPlay  allow-when-locked=true { spawn "noctalia" "msg" "media" "toggle"; }
+
+    // Dictation. DIFFERENCE: niri has no key-RELEASE binds, so hold-to-talk is
+    // not possible here. Right Ctrl (keyd -> F13, xkb <FK13>) gives keysym
+    // XF86Tools in the us layout (/usr/share/X11/xkb/symbols/inet). Press once
+    // to start, press again to stop and transcribe.
+    XF86Tools repeat=false { spawn "voxtype" "record" "toggle"; }
+    Mod+Shift+D { spawn "voxtype" "record" "cancel"; }
+
+    // Not ported: SUPER+CTRL+=/-/0 screen zoom. niri 26.04 has no zoom.
+
+    Mod+Escape allow-inhibiting=false { toggle-keyboard-shortcuts-inhibit; }
+    Mod+Shift+E { quit; }
+}

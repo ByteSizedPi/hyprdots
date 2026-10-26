@@ -1,0 +1,36 @@
+// Animations. Hyprland: the animation part of theme/appearance.lua.
+//
+// Hyprland "quick" is cubic-bezier(0.15, 0, 0.1, 1) at speed 2 (200 ms).
+// niri has no motion blur (modules/effects.lua), and no separate animation for
+// special workspaces, because a scratchpad here is a normal workspace.
+
+animations {
+    // Hyprland: workspace switching is instant. In niri this also makes the
+    // scratchpad toggle instant (Hyprland slid it in vertically).
+    workspace-switch {
+        off
+    }
+
+    window-open {
+        duration-ms 200
+        curve "cubic-bezier" 0.15 0 0.1 1
+    }
+
+    window-close {
+        duration-ms 200
+        curve "cubic-bezier" 0.15 0 0.1 1
+    }
+
+    // Must match the open/close timing, for the same reason as Hyprland's
+    // `windows` leaf: neighbours that slide slower than a new window pops in
+    // overlap it.
+    window-movement {
+        duration-ms 200
+        curve "cubic-bezier" 0.15 0 0.1 1
+    }
+
+    window-resize {
+        duration-ms 200
+        curve "cubic-bezier" 0.15 0 0.1 1
+    }
+}

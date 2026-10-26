@@ -1,0 +1,51 @@
+// Layout and window look. Hyprland: modules/behaviour.lua, modules/layouts.lua,
+// and the gaps/border part of theme/appearance.lua.
+//
+// THE NIRI IDEA: a column has a fixed width. Opening, closing or resizing one
+// column never resizes another. The strip can be shorter than the screen, and
+// then the wallpaper shows beside it. Hyprland's modules/scrollfill.lua forces
+// "always fill the screen". niri does not do that by itself. Its tools are:
+//   Mod+R / Mod+Shift+R   step the column through preset widths
+//   Mod+Ctrl+F            expand the column to fill the free space
+//   Mod+Shift+F           maximize the column (full width, bar stays)
+//   Mod+C                 center the column
+// Try it this way first. If the empty space still bothers you, the fill rule
+// can be added to scripts/niri-helper.
+//
+// Colours are NOT set here. noctalia.kdl sets them and is included last.
+
+layout {
+    // Hyprland: gaps_in 2 (4 px between windows), gaps_out 4. niri uses one
+    // value for both, so 4 matches.
+    gaps 4
+
+    // New columns open at half width, like scrolling.column_width 0.5.
+    default-column-width { proportion 0.5; }
+
+    // Mod+R cycles these, like scrolling.explicit_column_widths.
+    preset-column-widths {
+        proportion 0.33333
+        proportion 0.5
+        proportion 0.66667
+        proportion 1.0
+    }
+
+    // Like focus_fit_method 1 (fit): scroll only as far as needed to show the
+    // focused column. "always" would center it every time.
+    center-focused-column "never"
+
+    // Hyprland draws a 2 px border on every window and shrinks the window to
+    // make room. niri's `border` does the same. The `focus-ring` is drawn only
+    // around the focused window, so it is off.
+    focus-ring {
+        off
+    }
+    border {
+        width 2
+    }
+
+    // Tabbed columns (Mod+G) show a tab indicator on the left edge.
+    tab-indicator {
+        place-within-column
+    }
+}

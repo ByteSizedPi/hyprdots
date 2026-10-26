@@ -1,0 +1,41 @@
+// Monitors. Hyprland: modules/monitors.lua.
+//
+// niri matches an output by connector name (eDP-1) or by "make model serial"
+// from the EDID. Like Hyprland, a block applies whenever that output connects.
+// Positions are logical pixels, so scale changes the maths, same as Hyprland.
+//
+// DIFFERENCE: niri has no catch-all rule. An unknown monitor gets its preferred
+// mode, an automatic scale, and a place to the right. Hyprland forced scale 1.
+// If an unknown monitor comes up scaled, add a block for it.
+
+// Built-in laptop panel, top-left origin.
+output "eDP-1" {
+    mode "1920x1080@60"
+    scale 1
+    position x=0 y=0
+}
+
+// Home: AOC 24G2W1G3. Make/model/serial read from `hyprctl monitors all` on
+// 2026-10-20 (the model really ends in a hyphen). Its EDID prefers 60 Hz.
+output "AOC 24G2W1G3- AYAM91A000341" {
+    mode "1920x1080@144"
+    scale 1
+    position x=1920 y=0
+}
+
+// Docked: Samsung LS27C31x, same slot to the right. UNVERIFIED: Hyprland matches
+// on a description substring, niri needs the full "make model serial" string.
+// Check `niri msg outputs` the next time it is connected and fix this name.
+output "Samsung Electric Company LS27C31x Unknown" {
+    mode "1920x1080"
+    scale 1
+    position x=1920 y=0
+}
+
+// Hisense TV above the laptop panel (logical 1920x1080 at scale 2).
+// Name taken from the Hyprland desc: string, not verified in niri.
+output "Hisense Electric Co. Ltd. HISENSE 0x00000001" {
+    mode "3840x2160@30"
+    scale 2
+    position x=0 y=-1080
+}

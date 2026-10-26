@@ -272,6 +272,12 @@ option is a udev rule setting `LIBINPUT_IGNORE_DEVICE=1` on the Lid Switch.
 
 ## `/usr/share/noctalia/assets/templates/hyprland/hyprland.lua` — inactive border color
 
+> **SUPERSEDED 2026-10-20.** `hyprland/.config/hypr/modules/borders.lua` now sets
+> `inactive_border = primary` after `apply_theme()`, inside the stow tree. The
+> patch below is no longer needed and does not need reapplying after a noctalia
+> update. The package file is still patched today. Leaving it is harmless, or
+> return it to stock with `sudo dnf reinstall noctalia`.
+
 Package file from `noctalia` (matugen-style template noctalia renders into
 `~/.config/hypr/noctalia.lua`, symlinked from this repo's `hyprland` stow
 package). Not part of the stow tree, so a package update will overwrite it
@@ -337,8 +343,8 @@ DNF selects `updates` over terra because 5.2.0 is the higher version.
 `/usr/share/noctalia/assets/templates/hyprland/hyprland.lua` back to stock
 (`inactive_border = surface`). Reapplied on 2026-10-03 with the sed command in
 the section above, then `noctalia msg templates-apply`. Any future noctalia
-package install or upgrade does the same. Check that section after every
-upgrade.
+package install or upgrade does the same. (Since 2026-10-20 this no longer
+matters: modules/borders.lua overrides the colour. See that section.)
 
 **File content** (`/etc/dnf/versionlock.toml`):
 ```toml
@@ -932,3 +938,29 @@ sudo sed -i 's|^command = "/usr/local/bin/tuigreet-themed |command = "/usr/local
 ```
 greetd reads `/etc/greetd/config.toml` when the daemon starts. To test, reboot, or log out of the tty1 session and run `sudo systemctl restart greetd` from tty2. A restart stops any running greetd session.
 **To undo:** `sudo cp -a /etc/greetd/config.toml.bak-2026-09-29 /etc/greetd/config.toml`.
+
+---
+
+## `~/.config/user-dirs.dirs`: lowercase XDG folders (2026-10-21)
+
+```ini
+XDG_DESKTOP_DIR="$HOME/desktop"
+XDG_DOWNLOAD_DIR="$HOME/downloads"
+XDG_TEMPLATES_DIR="$HOME/templates"
+XDG_PUBLICSHARE_DIR="$HOME/public"
+XDG_DOCUMENTS_DIR="$HOME/documents"
+XDG_MUSIC_DIR="$HOME/music"
+XDG_PICTURES_DIR="$HOME/pictures"
+XDG_VIDEOS_DIR="$HOME/videos"
+```
+
+**Why:** One naming rule in `~`: lowercase, words joined with hyphens. The file is not in a stow package, so a fresh install recreates the capitalized folders.
+
+**Home layout after the 2026-10-21 reorg** (full move list in `~/home-reorg-2026-10-21.log`):
+- `~/projects/` all git repos (`kit/bin/work` needs this name): `clients/`, `internal/`, `kit/`, `personal/ezstream`, `personal/sandbox`, `share2teach`
+- `~/server/` homelab repo, `~/work/` NWUE job (Obsidian vault), `~/masters/` MSc
+- `~/notes/` Obsidian vault (was `~/Documents/Notes`), `~/hobbies/rubiks-cubes`
+- `~/.secrets/` (mode 700) plain-text passwords and the rclone OAuth client
+- `~/texmf` stays: TeX finds it as the default TEXMFHOME. `~/GoogleDrive` stays: `rclone-gdrive.service` mounts it.
+
+**To reapply:** edit the file to the content above, then run `xdg-user-dirs-update`.

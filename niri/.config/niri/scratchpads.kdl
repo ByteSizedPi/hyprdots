@@ -1,0 +1,49 @@
+// Scratchpads. Hyprland: modules/scratchpads.lua (special workspaces).
+//
+// THE NIRI IDEA: nothing is hidden. niri has no special workspace, no
+// minimize and no scratchpad. Every window lives on a workspace in the
+// vertical stack of one monitor.
+//
+// The replacement is a NAMED workspace per app, toggled by
+// scripts/scratch (bound to Mod+S / Mod+Y / Mod+B in binds.kdl):
+//   * press: the script moves the named workspace to the focused monitor and
+//     focuses it. It starts the app if the workspace has no window. This is
+//     the same job as on_created_empty.
+//   * press again: back to the previous workspace.
+//   * The workspace stays when its window closes, because niri never removes
+//     a named workspace. It is persistent, not ephemeral.
+//
+// Differences from Hyprland:
+//   * The scratchpad is a full workspace, not an overlay. Switching to it
+//     replaces the view, it does not slide over it. (Visually the same as
+//     dim_special = 1, which already made the overlay opaque.)
+//   * The named workspaces show in the Noctalia workspace widget, by name.
+//   * The script creates each one on first use at the bottom of the stack,
+//     so they do not shift the numbers of Mod+1..9 at login.
+//   * The Noctalia bar stays visible. Hiding it (Hyprland specialbar.lua) was
+//     removed on 2026-10-20 because the hide/show was glitchy.
+//
+// The rules below make each app open on its workspace however it starts.
+// A rule for a workspace that does not exist yet does nothing, and the window
+// opens where you are. open-maximized makes the column full width.
+
+// zellij: kitty with class zellij-local, session `main`.
+window-rule {
+    match app-id="^zellij-local$"
+    open-on-workspace "zellij"
+    open-maximized true
+}
+
+// YouTube Music: the separate Zen profile in ~/.zen/ytmusic, app-id zen-ytmusic.
+window-rule {
+    match app-id="^zen-ytmusic$"
+    open-on-workspace "youtube"
+    open-maximized true
+}
+
+// Beeper AppImage, app-id Beeper.
+window-rule {
+    match app-id="^Beeper$"
+    open-on-workspace "beeper"
+    open-maximized true
+}

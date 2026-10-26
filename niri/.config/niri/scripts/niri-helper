@@ -1,0 +1,110 @@
+#!/usr/bin/python3 -I
+"""niri-helper — small behaviours that niri does not have, driven by its event stream.
+
+Started by spawn-sh-at-startup in ../startup.kdl. Exits when niri exits.
+
+1. Empty workspace: when you close the last window on an unnamed workspace,
+   focus the nearest workspace on that monitor that still has windows. niri
+   then removes the empty one by itself. (Your Hyprland wish from 2026-10-20.)
+2. Urgent: a window on a scratchpad that is not on screen asks for attention
+   -> one desktop notification, until that window gets focus.
+   Hyprland: modules/urgent.lua.
+
+State comes from `niri msg --json event-stream`. The stream starts with the
+full workspace and window lists, then sends changes. Event names and fields
+are from the niri_ipc Event enum (niri 26.04).
+"""
+
+import json
+import subprocess
+
+SCRATCH = {"zellij": "Mod+S", "youtube": "Mod+Y", "beeper": "Mod+B"}
+
+workspaces = {}  # id -> workspace dict
+windows = {}  # id -> window dict
+notified = set()  # window ids already notified
+
+
+def run(*cmd):
+    subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+
+def has_windows(ws_id):
+    return any(w.get("workspace_id") == ws_id for w in windows.values())
+
+
+def on_window_closed(win):
+    ws = workspaces.get(win.get("workspace_id"))
+    if not ws or not ws.get("is_focused") or ws.get("name") or has_windows(ws["id"]):
+        return
+    others = [
+        o
+        for o in workspaces.values()
+        if o["output"] == ws["output"] and o["id"] != ws["id"] and has_windows(o["id"])
+    ]
+    if not others:
+        return
+    # Nearest by position. On a tie, the one above wins.
+    target = min(others, key=lambda o: (abs(o["idx"] - ws["idx"]), o["idx"]))
+    run("niri", "msg", "action", "focus-workspace", str(target["idx"]))
+
+
+def on_urgent(win_id, urgent):
+    win = windows.get(win_id)
+    if not win or not urgent or win_id in notified:
+        return
+    ws = workspaces.get(win.get("workspace_id"))
+    if not ws or ws.get("name") not in SCRATCH or ws.get("is_active"):
+        return
+    notified.add(win_id)
+    body = (win.get("title") or "") + "  —  " + SCRATCH[ws["name"]]
+    run("notify-send", "-a", "niri", f"{win.get('app_id')} wants attention", body)
+
+
+def handle(ev):
+    (kind, data), = ev.items()
+    if kind == "WorkspacesChanged":
+        workspaces.clear()
+        workspaces.update({w["id"]: w for w in data["workspaces"]})
+    elif kind == "WorkspaceActivated":
+        ws = workspaces.get(data["id"])
+        if not ws:
+            return
+        for o in workspaces.values():
+            if o["output"] == ws["output"]:
+                o["is_active"] = o["id"] == ws["id"]
+            if data["focused"]:
+                o["is_focused"] = o["id"] == ws["id"]
+    elif kind == "WindowsChanged":
+        windows.clear()
+        windows.update({w["id"]: w for w in data["windows"]})
+    elif kind == "WindowOpenedOrChanged":
+        w = data["window"]
+        windows[w["id"]] = w
+    elif kind == "WindowClosed":
+        win = windows.pop(data["id"], None)
+        notified.discard(data["id"])
+        if win:
+            on_window_closed(win)
+    elif kind == "WindowFocusChanged":
+        if data.get("id") is not None:
+            notified.discard(data["id"])
+    elif kind == "WindowUrgencyChanged":
+        if data["id"] in windows:
+            windows[data["id"]]["is_urgent"] = data["urgent"]
+        on_urgent(data["id"], data["urgent"])
+
+
+def main():
+    proc = subprocess.Popen(
+        ["niri", "msg", "--json", "event-stream"], stdout=subprocess.PIPE, text=True
+    )
+    for line in proc.stdout:
+        try:
+            handle(json.loads(line))
+        except (ValueError, KeyError, TypeError):
+            continue
+
+
+if __name__ == "__main__":
+    main()

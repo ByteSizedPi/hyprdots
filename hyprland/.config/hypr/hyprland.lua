@@ -14,6 +14,7 @@ require("modules.input")
 require("modules.behaviour")
 require("modules.effects")
 require("modules.layouts")
+require("modules.scrollfill")
 require("modules.keybinds")
 require("modules.autostart")
 require("modules.scratchpads")
@@ -36,6 +37,10 @@ require("theme")
 --
 -- So: don't move it, don't reword it, and don't let the string drift.
 require("noctalia").apply_theme()
+
+-- Primary border on unfocused windows too. Replaces the old sudo patch of the
+-- Noctalia template; see modules/borders.lua.
+require("modules.borders")
 
 -- Group borders and groupbar colours override the palette, so they load here.
 require("modules.groups")

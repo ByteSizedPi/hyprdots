@@ -1,0 +1,38 @@
+// Window and layer rules. Hyprland: rules/windows.lua and theme/layers.lua.
+// Scratchpad rules are in scratchpads.kdl.
+
+// Square corners, like decoration.rounding being unset in appearance.lua.
+// Nothing to set: niri draws square corners by default.
+
+// Blur behind the Noctalia shell surfaces, from theme/layers.lua (the no-glass
+// default). Namespaces are the measured ones from docs/problems.md.
+//
+// niri blur is new in 26.04. It has two kinds: xray (shows the wallpaper only,
+// very cheap) and normal (shows the windows behind). The bar used xray in
+// Hyprland, so it keeps xray. The other surfaces sit over windows, so they use
+// normal blur. Noctalia can also ask for blur itself (ext-background-effect,
+// a Noctalia setting). If both are on, check that a surface is not blurred twice.
+layer-rule {
+    match namespace="^noctalia-bar"
+    background-effect {
+        blur true
+        xray true
+    }
+}
+
+layer-rule {
+    match namespace="^noctalia-panel"
+    match namespace="^noctalia-screen-corner"
+    match namespace="^noctalia-notification$"
+    match namespace="^noctalia-osd$"
+    background-effect {
+        blur true
+        xray false
+    }
+}
+
+// The Noctalia wallpaper stays visible in the overview, between workspaces.
+layer-rule {
+    match namespace="^noctalia-wallpaper"
+    place-within-backdrop true
+}

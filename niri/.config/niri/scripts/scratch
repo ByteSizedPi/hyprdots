@@ -1,0 +1,52 @@
+#!/usr/bin/env bash
+# scratch NAME — toggle a scratchpad workspace in niri.
+# Bound to Mod+S / Mod+Y / Mod+B in ../binds.kdl. Design notes: ../scratchpads.kdl.
+#
+# niri has no special workspaces, so a scratchpad is a NAMED workspace:
+#   1. If NAME is the focused workspace, go back to the previous workspace.
+#   2. Else, if NAME exists, move it to the focused monitor and focus it.
+#   3. Else, name the empty workspace at the bottom of the focused monitor NAME.
+#      niri always keeps one empty workspace last, so new scratchpads go to the
+#      bottom and do not shift the positions that Mod+1..9 use.
+#   4. If NAME has no window, start the app (Hyprland: on_created_empty).
+set -euo pipefail
+
+name=${1:?usage: scratch NAME}
+
+# The launch commands from hyprland/.config/hypr/modules/scratchpads.lua.
+case $name in
+zellij) cmd='kitty --class zellij-local --title local zellij attach main --create' ;;
+youtube) cmd='zen-browser --profile ~/.zen/ytmusic --no-remote --name zen-ytmusic' ;;
+beeper) cmd='exec "$(ls -1 ~/Downloads/Beeper-*.AppImage | sort -V | tail -1)"' ;;
+*)
+	echo "scratch: unknown scratchpad '$name'" >&2
+	exit 1
+	;;
+esac
+
+ws=$(niri msg --json workspaces)
+
+focused=$(jq -r '.[] | select(.is_focused) | .name // ""' <<<"$ws")
+if [[ $focused == "$name" ]]; then
+	niri msg action focus-workspace-previous
+	exit 0
+fi
+
+out=$(niri msg --json focused-output | jq -r .name)
+target_out=$(jq -r --arg n "$name" '.[] | select(.name == $n) | .output' <<<"$ws")
+
+if [[ -z $target_out ]]; then
+	last=$(jq --arg o "$out" '[.[] | select(.output == $o)] | max_by(.idx) | .idx' <<<"$ws")
+	niri msg action focus-workspace "$last"
+	niri msg action set-workspace-name "$name"
+else
+	if [[ $target_out != "$out" ]]; then
+		niri msg action move-workspace-to-monitor --reference "$name" "$out"
+	fi
+	niri msg action focus-workspace "$name"
+fi
+
+id=$(niri msg --json workspaces | jq --arg n "$name" '.[] | select(.name == $n) | .id')
+if ! niri msg --json windows | jq -e --argjson id "$id" 'any(.[]; .workspace_id == $id)' >/dev/null; then
+	setsid -f sh -c "$cmd" >/dev/null 2>&1
+fi

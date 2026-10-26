@@ -1,0 +1,39 @@
+// Session environment and autostart.
+// Hyprland: modules/environment.lua, modules/autostart.lua.
+
+// niri-session starts niri as a systemd user service, so niri inherits the user
+// manager environment, which includes environment.d from the `environment` stow
+// package. PATH with ~/bin and ~/.local/bin therefore needs no copy here (the
+// Hyprland PATH fix in environment.lua exists because plain start-hyprland
+// does not go through systemd). Inferred from niri-session, not yet verified
+// inside a niri login.
+environment {
+    QT_QPA_PLATFORMTHEME "kde"
+}
+
+cursor {
+    xcursor-size 24
+}
+
+// Hand the session env to the ksecretd that pam_kwallet5 started at the greeter,
+// so the wallet it unlocked joins D-Bus. Same as autostart.lua.
+spawn-at-startup "/usr/libexec/pam_kwallet_init"
+
+// Noctalia: bar, wallpaper, notifications, launcher, lock, idle, OSD, polkit.
+spawn-at-startup "noctalia" "--daemon"
+
+// Event-stream helper: jump off an emptied workspace, notify on urgent
+// scratchpad windows. See the script header.
+spawn-sh-at-startup "~/.config/niri/scripts/niri-helper"
+
+// Do not show niri's "Important Hotkeys" popup at every login.
+// Mod+Shift+/ still shows it.
+hotkey-overlay {
+    skip-at-startup
+}
+
+// Ask apps to drop their own title bars (client-side decorations). Under
+// Hyprland, GTK apps draw their own title bar because Hyprland has no
+// server-side decorations. Here niri draws the border instead, which looks
+// closer to plain tiling. Remove this line to get the Hyprland look back.
+prefer-no-csd
