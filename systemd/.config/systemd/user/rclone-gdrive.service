@@ -17,6 +17,9 @@
 #       stops previewers from requesting exports.
 #   Type=notify
 #       systemd marks the unit started only once the mount is ready.
+#   SuccessExitStatus=143
+#       rclone exits 143 on SIGTERM. Without this line, every logout marks
+#       the unit failed.
 
 [Unit]
 Description=rclone mount of Google Drive at ~/GoogleDrive
@@ -24,6 +27,7 @@ Documentation=man:rclone(1)
 
 [Service]
 Type=notify
+SuccessExitStatus=143
 ExecStartPre=/usr/bin/mkdir -p %h/GoogleDrive
 ExecStart=/usr/bin/rclone mount gdrive: %h/GoogleDrive \
     --vfs-cache-mode full \
