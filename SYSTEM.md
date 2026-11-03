@@ -964,3 +964,26 @@ XDG_VIDEOS_DIR="$HOME/videos"
 - `~/texmf` stays: TeX finds it as the default TEXMFHOME. `~/GoogleDrive` stays: `rclone-gdrive.service` mounts it.
 
 **To reapply:** edit the file to the content above, then run `xdg-user-dirs-update`.
+
+---
+
+## `/etc/yum.repos.d/anydesk.repo`: AnyDesk RPM repo (2026-10-29)
+
+```ini
+[anydesk]
+name=AnyDesk RHEL - stable
+baseurl=https://rpm.anydesk.com/rhel/$basearch/
+gpgcheck=1
+repo_gpgcheck=1
+gpgkey=https://keys.anydesk.com/repos/RPM-GPG-KEY
+```
+
+**Why:** AnyDesk is not in the Fedora repos. The vendor repo gives `dnf upgrade` updates.
+Installed `anydesk-8.1.0-1.x86_64`. GPG key fingerprint `06B5EA2FAE208E7CDA9761DCA2FB21D5A8772835`.
+
+**Side effect:** the RPM `%posttrans` scriptlet creates and enables the system unit
+`/etc/systemd/system/anydesk.service` (enabled in `multi-user.target`). The service runs at boot as root.
+
+**To reapply:** write the file above with `sudo tee`, then `sudo dnf install -y anydesk`.
+**To undo:** `sudo dnf remove anydesk && sudo rm /etc/yum.repos.d/anydesk.repo`.
+To keep the package but stop the boot service: `sudo systemctl disable --now anydesk`.
