@@ -4,7 +4,7 @@ Changes made outside of the dotfiles stow tree. These require manual re-applicat
 
 > Start at **`CLAUDE.md`** (repo root) and **`docs/`** for the full system
 > overview and problem log. Deep-dive diagnosis of the recurring Hyprland/Plasma
-> issues (greeter ghost, dwindle crash, hybrid GPU, Lua-config gotchas) lives in
+> issues (greeter ghost, hybrid GPU, Lua-config gotchas) lives in
 > **`docs/hyprland-plasma-diagnosis.md`**.
 
 ---

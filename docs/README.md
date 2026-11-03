@@ -56,7 +56,7 @@ tried on it. Read order for a new session:
 ## Deep-dive writeups (referenced from problems.md)
 
 - **[hyprland-plasma-diagnosis.md](hyprland-plasma-diagnosis.md)** — greeter
-  ghost + dwindle crash + hybrid-GPU + Lua-config gotchas.
+  ghost + hybrid-GPU + Lua-config gotchas.
 - **[hyprland-tty1-dead-screen.md](hyprland-tty1-dead-screen.md)** — tty1 panel
   physically dead while Plasma runs on tty2 (unsolved; leading hypothesis =
   dual-session seat/DRM-master contention).

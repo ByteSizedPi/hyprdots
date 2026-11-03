@@ -332,7 +332,7 @@ require("theme")
 `noctalia.lua`.
 
 Swapping whole behaviour files per theme would let an old theme silently revert the
-dwindle-crash workaround and the `misc`/`debug` settings. The split makes that
+`misc`/`debug` settings. The split makes that
 structurally impossible.
 
 `apply.sh` **copies** rather than symlinks: Hyprland's file watch follows the

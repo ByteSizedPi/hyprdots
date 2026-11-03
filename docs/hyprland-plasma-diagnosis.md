@@ -37,7 +37,7 @@ Shell/UI: noctalia (bar, wallpaper, notifications, lockscreen, etc.)
 ### Symptom
 A faint image of the Plasma login screen stays composited over the Hyprland desktop
 after login. **Happens on every boot** (confirmed: appears on a clean reboot with no
-prior Hyprland crash — so it is NOT caused by Issue 2). Invisible to all userspace
+prior Hyprland crash). Invisible to all userspace
 checks: no greeter process, no DRM client, nothing in `hyprctl clients`/`layers`.
 
 ### Root cause (confirmed)
@@ -97,36 +97,6 @@ worked around. See SYSTEM.md ("Display manager: greetd + tuigreet") for the full
 - **gtkgreet / ReGreet** (graphical greeters): run inside their own compositor (`cage`), i.e.
   another KMS handoff that could reintroduce the same ghost. Avoided for that reason; tuigreet
   (no compositor) is the safe choice. ReGreet also isn't packaged in Fedora 44.
-
----
-
-## ISSUE 2 — Hyprland SIGSEGV on shutdown (dwindle + special workspace)
-
-Separate from the ghost (ghost happens without any crash). This is the full record —
-a standalone draft bug report previously lived in `bugreport-hyprland-dwindle.md`,
-deleted 2026-07-27 as stale (written against 0.55.4, never filed). Summary:
-
-- **Crash:** on exit, `main` → `CCompositor::cleanup()` → a special-workspace window
-  unmaps → `setSpecialWorkspace` → `CDwindleAlgorithm::calculateWorkspace` →
-  `ITarget::setPositionGlobal` on freed state → SIGSEGV. Use-after-free during teardown.
-- **Reproduction (was 100% on 0.55.4):** 1. use the **dwindle** layout; 2. open windows
-  in special workspaces (`special:zellij`, `special:jjserver`); 3. exit with
-  `hyprctl dispatch exit`. No crash if the special workspaces are empty at exit.
-- **Trigger:** windows present in special workspaces at exit. noctalia logout uses
-  `hyprctl dispatch exit`, so logout hits it.
-- **Downstream:** xdph then segfaults in its atexit destructor; the failed exit is why
-  the greeter comes back (and re-leaks the plane — see Issue 1).
-- **Mitigation available but NOT currently applied:** switching layout `dwindle` →
-  `master` in `ui.lua` avoids it (the crash is entirely inside `CDwindleAlgorithm`).
-  As of 2026-07-27 that line is **commented out**, so the running layout is dwindle.
-  Do NOT add `Restart=on-failure` to `wayland-wm@hyprland.desktop.service` — it
-  breaks logout (see SYSTEM.md).
-- **Upstream:** same bug as hyprwm/Hyprland#15096 (0.55.2) and #13778 (0.54.2), both
-  closed *not planned* for lack of a reliable repro. See also PR #5498, a prior fix in
-  this same exit/cleanup path — shutdown ordering here is historically fragile.
-  Ours was 100% reproducible **on 0.55.4**. Not yet
-  re-verified on 0.56.0 (installed 2026-07-21) — no Hyprland coredump has been
-  recorded since that upgrade.
 
 ---
 

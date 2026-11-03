@@ -19,7 +19,7 @@ modules/            hand-written config, one concern per file
   keybinds.lua      all binds except voxtype's (see voxtype.lua)
   autostart.lua     noctalia daemon
   scratchpads.lua   special workspaces: SUPER+S zellij (monocle, local only), YouTube Music, Beeper
-  specialbar.lua    hides the Noctalia bar while a special workspace shows
+  specialbar.lua    blurred background behind special workspaces
   layouts.lua       scrolling-layout binds and per-workspace layout rules
   groups.lua        group borders + groupbar (loaded AFTER the palette)
   plugins.lua       hyprpm loading model (read before touching plugins)

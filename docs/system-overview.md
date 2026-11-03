@@ -98,8 +98,8 @@ seat/DRM-master contention (see problems.md → "tty1 dead screen").
   theme** — `theme.source = "wallpaper"`, so the picture is the palette; paths only,
   images stay in `~/Pictures/Wallpapers/`. Full guide: [theming.md](theming.md).
 - **`hypr/modules/behaviour.lua` = behaviour; `hypr/theme/` = appearance**
-  (generated, gitignored, `require`d last). Split so a theme swap can't revert the
-  dwindle-crash workaround or `misc`/`debug`.
+  (generated, gitignored, `require`d last). Split so a theme swap can't revert
+  `misc`/`debug`.
 - **hyprglass is per-theme.** `manifest.conf` carries `hyprglass = on|off`;
   `apply.sh` always writes `theme/glass.lua`, using an explicit disable stub when
   off — `hyprctl reload` resets plugin options to defaults and hyprglass defaults

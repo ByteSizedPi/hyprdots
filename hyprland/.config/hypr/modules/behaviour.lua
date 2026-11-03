@@ -1,16 +1,14 @@
 -- Hyprland BEHAVIOUR — what the compositor DOES. Appearance lives in
 -- theme/appearance.lua, generated per theme.
 --
--- The split exists so switching themes can't silently revert the dwindle-crash
--- workaround, misc/, or debug/ — see themes/README.md.
+-- The split exists so switching themes can't silently revert misc/ or debug/ —
+-- see themes/README.md.
 
 hl.config({
 	general = {
-		-- Scrolling on every workspace (chosen 2026-10-07 after a trial on workspace 3).
-		-- Per-workspace exceptions live in modules/layouts.lua. This also moves off
-		-- dwindle, which had the CDwindleAlgorithm shutdown crash; see
-		-- docs/hyprland-plasma-diagnosis.md ISSUE 2.
-		layout = "scrolling",
+		-- Back to dwindle on 2026-11-01, the layout in use before scrolling
+		-- (2026-10-07 to 2026-11-01).
+		layout = "dwindle",
 		resize_on_border = true,
 		-- allow_tearing = false,
 	},

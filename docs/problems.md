@@ -8,6 +8,80 @@ Status key: 🟥 OPEN · 🟧 MITIGATED (worked around, root cause unsolved) · 
 
 ---
 
+## 🟩 Scrolling layout removed, back to dwindle, 2026-11-01
+
+**Decision:** the scrolling layout (global since 2026-10-07) annoyed the user in
+daily use. `general.layout` is `dwindle` again in `modules/behaviour.lua`.
+Dwindle is the layout that ran before scrolling, because the `master` line was
+commented out at that time. `hyprland.lua` no longer loads `modules/scrollfill.lua`.
+The file stays in the tree. The other "Scrolling layout" entries in this log do
+not apply until scrolling comes back.
+
+---
+
+## 🟧 Failed user units at every login (espanso, rclone-gdrive, imsettings-start), 2026-10-26
+
+**Symptom:** Plasma login at 11:40:53 showed a stream of "Failed unit detected"
+notifications, and the user reported a slow start. `systemd-analyze --user` measured 5.8 s to
+`plasma-workspace.target` and 8.3 s to the end of user-manager startup. The
+journal shows no long wait in that login. **The slow start is not explained.**
+
+**Causes and fixes (all in the `systemd` stow package, verified live):**
+- `espanso.service` (`WantedBy=default.target`) starts before the compositor
+  exports `WAYLAND_DISPLAY`. espanso panics with `NoCompositor`
+  (`espanso-detect/src/evdev/sync/wayland.rs:42`), and `Restart=on-failure`
+  starts it again 3 s later. Same pattern under Hyprland (11:20:11). Fix:
+  `ExecStart` waits up to 30 s for `WAYLAND_DISPLAY` in
+  `systemctl --user show-environment` and its socket, then execs espanso.
+- `rclone-gdrive.service` exits 143 on SIGTERM, so every logout marked it
+  failed. Fix: `SuccessExitStatus=143`.
+- `app-imsettings\x2dstart@autostart.service` (from
+  `/etc/xdg/autostart/imsettings-start.desktop`) exits 1 on KDE: "Current
+  desktop isn't supported by IMSettings". Fix: drop-in `not-kde.conf` with an
+  `ExecCondition`. The unit now shows "skipped", not "failed".
+
+**Stow gotcha:** a NEW drop-in directory gets stowed as a directory symlink,
+and systemd did not load the drop-in through it (`DropInPaths` did not list
+it). Fix: `mkdir` the real directory in `~/.config/systemd/user/`, then
+`stow -R systemd` so stow links the file inside it.
+
+**The notifications:** `fumon.service` (systemd package, `/usr/lib/systemd/user/`)
+sends one "Failed unit detected" notification per failed user unit.
+
+**imsettings, second source (not fixed yet):** `/etc/X11/xinit/xinitrc.d/50-xinput.sh`
+runs at login, and `/usr/share/dbus-1/services/com.redhat.imsettings.service`
+has `Exec=/bin/false`. Every D-Bus call to imsettings before its daemon is up
+makes one failed `dbus-:1.2-com.redhat.imsettings@N.service`: 14 at this login.
+No input method is in use (`imsettings-info` = `none.conf`). Proposed fix:
+`sudo dnf remove imsettings` (removes 6 packages: imsettings, -libs,
+-gsettings, -plasma, im-chooser, im-chooser-common; ibus stays).
+
+**The 20 s freeze (OPEN):** the desktop showed, but no panel and no SUPER for
+about 20 s. plasmashell started at 11:40:56.7 and was blocked until 11:41:22.9.
+Evidence: at 11:41:22 kdeconnectd ("Could not query capabilities from
+notifications server") and imsettings-daemon (libnotify) both got answers from
+the notification server, which plasmashell hosts. plasmashell logged its portal
+registration at the same time, 26 s after start. xdg-desktop-portal was up at
+11:40:59.7 and 10 other KDE processes registered at once. A 25 s gap = the
+default D-Bus call timeout, so the guess is a D-Bus call that got no answer
+(possibly plasmashell -> portal -> a backend -> plasmashell). NOT proven.
+- Tried: `systemctl --user restart plasma-plasmashell` with `busctl --user monitor`
+  running. No call took over 1 s. The freeze happens only at login.
+- Suspect, not proven: `~/.config/xdg-desktop-portal/portals.conf` (not stowed)
+  has `default=hyprland;kde;gtk` for ALL desktops. Under KDE the portal tries the
+  Hyprland backend first (4 skipped activations at 11:40:59).
+- Next step: capture the bus and `eu-stack -p <plasmashell>` during a real login.
+
+**Not fixed, seen in the Hyprland session before (11:20 to 11:40):**
+- 30+ "Dependency failed for xdg-desktop-portal.service". The unit has
+  `Requisite=graphical-session.target`, which Hyprland never starts here.
+  Every portal activation fails (ksecretd logged it). Apps that wait on the
+  portal can stall in Hyprland. Next step: start `graphical-session.target`
+  from Hyprland, or a drop-in that removes the `Requisite`.
+- Hyprland SIGSEGV at 11:40:40 (coredump PID 1881) ended that session.
+
+---
+
 ## 🟥 Scrolling layout: a dragged window stacks vertically on drop
 
 **Symptom (2026-10-20):** SUPER + left-drag a tiled window onto another window,
@@ -555,6 +629,12 @@ event-loop turns** or Hyprland coalesces them into a no-op.
   after a second before concluding a call failed.
 - **Explicit modes beat `"preferred"`.** `preferred` picks 48Hz on eDP-1 and
   60Hz on the AOC. Pin the refresh rate.
+- **Hyprland range-checks option values and rejects the whole key.** Example
+  (2026-11-03): `decoration.blur.vibrancy = 9` gave "value 9 is more than the
+  maximum of 1.00" in `hyprctl configerrors`. Hyprland kept the default 0.1696.
+  The other keys in the same `hl.config` table still applied. Fix: removed the
+  key from `modules/specialbar.lua`, `themes/noctalia` and `themes/comicmono`.
+  Check `hyprctl configerrors` after every config edit.
 
 ---
 
@@ -674,6 +754,14 @@ per-frame re-blur of the sliding overlay, keeps blur on everything else. Cheaper
 alternatives: lower blur `passes`/`size`, or change the special animation from
 `slidevert` to `fade`. None applied — the quirk is undocked-only and purely
 visual on one animation.
+
+**Update (2026-11-01):** `decoration.blur.special = true` is now on, in
+`modules/specialbar.lua`, with `dim_special = 0`, `size = 10`, `passes = 3`,
+`xray = true` and `vibrancy = 9` (default blur size 8, passes 1 was rejected as
+not the expected look): the user chose a blurred special
+workspace background instead of solid black. This setup is the expensive path that
+this entry describes, so expect the stutter undocked. If the stutter matters, use
+the cheaper alternatives above.
 
 **Lesson:** don't use `mode="preferred"` for panels exposing a low-refresh mode
 (pin the refresh — done). And on this hybrid-GPU box, heavy per-frame effects
@@ -1800,12 +1888,11 @@ nothing now. `hyprctl gestures` does not exist (`unknown request`).
 ---
 
 ## See also (existing deep dives)
-- 🟧/🟩 **Greeter ghost + dwindle crash + hybrid-GPU + Lua gotchas** —
+- 🟧/🟩 **Greeter ghost + hybrid-GPU + Lua gotchas** —
   [hyprland-plasma-diagnosis.md](hyprland-plasma-diagnosis.md). Read first when
   revisiting greeter/login or Plasma↔Hyprland interactions.
-- **Dwindle layout crash on shutdown** — [hyprland-plasma-diagnosis.md](hyprland-plasma-diagnosis.md)
-  → ISSUE 2. (The standalone draft bug report was deleted 2026-07-27 as stale: written
-  against 0.55.4, never filed, and no Hyprland coredump since the 0.56.0 upgrade.)
+- **"Dwindle layout crash on shutdown" was a misdiagnosis** (removed 2026-11-03).
+  Dwindle does not crash Hyprland on exit. Do not switch to `master` to avoid it.
 
 ---
 
