@@ -8,6 +8,60 @@ Status key: 🟥 OPEN · 🟧 MITIGATED (worked around, root cause unsolved) · 
 
 ---
 
+## 🟩 Portal 2: squashed menus and mouse offset, 2026-11-11
+
+**Symptom:** the image looked warped. Menu buttons only reacted to clicks
+beside the button.
+
+**Setup:** Portal 2 (AppID 620) is the **native Linux** build (OpenGL, Soldier
+runtime), not Proton. Steam is the Flatpak. The game window is XWayland,
+fullscreen on HDMI-A-1, 1920x1080.
+
+**Cause (verified):**
+`~/.var/app/com.valvesoftware.Steam/.local/share/Steam/steamapps/common/Portal 2/update/cfg/video.txt`
+had `setting.defaultres "3840"` × `defaultresheight "1080"`. XWayland reports
+one 3840x1080 X screen (eDP-1 + HDMI-A-1 side by side). The game picked the
+full X screen width. It renders 3840 px into a 1920 px window, so the image is
+squashed 2:1 horizontally and mouse coordinates no longer match the buttons.
+
+**Tried, did NOT work:** set the resolution to 1920x1080 in Options → Video.
+`video.txt` then showed 1920x1080. The Hyprland window and the X11 window
+(python-xlib) were both 1920x1080 at 1920,0. The image was still wrong:
+a `grim -o HDMI-A-1` screenshot showed a cropped, zoomed picture, with the
+pause menu pushed down and right. Do not edit `video.txt` while the game
+runs. The game rewrites `video.txt` on exit.
+
+**Fix (user confirmed "seems good", 2026-11-16):** 1920x1080 plus a full
+restart of the game. After the fix, `video.txt` (written 2026-11-12 14:44)
+still has `setting.fullscreen "1"` and `nowindowborder "0"`. `localconfig.vdf`
+has no launch options. So exclusive fullscreen at 1920x1080 works. The
+zoomed picture was most likely a stale mode from changing the resolution
+while the game ran (inferred, not verified).
+
+**If the problem comes back:** use Display Mode "Windowed (no border)" at
+1920x1080, or the launch options `-windowed -noborder -w 1920 -h 1080`.
+The resolution can go back to 3840x1080 if `video.txt` is deleted, because
+the game then picks the full XWayland screen width again.
+
+---
+
+## 🟩 Workspace switch by keybind had no slide animation, 2026-11-09
+
+**Symptom:** the 3-finger swipe slid between workspaces. SUPER+5 from
+workspace 4 (or SUPER+ALT+L) did not slide.
+
+**Cause:** `theme/appearance.lua` disabled the `workspaces`,
+`workspacesIn` and `workspacesOut` leaves. The swipe gesture moves the
+workspaces with the fingers, so the swipe still looked animated.
+
+**Fix (verified with `hyprctl animations`):** enable the three leaves with
+`style = "slide"`, speed 4, bezier `easeOutQuint`.
+
+**Tried earlier, did NOT work:** `style = "fade"`. The cross-fade showed the
+windows of both workspaces at once.
+
+---
+
 ## 🟩 Scrolling layout removed, back to dwindle, 2026-11-01
 
 **Decision:** the scrolling layout (global since 2026-10-07) annoyed the user in
@@ -2169,3 +2223,28 @@ gets any style.
 --remote-allow-system-access`), then `Services.console.getMessageArray()` in
 the chrome context showed "Loading failed for the <script> with source
 moz-extension://88183f85-…/background.js".
+
+## 🟥 Jellyfin Desktop: mouse-wheel scrolling is not smooth (2026-11-09)
+
+**Symptom:** the Flathub app `org.jellyfin.JellyfinDesktop` 2.0.0 shows the
+same web client as the browser, but each wheel notch jumps the page. Chrome
+and Firefox animate the scroll.
+
+**Cause (verified in source):** the app renders the web client in a Qt
+WebEngine `WebEngineView`. Qt WebEngine has the setting
+`QWebEngineSettings::ScrollAnimatorEnabled`, default `false`. Upstream
+`src/ui/webview.qml` sets `errorPageEnabled`, `localContentCanAccess*`,
+`allowRunningInsecureContent` and `playbackRequiresUserGesture`, but not
+`scrollAnimatorEnabled`. So the scroll animation stays off.
+
+**Tried, did NOT work:**
+* `QTWEBENGINE_CHROMIUM_FLAGS=--enable-smooth-scrolling` (via
+  `flatpak run --env=…`). The main process got the variable (checked in
+  `/proc/<pid>/environ`). The scroll was not smooth. Qt WebEngine writes the
+  scroll-animator preference from its own setting, so the Chromium switch has
+  no effect.
+
+**Possible fixes (not done):**
+* Add `settings.scrollAnimatorEnabled: true` to `src/ui/webview.qml` and build
+  the Flathub manifest locally with `flatpak-builder`.
+* Send the same one-line change upstream as a PR.
