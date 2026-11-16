@@ -8,6 +8,20 @@ config lives. Keep this current as the setup evolves.
 - **Machine:** Dell laptop (Dell Privacy Driver / Dell WMI hotkeys present),
   BOE internal panel (eDP-1, `0x0B8E`), often used with an AOC external monitor
   (HDMI-A-1, `24G2W1G3-`).
+- **Samsung 4K TV (gaming, added 2026-11-12):** 55" (950x540 mm), on the same
+  HDMI-A-1 port, description `Samsung Electric Company SAMSUNG 0x01000E00`.
+  - **Rule:** `modules/monitors.lua` sets 3840x2160@60, scale 2 (a 1920x1080
+    logical desktop), position `1920x0`, right of the laptop.
+  - **Why the rule is needed:** the TV's EDID preferred mode is 3840x2160@30.
+    Without the rule, the catch-all rule picks 30 Hz at scale 1.
+  - **If the screen is black at 60 Hz:** turn on Input Signal Plus for that
+    HDMI port on the TV, or use an HDMI 2.0 cable.
+  - **No VRR:** Hyprland reports `vrrCapable: no` for this output.
+  - **GPU path:** HDMI-A-1 is on the Intel GPU (`card1`). Games must ask for
+    the NVIDIA GPU with PRIME offload (`switcherooctl launch`, or the
+    `__NV_PRIME_RENDER_OFFLOAD=1` env vars). Play at 1920x1080, because the
+    RTX 500 (4 GB) is too slow for 4K.
+  - **Controller:** Xbox Wireless Adapter through `xone` (see `SYSTEM.md`).
 - **GPU: HYBRID.** Intel Arc (Meteor Lake-P, integrated) **+** NVIDIA RTX 500
   Ada (discrete). The internal panel runs off the Intel side (`/dev/dri/card1`,
   `intel_backlight`). Hybrid graphics + Wayland + DRM master is a recurring
