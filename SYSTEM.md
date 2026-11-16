@@ -987,3 +987,46 @@ Installed `anydesk-8.1.0-1.x86_64`. GPG key fingerprint `06B5EA2FAE208E7CDA9761D
 **To reapply:** write the file above with `sudo tee`, then `sudo dnf install -y anydesk`.
 **To undo:** `sudo dnf remove anydesk && sudo rm /etc/yum.repos.d/anydesk.repo`.
 To keep the package but stop the boot service: `sudo systemctl disable --now anydesk`.
+
+---
+
+## xone: Xbox Wireless Adapter driver (2026-11-12)
+
+Packages from the Terra repo (already enabled): `akmod-xone-2:0.5.8-3.fc44`,
+`xone-2:0.5.8-2.fc44`, `xone-firmware-2:0.5.8-2.fc44`.
+
+**Why:** The USB Xbox Wireless Adapter (`045e:02e6`, "XBOX ACC", MediaTek chip) has no
+in-kernel driver. Without xone, the `mt76x2u` Wi-Fi driver claims the adapter and no
+controller appears. The akmod rebuilds the module for each new kernel, the same way
+as `akmod-nvidia`.
+
+**Files the packages install** (not written by hand):
+
+`/usr/lib/modprobe.d/60-xone.conf`
+```
+blacklist xpad
+blacklist mt76x2u
+```
+
+`/usr/lib/dracut/dracut.conf.d/60-xone-snd.conf`
+```
+add_drivers+=" snd-pcm snd-seq "
+```
+
+Firmware: `/usr/lib/firmware/xone_dongle_{02e6,02f9,02fe,091e}.bin`.
+Kernel modules: `/lib/modules/<kernel>/extra/xone/` (`xone_dongle`, `xone_gip`, …).
+
+**Side effects:**
+- `xpad` is blacklisted. xone also drives wired Xbox One/Series controllers, so a USB
+  cable still works. Older Xbox 360 wired pads, which need `xpad`, stop working.
+- `mt76x2u` is blacklisted. Any MediaTek MT76x2U USB Wi-Fi dongle stops working.
+
+**To reapply:**
+```
+sudo dnf install -y akmod-xone xone-firmware
+sudo akmods --force --kernels "$(uname -r)" --akmod xone
+sudo modprobe -r mt76x2u; sudo modprobe xone_dongle
+```
+Then unplug and replug the adapter.
+
+**To undo:** `sudo dnf remove akmod-xone xone xone-firmware kmod-xone-*`, then reboot.

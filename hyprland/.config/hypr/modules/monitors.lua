@@ -58,6 +58,16 @@ hl.monitor({
 	scale = 2,
 })
 
+-- Samsung 4K TV (55", 950x540 mm), right of the laptop. Its EDID preferred
+-- mode is 3840x2160@30, so the mode must be explicit. Scale 2 gives a
+-- 1920x1080 logical desktop, readable from the couch. (2026-11-12)
+hl.monitor({
+	output = "desc:Samsung Electric Company SAMSUNG 0x01000E00",
+	mode = "3840x2160@60",
+	position = "1920x0",
+	scale = 2,
+})
+
 hl.monitor({
 	output = "desc:XXX AAA",
 	mode = "1920x1080@60",
