@@ -37,13 +37,70 @@ hl.bind(mainMod .. " + SHIFT + j", hl.dsp.window.move({ direction = "down" }))
 hl.bind(mainMod .. " + SHIFT + k", hl.dsp.window.move({ direction = "up" }))
 hl.bind(mainMod .. " + SHIFT + l", hl.dsp.window.move({ direction = "right" }))
 
--- Monitor-scoped workspace navigation (Super+Alt tier — same monitor, adjacent workspace)
-hl.bind(mainMod .. " + ALT + h", hl.dsp.focus({ workspace = "m-1" }))
-hl.bind(mainMod .. " + ALT + l", hl.dsp.focus({ workspace = "m+1" }))
+-- Monitor-scoped workspace navigation (Super+Alt tier: same monitor, adjacent
+-- workspace). ws_step() copies the 3-finger swipe (modules/input.lua):
+--   * It steps to the next workspace ID on the focused monitor. It does not wrap.
+--   * Past the last workspace it creates a new one (first free ID above the
+--     current one), the same as gestures:workspace_swipe_create_new.
+--   * It does not create a new workspace from an empty one, so repeated presses
+--     do not stack empty workspaces.
+-- carry = true moves the focused window with you (Shift latches). A carry from a
+-- workspace whose only window is the focused one does nothing at the right end,
+-- because the result would be the same window alone on a new workspace.
+-- Replaced 2026-11-09: the old binds used "m-1"/"m+1", which wrap around and
+-- never create a workspace.
+local function ws_step(dir, carry)
+	return function()
+		local mon = hl.get_active_monitor()
+		local cur = mon and mon.active_workspace
+		if not (cur and cur.id) then
+			return
+		end
+
+		local used, target = {}, nil
+		for _, ws in ipairs(hl.get_workspaces()) do
+			if ws.id and ws.id > 0 and not ws.special then
+				used[ws.id] = true
+				if ws.monitor and ws.monitor.name == mon.name then
+					local d = (ws.id - cur.id) * dir
+					if d > 0 and (not target or d < (target - cur.id) * dir) then
+						target = ws.id
+					end
+				end
+			end
+		end
+
+		if not target then
+			if dir < 0 then
+				return
+			end
+			local win = carry and hl.get_active_window()
+			if carry and not win then
+				return
+			end
+			if cur.is_empty or (carry and #hl.get_workspace_windows(cur.id) <= 1) then
+				return
+			end
+			target = cur.id + 1
+			while used[target] do
+				target = target + 1
+			end
+		end
+
+		if carry then
+			hl.dispatch(hl.dsp.window.move({ workspace = target }))
+		else
+			hl.dispatch(hl.dsp.focus({ workspace = target }))
+		end
+	end
+end
+
+hl.bind(mainMod .. " + ALT + h", ws_step(-1, false))
+hl.bind(mainMod .. " + ALT + l", ws_step(1, false))
 
 -- Carry window to adjacent workspace on same monitor (Shift latches)
-hl.bind(mainMod .. " + ALT + SHIFT + h", hl.dsp.window.move({ workspace = "m-1" }))
-hl.bind(mainMod .. " + ALT + SHIFT + l", hl.dsp.window.move({ workspace = "m+1" }))
+hl.bind(mainMod .. " + ALT + SHIFT + h", ws_step(-1, true))
+hl.bind(mainMod .. " + ALT + SHIFT + l", ws_step(1, true))
 
 -- Workspace switch / move window
 for i = 1, 10 do
