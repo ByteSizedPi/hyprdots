@@ -8,6 +8,25 @@ Status key: 🟥 OPEN · 🟧 MITIGATED (worked around, root cause unsolved) · 
 
 ---
 
+## 🟧 Zellij: Ctrl+y needs two presses after a move-mode break-pane, 2026-11-19
+
+**Symptom:** Ctrl+y enters move mode. `[` or `]` (BreakPaneLeft/Right) moves the
+pane to the next tab and the status bar shows normal mode. The next Ctrl+y does
+nothing. A second Ctrl+y enters move mode.
+
+**Found:** `zellij/.config/zellij/config.kdl` bound move-mode entry to Ctrl+y
+(`shared_except "locked" "move"`) but move-mode exit to Ctrl+h. So Ctrl+y did
+nothing while in move mode. Every other mode toggles on its own key.
+
+**Tried:** changed the move-mode exit bind from Ctrl+h to Ctrl+y, so Ctrl+y
+toggles. Not yet confirmed that this removes the double press.
+
+**Not verified:** why the first Ctrl+y is lost. Two hypotheses (zellij 0.45.1):
+(a) the client stays in move mode after BreakPane* and the new tab's status bar
+shows a stale "normal". (b) the client is in normal mode, the first Ctrl+y
+works, but the status bar does not redraw. Test: after `]`, press `h`. If the
+pane moves, (a) is correct.
+
 ## 🟩 Portal 2: squashed menus and mouse offset, 2026-11-11
 
 **Symptom:** the image looked warped. Menu buttons only reacted to clicks
@@ -2248,3 +2267,24 @@ WebEngine `WebEngineView`. Qt WebEngine has the setting
 * Add `settings.scrollAnimatorEnabled: true` to `src/ui/webview.qml` and build
   the Flathub manifest locally with `flatpak-builder`.
 * Send the same one-line change upstream as a PR.
+
+## 🟨 zellij: pane "hangs" after closing claude/nvim, Ctrl+C closes the pane
+**Symptom:** in the resurrected `main` session, quitting `claude` or `nvim` in a
+pane leaves the pane frozen. No shell prompt comes back. Ctrl+C then removes the
+pane ("crashes").
+
+**Cause (confirmed 2026-11-19):** resurrection restores those panes as
+**command panes** (`pane command="claude"` in
+`~/.cache/zellij/contract_version_1/session_info/main/session-layout.kdl`).
+`ps` showed `claude` (pid 13607) as a direct child of the zellij server, with no
+zsh between them. When the command exits, zellij holds the pane and waits:
+Enter = re-run, Esc = drop to a shell, Ctrl+C = close the pane. Zellij prints
+that hint in the pane frame, and `pane_frames false` in `config.kdl` hides it.
+So the "hang" is the held state, and the "crash" is the documented Ctrl+C close.
+Not a zellij bug.
+
+**Workaround:** press **Esc** in the held pane to get a zsh prompt.
+
+**Tried:** nothing yet. Candidate fixes: `post_command_discovery_hook` in
+`config.kdl` to rewrite the serialized command (untested), or turn pane frames
+back on so the hint shows.

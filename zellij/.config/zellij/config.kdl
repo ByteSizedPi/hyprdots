@@ -77,7 +77,7 @@ keybinds clear-defaults=true {
         bind "up" { MovePane "up"; }
         bind "right" { MovePane "right"; }
         bind "h" { MovePane "left"; }
-        bind "Ctrl h" { SwitchToMode "normal"; }
+        bind "Ctrl y" { SwitchToMode "normal"; }
         bind "j" { MovePane "down"; }
         bind "k" { MovePane "up"; }
         bind "l" { MovePane "right"; }
@@ -282,7 +282,7 @@ simplified_ui true
 // ── ACTIVE THEME ── managed by noctalia (noctalia msg templates-apply) ──
 // Available: noctalia (dynamic), tokyonight-storm, dracula, catppuccin-macchiato-custom
 theme "noctalia"
-// noctalia-theme-applied: 1794502137
+// noctalia-theme-applied: 1795002624
 
 ui {
 	pane_frames {
