@@ -55,3 +55,9 @@
 
 # No "espanso is running" toast at login.
 show_notifications: false
+
+# --- Keyboard layout
+# Under Hyprland espanso can't read the active layout ("unable to determine
+# keyboard layout automatically"); both machines use plain US.
+keyboard_layout:
+  layout: us

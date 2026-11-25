@@ -10,7 +10,7 @@ so `omarchy update` never has to fight it. Never edit `/usr/share/omarchy/`.
 
 ```bash
 cd ~/dotfiles
-stow --no-folding zsh zellij hypr-omarchy
+stow --no-folding zsh zellij hypr-omarchy espanso systemd-omarchy
 stow omarchy          # WITH folding — see "theme must be a directory link"
 ```
 
@@ -19,7 +19,9 @@ stow omarchy          # WITH folding — see "theme must be a directory link"
 | `zsh` | `.zshrc`, `~/.config/zsh/omarchy.zsh`, `bira-status` theme | `.zshrc` is host-safe: it sources `omarchy.zsh` only if present, and picks dnf vs `omarchy pkg` aliases per distro |
 | `zellij` | config + layouts + static themes | `theme "omarchy"`; see Zellij theming |
 | `omarchy` | `themes/catppuccin-frappe/`, `themed/zellij.kdl.tpl`, `hooks/theme-set.d/zellij-reload` | |
-| `hypr-omarchy` | `~/.config/hypr/looknfeel.lua` | Gaps, animations, motion blur, layer blur — loaded after Omarchy defaults and the theme |
+| `hypr-omarchy` | `~/.config/hypr/{hyprland,looknfeel,scratchpads}.lua` | Gaps, animations, motion/layer blur; scratchpads; espanso helper-window rule. `hyprland.lua` is Omarchy's user entry file plus `require("hypr.scratchpads")` |
+| `espanso` | config + `match/base.yml` (shared with master) | `match/private.yml` is gitignored — copy it from home by hand |
+| `systemd-omarchy` | `espanso.service.d/graphical-session.conf` | Ties the packaged unit to `graphical-session.target` (uwsm sets `WAYLAND_DISPLAY` before it) instead of home's wait-loop unit |
 
 **Not stowed here:** `home` (would replace Omarchy's `.bashrc`), `hyprland`,
 `noctalia`, `niri`, `kitty`, `alacritty`, `gtk`, `systemd` (KDE/Plasma drop-ins).
@@ -53,6 +55,25 @@ Not matched (Omarchy's bar has no knobs; would need `omarchy plugin clone omarch
 which forfeits bar updates): bar border, floating margins, notification
 position (top-centre at home), Noctalia widget set.
 
+## Scratchpads (special workspaces)
+
+`hypr-omarchy/.config/hypr/scratchpads.lua`, ported from master's
+`modules/{scratchpads,specialbar,urgent}.lua` + the special gestures in `input.lua`.
+Keys were picked against `hyprctl binds` so no Omarchy default is overridden:
+
+| Home | Here | Why |
+|---|---|---|
+| SUPER+S zellij | **SUPER+Z** | SUPER+S / SUPER+ALT+S are Omarchy's own scratchpad (kept) |
+| SUPER+Y YouTube Music (Zen profile) | SUPER+Y, Omarchy web app (`omarchy-launch-webapp`) | Zen not installed; class `chrome-music.youtube.com__-Default` |
+| SUPER+B Beeper | not set up | x86_64 AppImage; SUPER+B is free if an arm64 build turns up |
+| SUPER+Tab monocle cycle | ALT+Tab (Omarchy's `cycle_next`) | SUPER+Tab is Omarchy's next workspace |
+
+zellij runs in **foot** (`--app-id=zellij-local`), monocle layout, session `main`.
+Gestures: SUPER+3-finger up toggles zellij, SUPER+3-finger down dismisses it,
+3-finger down dismisses any special workspace. `dim_special = 0` + special blur
+(size 10, passes 3, xray) — global, so it also sets the bar's blur. Urgent windows
+in a hidden scratchpad raise a notification naming the key.
+
 ## Zellij theming
 
 `~/.config/omarchy/themed/zellij.kdl.tpl` (ported from
@@ -70,6 +91,7 @@ Reapply by hand on a fresh install.
 | Change | How |
 |---|---|
 | `/etc/keyd/default.conf`: `capslock = overload(meta, esc)` only (no `rightcontrol = f13`: no right Ctrl, no voxtype; dictation is Superwhisper) | `pacman -S keyd`, write file, `systemctl enable --now keyd` |
+| espanso 2.2.1 (AUR `espanso-wayland`, arch=x86_64 only) | `yay -G espanso-wayland`, install deps (`rust wxwidgets-gtk3 wxwidgets-common wl-clipboard`), `makepkg -A --nocheck`, `pacman -U`; install script sets `cap_dac_override+p`. Then `systemctl --user add-wants graphical-session.target espanso.service`. First run shows a welcome window. |
 | Packages | `pacman -S keyd zsh pkgfile zellij stow ttf-cascadia-code-nerd`; `pkgfile -u`; `systemctl enable --now pkgfile-update.timer` |
 | Login shell zsh | `chsh -s /usr/bin/zsh` |
 | oh-my-zsh + custom plugins (git clones, not tracked) | `git clone --depth 1` ohmyzsh → `~/.oh-my-zsh`; `zsh-users/zsh-autosuggestions` and `zdharma-continuum/fast-syntax-highlighting` → `~/.oh-my-zsh/custom/plugins/` |
