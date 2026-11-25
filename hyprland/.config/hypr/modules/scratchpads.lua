@@ -1,7 +1,12 @@
 -- Special-workspace scratchpads: what launches in them, and how they look.
 --
--- These are `on_created_empty` rules, so the command runs the first time the
--- scratchpad is summoned and never again — the session persists across toggles.
+-- A `workspace.created` handler (end of this file) runs each launch command the
+-- first time the scratchpad is summoned, and never again while the workspace
+-- lives. The session persists across toggles.
+--
+-- 2026-11-23: moved from the `on_created_empty` workspace-rule key to the Lua
+-- handler. Hyprland 0.57.2 `hyprctl deprecated-config` flags on_created_empty and
+-- says to use a "workspace.created" handler that checks `.is_empty`.
 -- Bound to SUPER+S / SUPER+Y / SUPER+B in modules/keybinds.lua.
 
 local terminal = require("lib.terminal")
@@ -24,7 +29,6 @@ local terminal = require("lib.terminal")
 hl.workspace_rule({
 	workspace = "special:zellij",
 	layout = "monocle",
-	on_created_empty = "kitty --class zellij-local --title local zellij attach main --create",
 })
 
 hl.window_rule({
@@ -38,11 +42,11 @@ hl.window_rule({
 --
 -- Each app needs rules 1 and 2. Rule 3 is optional, and neither app uses it now:
 --
---   1. workspace_rule + on_created_empty — launches the app the first time you
+--   1. an entry in `launch_on_create` (below) — launches the app the first time you
 --      press the key. This is the closest thing Hyprland has to session restore.
 --      Hyprland 0.56.2 has NO window session save or restore (the only "session"
 --      keys in the Lua API are misc.session_lock_*, which are lock-screen keys).
---      on_created_empty needs none, because it is config, not saved state: after
+--      The launch entry needs none, because it is config, not saved state: after
 --      a reboot the first toggle simply starts the app again.
 --   2. window_rule workspace — pins the window to that special workspace however
 --      it was started. Both apps are single-instance, so starting them a second
@@ -69,11 +73,6 @@ hl.window_rule({
 --     were copied from the main profile by hand. See zen/README.md.
 local youtube_class = "^zen-ytmusic$"
 
-hl.workspace_rule({
-	workspace = "special:youtube",
-	on_created_empty = "zen-browser --profile ~/.zen/ytmusic --no-remote --name zen-ytmusic",
-})
-
 hl.window_rule({
 	name = "youtube-music-workspace",
 	match = { class = youtube_class },
@@ -93,16 +92,28 @@ hl.window_rule({
 -- on the next update. `sort -V | tail -1` picks the newest one present.
 local beeper_class = "^Beeper$"
 
-hl.workspace_rule({
-	workspace = "special:beeper",
-	on_created_empty = "sh -c 'exec \"$(ls -1 ~/Downloads/Beeper-*.AppImage | sort -V | tail -1)\"'",
-})
-
 hl.window_rule({
 	name = "beeper-workspace",
 	match = { class = beeper_class },
 	workspace = "special:beeper silent",
 })
+
+-- ---------------------------------------------------------------------------
+-- Launch on first summon. Replaces the deprecated `on_created_empty` rule key.
+-- Keys are the workspace `name` as `hyprctl workspaces` shows it.
+-- ---------------------------------------------------------------------------
+local launch_on_create = {
+	["special:zellij"] = "kitty --class zellij-local --title local zellij attach main --create",
+	["special:youtube"] = "zen-browser --profile ~/.zen/ytmusic --no-remote --name zen-ytmusic",
+	["special:beeper"] = "sh -c 'exec \"$(ls -1 ~/Downloads/Beeper-*.AppImage | sort -V | tail -1)\"'",
+}
+
+hl.on("workspace.created", function(ws)
+	local cmd = launch_on_create[ws.name]
+	if cmd and ws.is_empty then
+		hl.exec_cmd(cmd)
+	end
+end)
 
 -- ---------------------------------------------------------------------------
 -- MEASURED 2026-09-03: the Noctalia workspaces widget draws the workspace NUMBER,
