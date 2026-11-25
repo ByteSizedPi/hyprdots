@@ -94,6 +94,12 @@ ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=244'
 [[ -r ${XDG_CONFIG_HOME:-$HOME/.config}/zsh/noctalia-theme.zsh ]] \
   && source ${XDG_CONFIG_HOME:-$HOME/.config}/zsh/noctalia-theme.zsh
 
+# Omarchy hosts: PATH, mise, zoxide, fzf, try, Omarchy aliases and functions.
+# Loaded before oh-my-zsh so omz plugins and the aliases below win clashes.
+# Absent on other hosts, so this file stays shareable.
+[[ -r ${XDG_CONFIG_HOME:-$HOME/.config}/zsh/omarchy.zsh ]] \
+  && source ${XDG_CONFIG_HOME:-$HOME/.config}/zsh/omarchy.zsh
+
 source $ZSH/oh-my-zsh.sh
 
 export EDITOR="nvim"
@@ -125,12 +131,18 @@ export EDITOR="nvim"
 # Example aliases
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
-alias i="sudo dnf5 install -y"
+# Package manager aliases, per distro
+if (( $+commands[dnf5] )); then
+  alias i="sudo dnf5 install -y"
+  alias sup="sudo dnf update --refresh"
+elif (( $+commands[omarchy] )); then
+  alias i="omarchy pkg add"
+  alias sup="omarchy update"
+fi
 alias ls="eza --icons=auto"
 alias la="eza -lah --icons=auto --git"
 alias tree="eza --tree --icons=auto"
 alias grep="rg --color=auto"
-alias sup="sudo dnf update --refresh"
 alias wifi="nmcli radio wifi on"
 alias open="xdg-open"
 alias dl="cd ~/Downloads/"

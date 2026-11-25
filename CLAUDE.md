@@ -4,6 +4,10 @@ This repo is the **single source of truth** for how this machine is configured
 beyond the base Fedora install. Everything not part of the stock distribution
 should be discoverable from here.
 
+> **Branch `omarchy`:** this branch is the Omarchy MacBook, not the Fedora
+> desktop described below. Start at **`docs/omarchy.md`** — it lists the stow
+> packages used here and every change outside the stow tree.
+
 ## Read this before doing anything
 
 Before diagnosing, configuring, or changing system state, read:

@@ -1,0 +1,11 @@
+#!/bin/bash
+# Omarchy theme-set hook: make running Zellij sessions re-read the theme.
+# Omarchy has already rendered ~/.config/omarchy/themed/zellij.kdl.tpl into
+# ~/.local/state/omarchy/current/theme/zellij.kdl (~/.config/zellij/themes/omarchy.kdl
+# links to it). Zellij has no theme-reload IPC; it watches config.kdl, so bump the
+# marker line. Rewrite IN PLACE (>) - sed -i would swap the inode and Zellij's
+# watch would miss it (see hyprdots noctalia/scripts/zellij-reload.sh).
+cfg=~/.config/zellij/config.kdl
+[[ -f $cfg ]] || exit 0
+new="$(sed "s|^// omarchy-theme-applied:.*|// omarchy-theme-applied: $(date +%s)|" "$cfg")"
+printf '%s\n' "$new" >"$cfg"

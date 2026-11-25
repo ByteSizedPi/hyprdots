@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 3840 2160" width="3840" height="2160">
+  <!-- Dark Side of the Moon prism, Catppuccin colors. Geometry measured from 3vpd1ov7brib1.png. -->
+  <rect width="3840" height="2160" fill="#303446"/>
+  <g shape-rendering="geometricPrecision">
+    <polygon fill="#F38BA8" points="1900,825.84 3840,1124.67 3840,1179.43 1900,846.11"/>
+    <polygon fill="#FAB387" points="1900,846.11 3840,1179.43 3840,1234.2 1900,866.38"/>
+    <polygon fill="#F9E2AF" points="1900,866.38 3840,1234.2 3840,1288.97 1900,886.64"/>
+    <polygon fill="#A6E3A1" points="1900,886.64 3840,1288.97 3840,1343.73 1900,906.91"/>
+    <polygon fill="#74C7EC" points="1900,906.91 3840,1343.73 3840,1398.49 1900,927.18"/>
+    <polygon fill="#CBA6F7" points="1900,927.18 3840,1398.49 3840,1453.26 1900,947.45"/>
+    <polygon fill="#CDD6F4" points="0,1367.03 1800,894.42 1800,912.16 0,1384.77"/>
+    <polygon fill="#CDD6F4" points="1918.5,573.5 2357.5,1342.5 1477.5,1342.5"/>
+    <polygon fill="#303446" points="1918.27,652.45 2292.30,1307.5 1543.08,1307.5"/>
+  </g>
+</svg>

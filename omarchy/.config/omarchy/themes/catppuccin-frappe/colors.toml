@@ -1,0 +1,39 @@
+# Catppuccin Frappé, Mauve accent — matches home (Noctalia community palette
+# "Catppuccin Frappe Mauve", hyprdots themes/catppuccin). Palette values from
+# catppuccin.com/palette (Frappé).
+mode = "dark"
+
+accent = "#ca9ee6"            # mauve
+selection = "#51576d"         # surface1
+muted = "#737994"             # overlay0
+
+background = "#303446"        # base
+dark_background = "#292c3c"   # mantle
+darker_background = "#232634" # crust
+lighter_background = "#414559" # surface0
+
+foreground = "#c6d0f5"        # text
+dark_foreground = "#a5adce"   # subtext0
+light_foreground = "#b5bfe2"  # subtext1
+bright_foreground = "#c6d0f5"
+
+red = "#e78284"
+yellow = "#e5c890"
+orange = "#ef9f76"            # peach
+green = "#a6d189"
+cyan = "#81c8be"              # teal
+blue = "#8caaee"
+magenta = "#f4b8e4"           # pink
+brown = "#eebebe"             # flamingo
+
+bright_red = "#ea999c"        # maroon
+bright_yellow = "#e5c890"
+bright_green = "#a6d189"
+bright_cyan = "#99d1db"       # sky
+bright_blue = "#85c1dc"       # sapphire
+bright_magenta = "#ca9ee6"    # mauve
+
+# Home draws Mauve (Noctalia "primary") on EVERY window border, focused or not
+# (hyprdots hyprland/modules/borders.lua).
+hyprland_active_border = "#ca9ee6"
+hyprland_inactive_border = "#ca9ee6"

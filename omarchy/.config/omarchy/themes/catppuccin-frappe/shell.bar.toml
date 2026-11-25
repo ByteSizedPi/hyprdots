@@ -1,0 +1,11 @@
+# Replaces only the [bar] section of the generated shell.toml (Omarchy section
+# override). Home parity: Noctalia bar.default.background_opacity = 0.8,
+# bar.default.color = "primary" (mauve); blur comes from the layer rule in
+# ~/.config/hypr/looknfeel.lua.
+background       = "#303446"
+background-alpha = 0.8
+text             = "#ca9ee6"
+active           = "#e78284"
+scale-with-font  = true
+size-horizontal  = 26
+size-vertical    = 28

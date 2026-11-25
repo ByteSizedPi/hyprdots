@@ -1,0 +1,7 @@
+# Home parity: Noctalia notification.background_opacity = 0.8, blurred.
+background       = "#303446"
+background-alpha = 0.8
+text             = "#c6d0f5"
+border           = "hyprland.active-border"
+border-alpha     = 1.0
+countdown        = "#ca9ee6"
