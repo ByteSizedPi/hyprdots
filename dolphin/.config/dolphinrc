@@ -3,6 +3,7 @@ UsePermissionsFormat=CombinedFormat
 
 [DetailsMode]
 IconSize=64
+PreviewSize=64
 
 [General]
 ShowFullPathInTitlebar=true
