@@ -63,6 +63,8 @@ did nothing. Briefly saw something "like a lockscreen-crashed screen."
    `New device Lid Switch` → `Restoring crtc 149 … 1920x1080@60` →
    `drm: Disabling output eDP-1`. ACPI said lid **open**. Applied a libinput
    `write_open` quirk (logged in SYSTEM.md). **Inconclusive** — see contradiction.
+   **2026-11-20:** the quirk file had a parse error (`MatchBus=host`) and never
+   applied. Fixed. The lid test must be repeated.
 3. **★ LEADING UNRESOLVED — seat/DRM-master flapping.** Log has **228×
    `Session inactive`** and repeated `[libseat] Enabling seat`. Running **two
    graphical sessions** (Plasma tty2 + Hyprland tty1) may be fighting over the

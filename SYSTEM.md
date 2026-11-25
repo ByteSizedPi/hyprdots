@@ -246,7 +246,6 @@ Switch to tty2 (Ctrl+Alt+F2), log in, then revert:
 
 [NWU Lid Switch Unreliable]
 MatchName=Lid Switch
-MatchBus=host
 MatchVendor=0x0000
 MatchProduct=0x0005
 AttrLidSwitchReliability=write_open
@@ -259,6 +258,14 @@ succeeded (`Restoring crtc 149 … 1920x1080@60`), but the Lid Switch
 despite ACPI reporting `open`, so aquamarine disabled eDP-1 right after
 enabling it (`drm: Disabling output eDP-1`). `write_open` marks the switch
 unreliable so libinput forces the open state.
+
+**Correction 2026-11-20:** the first version had `MatchBus=host`. libinput
+does not accept `host` as a `MatchBus` value, so the file failed to parse.
+A parse failure makes libinput drop **all** quirks, including the stock files in
+`/usr/share/libinput`. From 25 June to 20 November no quirk applied (lid,
+touchpad, keyboard). Hyprland logged `Failed to load the device quirks`.
+The `MatchBus` line is now removed. `sudo libinput debug-events --verbose`
+now shows `Lid Switch: will write switch open events` and no quirk error.
 
 **To reapply:**
 ```

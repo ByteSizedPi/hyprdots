@@ -8,6 +8,26 @@ Status key: 🟥 OPEN · 🟧 MITIGATED (worked around, root cause unsolved) · 
 
 ---
 
+## 🟩 `hyprctl deprecated-config` flags `on_created_empty` (3 rules), 2026-11-23
+
+**Symptom:** Hyprland 0.57.2 `hyprctl deprecated-config` printed one warning
+for each of the 3 scratchpad workspace rules (zellij, youtube, beeper):
+"use a Lua handler for the "workspace.created" event that checks the
+workspace's .is_empty field".
+
+**Fix:** `hyprland/.config/hypr/modules/scratchpads.lua` now has a
+`launch_on_create` table (workspace name → command) and one
+`hl.on("workspace.created", ...)` handler. The handler runs `hl.exec_cmd`
+when `ws.is_empty` is true. The workspace rules keep only `workspace` (and
+`layout` for zellij).
+
+**Verified:** `hyprctl deprecated-config` prints "All good!".
+`hyprctl configerrors` is empty. `hyprctl workspaces` shows the name as
+`special:zellij`, so the table keys match. **Not yet verified:** a first
+summon after a fresh login actually launches each app.
+
+---
+
 ## 🟧 Zellij: Ctrl+y needs two presses after a move-mode break-pane, 2026-11-19
 
 **Symptom:** Ctrl+y enters move mode. `[` or `]` (BreakPaneLeft/Right) moves the
@@ -1003,6 +1023,16 @@ reporting the lid **open**.
 
 **Fix applied:** `/etc/libinput/local-overrides.quirks` marks the Lid Switch
 `AttrLidSwitchReliability=write_open` (logged in [../SYSTEM.md](../SYSTEM.md)).
+
+**Correction 2026-11-20:** the quirk **never applied** before this date. The
+file had `MatchBus=host`, which libinput rejects. libinput then dropped every
+quirk file (stock ones too). Hyprland logged `[libinput] Failed to load the
+device quirks …` at each start. Removed the `MatchBus` line. Verified with
+`sudo timeout 2 libinput debug-events --verbose`: no quirk error, and
+`Lid Switch: will write switch open events`. Any earlier test of this quirk
+against the dead tty1 screen is **invalid** and needs a repeat.
+**Lesson:** after any quirk edit, run the verify command above. A bad key or
+value fails the whole quirk database silently, not only the one section.
 
 **Uncertain:** likely **not** the real cause of the dead screen — the holder
 showed eDP staying `enabled` while still dark (see the OPEN item). May be a
